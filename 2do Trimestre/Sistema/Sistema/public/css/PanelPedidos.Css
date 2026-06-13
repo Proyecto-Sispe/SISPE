@@ -1,0 +1,278 @@
+* {
+    box-sizing: border-box; 
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    margin: 0;
+    background-color: gray; 
+    font-family: Arial, sans-serif;
+    min-height: 100vh;
+}
+
+nav {
+    width: 100%;
+    background-color: gray;
+}
+
+.menu {
+    display: flex;
+    align-items: center;
+    list-style: none;
+    margin: 0;
+    padding: 0 20px;
+}
+
+.logo img {
+    height: 45px;
+}
+
+.logo {
+    margin-right: 30px;
+}
+
+.menu li {
+    margin-right: 20px;
+}
+
+.right {
+    margin-left: auto;
+}
+
+.menu li a {
+    font-weight: bold;
+    padding: 10px 15px;
+    color: white;
+    text-decoration: none;
+    transition: 0.3s ease;
+}
+
+.hero {
+    padding: 25px 20px;
+    background: darkgray; 
+    color: white;
+    text-align: center;
+    border-bottom: 4px solid #ffff00; 
+}
+
+.hero h1 {
+    margin: 0 0 8px 0;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.hero p {
+    margin: 0;
+    font-size: 14px;
+    color: #e0e0e0;
+}
+
+.panel-pedidos-container {
+    padding: 30px 20px;
+    max-width: 1300px;
+    margin: 0 auto;
+}
+
+.grid-pedidos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 25px;
+}
+
+.tarjeta-pedido {
+    background: white; 
+    border: 2px solid gold; 
+    border-radius: 10px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    color: darkgray; 
+}
+
+.pedido-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid darkgray;
+    padding-bottom: 10px;
+    margin-bottom: 12px;
+}
+
+.pedido-header h2 {
+    margin: 0;
+    color: darkgray;
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.pedido-header .hora {
+    font-size: 13px;
+    color: darkgray;
+    font-weight: bold;
+}
+
+.texto-cliente {
+    margin-bottom: 12px;
+    font-size: 15px;
+    color: darkgray;
+}
+
+.texto-cliente strong {
+    color: darkgray;
+}
+
+.titulo-productos {
+    margin-bottom: 6px;
+    font-weight: bold;
+    color: darkgray;
+    font-size: 14px;
+}
+
+.lista-productos {
+    background: beige; 
+    padding: 12px 15px 12px 25px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    list-style-type: disc;
+}
+
+.item-producto {
+    margin-bottom: 5px;
+    font-size: 14px;
+    color: gray;
+}
+
+.item-producto:last-child {
+    margin-bottom: 0;
+}
+
+.nota-adicional {
+    color: darkgray; 
+    font-style: italic;
+    font-size: 13px;
+    display: block;
+    margin-top: 4px;
+}
+
+.estado-contenedor {
+    margin-bottom: 15px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.badge-estado {
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 13px;
+    display: inline-block;
+}
+
+.estado-espera {
+    background: gold;
+    color: gray;
+}
+
+.estado-preparacion {
+    background: gold;
+    color: gray;
+}
+
+.estado-camino {
+    background: gold;
+    color: gray;
+}
+
+.acciones-cocina {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: auto; 
+}
+
+.btn-accion {
+    text-align: center;
+    padding: 10px;
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 6px;
+    font-size: 14px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-preparar {
+    background: gold;
+    color: gray;
+}
+
+.btn-preparar:hover {
+    background: yellow;
+}
+
+.btn-camino {
+    background: gold;
+    color: gray;
+}
+
+.btn-camino:hover {
+    background: yellow;
+}
+
+.btn-completar {
+    background: gold;
+    color: gray; 
+}
+
+.btn-completar:hover {
+    background: yellow;
+}
+
+.sin-pedidos {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: gray;
+    background: white;
+    border: 2px dashed gold;
+    padding: 40px;
+    border-radius: 10px;
+}
+
+@media (max-width: 650px) {
+
+    .menu {
+        flex-wrap: wrap;
+        padding: 10px 15px;
+        justify-content: center;
+    }
+
+    .logo {
+        margin-right: 0;
+        width: 100%;
+        text-align: center;
+        margin-bottom: 10px;
+    }
+
+    .menu li {
+        margin: 5px 10px;
+    }
+
+    .right {
+        margin-left: 0;
+    }
+
+    .panel-pedidos-container {
+        padding: 15px;
+    }
+
+    .grid-pedidos {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .hero h1 {
+        font-size: 22px;
+    }
+}

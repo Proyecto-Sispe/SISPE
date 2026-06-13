@@ -1,0 +1,96 @@
+CRITICAL - 2026-06-10 23:54:33 --> Error: Class "Locale" not found
+[Method: GET, Route: /]
+in SYSTEMPATH\CodeIgniter.php on line 189.
+ 1 SYSTEMPATH\Boot.php(404): CodeIgniter\CodeIgniter->initialize()
+ 2 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::initializeCodeIgniter()
+ 3 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-06-10 23:54:35 --> ErrorException: Uncaught Error: Class "Locale" not found in C:\Users\MILENA\Desktop\XAMPP\htdocs\Sistema\Sistema\system\Helpers\number_helper.php:142
+Stack trace:
+#0 C:\Users\MILENA\Desktop\XAMPP\htdocs\Sistema\Sistema\system\Helpers\number_helper.php(60): format_number(10.0, 2, NULL, Array)
+#1 C:\Users\MILENA\Desktop\XAMPP\htdocs\Sistema\Sistema\system\Debug\BaseExceptionHandler.php(158): number_to_size(10.0, 2)
+#2 C:\Users\MILENA\Desktop\XAMPP\htdocs\Sistema\Sistema\app\Views\Errors\html\error_exception.php(408): CodeIgniter\Debug\BaseExceptionHandler::describeMemory(10485760)
+#3 C:\Users\MILENA\Desktop\XAMPP\htdocs\Sistema\Sistema\system\Debug\BaseExceptionHandler.php(270): include('C:\\Users\\MILENA...')
+#4 C:\Users\MILENA\Desktop\XAMPP\htdocs\Sistema\Sistema\system\Debug\BaseExceptionHandler.php(273): CodeIgniter\Debug\BaseExceptionHandler->CodeIgniter\Debug\{closure}()
+#5 C:\Users\MILENA\Desktop\XAMPP\htdocs\Sistema\Sistema\system\Debug\ExceptionHandler.php(126): CodeIgniter\Debug\BaseExceptionHandler->render(Object(Error), 500, 'C:\\Users\\MILENA...')
+#6 C:\Users\MILENA\Desktop\XAMPP\htdocs\Sistema\Sistema\system\Debug\Exceptions.php(151): CodeIgniter\Debug\ExceptionHandler->handle(Object(Error), Object(CodeIgniter\HTTP\IncomingRequest), Object(CodeIgniter\HTTP\Response), 500, 1)
+#7 [internal function]: CodeIgniter\Debug\Exceptions->exceptionHandler(Object(Error))
+#8 {main}
+  thrown
+【Previous Exception】
+Error
+Class "Locale" not found
+#0 C:\Users\MILENA\Desktop\XAMPP\htdocs\Sistema\Sistema\system\Boot.php(404): CodeIgniter\CodeIgniter->initialize()
+#1 C:\Users\MILENA\Desktop\XAMPP\htdocs\Sistema\Sistema\system\Boot.php(67): CodeIgniter\Boot::initializeCodeIgniter()
+#2 C:\Users\MILENA\Desktop\XAMPP\htdocs\Sistema\Sistema\public\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#3 {main}
+[Method: GET, Route: /]
+in SYSTEMPATH\Helpers\number_helper.php on line 142.
+ 1 [internal function]: CodeIgniter\Debug\Exceptions->shutdownHandler()
+CRITICAL - 2026-06-10 23:57:44 --> Error: Class "Locale" not found
+[Method: GET, Route: /]
+in SYSTEMPATH\CodeIgniter.php on line 189.
+ 1 SYSTEMPATH\Boot.php(404): CodeIgniter\CodeIgniter->initialize()
+ 2 SYSTEMPATH\Boot.php(67): CodeIgniter\Boot::initializeCodeIgniter()
+ 3 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-06-10 23:57:46 --> ErrorException: Uncaught Error: Class "Locale" not found in C:\Users\MILENA\Desktop\XAMPP\htdocs\Sistema\Sistema\system\Helpers\number_helper.php:142
+Stack trace:
+#0 C:\Users\MILENA\Desktop\XAMPP\htdocs\Sistema\Sistema\system\Helpers\number_helper.php(60): format_number(10.0, 2, NULL, Array)
+#1 C:\Users\MILENA\Desktop\XAMPP\htdocs\Sistema\Sistema\system\Debug\BaseExceptionHandler.php(158): number_to_size(10.0, 2)
+#2 C:\Users\MILENA\Desktop\XAMPP\htdocs\Sistema\Sistema\app\Views\Errors\html\error_exception.php(408): CodeIgniter\Debug\BaseExceptionHandler::describeMemory(10485760)
+#3 C:\Users\MILENA\Desktop\XAMPP\htdocs\Sistema\Sistema\system\Debug\BaseExceptionHandler.php(270): include('C:\\Users\\MILENA...')
+#4 C:\Users\MILENA\Desktop\XAMPP\htdocs\Sistema\Sistema\system\Debug\BaseExceptionHandler.php(273): CodeIgniter\Debug\BaseExceptionHandler->CodeIgniter\Debug\{closure}()
+#5 C:\Users\MILENA\Desktop\XAMPP\htdocs\Sistema\Sistema\system\Debug\ExceptionHandler.php(126): CodeIgniter\Debug\BaseExceptionHandler->render(Object(Error), 500, 'C:\\Users\\MILENA...')
+#6 C:\Users\MILENA\Desktop\XAMPP\htdocs\Sistema\Sistema\system\Debug\Exceptions.php(151): CodeIgniter\Debug\ExceptionHandler->handle(Object(Error), Object(CodeIgniter\HTTP\IncomingRequest), Object(CodeIgniter\HTTP\Response), 500, 1)
+#7 [internal function]: CodeIgniter\Debug\Exceptions->exceptionHandler(Object(Error))
+#8 {main}
+  thrown
+【Previous Exception】
+Error
+Class "Locale" not found
+#0 C:\Users\MILENA\Desktop\XAMPP\htdocs\Sistema\Sistema\system\Boot.php(404): CodeIgniter\CodeIgniter->initialize()
+#1 C:\Users\MILENA\Desktop\XAMPP\htdocs\Sistema\Sistema\system\Boot.php(67): CodeIgniter\Boot::initializeCodeIgniter()
+#2 C:\Users\MILENA\Desktop\XAMPP\htdocs\Sistema\Sistema\public\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+#3 {main}
+[Method: GET, Route: /]
+in SYSTEMPATH\Helpers\number_helper.php on line 142.
+ 1 [internal function]: CodeIgniter\Debug\Exceptions->shutdownHandler()
+DEBUG - 2026-06-10 22:02:26 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-06-10 22:04:54 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-06-10 22:10:39 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-06-10 22:17:11 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-06-10 22:18:50 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-06-10 22:21:09 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-06-10 22:21:10 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-06-10 22:21:32 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-06-10 22:31:41 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-06-10 22:34:46 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-06-10 22:44:29 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-06-10 22:47:01 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-06-10 22:47:46 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-06-10 22:47:49 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-06-10 22:50:08 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-06-10 22:50:35 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-06-10 22:50:39 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-06-10 22:50:58 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-06-10 22:51:08 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-06-10 22:54:05 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-06-10 22:54:42 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-06-10 22:55:26 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-06-10 22:55:28 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-06-10 22:56:11 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-06-10 22:56:13 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-06-10 22:56:21 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-06-10 22:56:28 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-06-10 22:56:30 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-06-10 22:57:48 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-06-10 22:57:54 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-06-10 22:57:54 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-06-10 23:06:02 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-06-10 23:06:08 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-06-10 23:06:15 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-06-10 23:06:24 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-06-10 23:07:41 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-06-10 23:11:19 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-06-10 23:17:56 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-06-10 23:18:07 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-06-10 23:18:12 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
