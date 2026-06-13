@@ -13,12 +13,6 @@ $routes->get('logout', 'LoginController::logout');
 $routes->get('registro', 'RegistroController::registrar');
 $routes->post('guardar', 'RegistroController::guardar');
 
-// Recuperacion de contrasena (vistas web)
-$routes->get('olvide-password', 'PasswordController::olvide');
-$routes->post('olvide-password', 'PasswordController::enviarEnlace');
-$routes->get('reset-password', 'PasswordController::reset');
-$routes->post('reset-password', 'PasswordController::actualizar');
-
 
 $routes->get('personas', 'AdminPersonaController::index');                     // Lista y Filtros
 $routes->get('personas/crear', 'AdminPersonaController::crear');               // Vista Formulario Agregar
@@ -117,10 +111,6 @@ $routes->post('menu/guardarCategoria', 'MenuController::guardarCategoria');
 $routes->group('api', ['namespace' => 'App\Controllers\Api', 'filter' => 'cors'], static function ($routes) {
     // Autenticacion
     $routes->post('login', 'AuthApi::login');
-
-    // Recuperacion de contrasena
-    $routes->post('forgot-password', 'AuthApi::forgotPassword');
-    $routes->post('reset-password', 'AuthApi::resetPassword');
 
     // Recursos CRUD
     $routes->resource('mesas',    ['controller' => 'MesaApi']);

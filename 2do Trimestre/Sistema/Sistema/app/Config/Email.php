@@ -10,22 +10,6 @@ class Email extends BaseConfig
     public string $fromName   = '';
     public string $recipients = '';
 
-    public function __construct()
-    {
-        parent::__construct();
-
-        // Las credenciales reales se leen desde el archivo .env (ver instrucciones).
-        $this->fromEmail      = env('email.fromEmail', 'no-reply@sispe.com');
-        $this->fromName       = env('email.fromName', 'SISPE');
-        $this->protocol       = env('email.protocol', 'smtp');
-        $this->SMTPHost       = env('email.SMTPHost', 'smtp.gmail.com');
-        $this->SMTPUser       = env('email.SMTPUser', '');
-        $this->SMTPPass       = env('email.SMTPPass', '');
-        $this->SMTPPort       = (int) env('email.SMTPPort', 587);
-        $this->SMTPCrypto     = env('email.SMTPCrypto', 'tls');
-        $this->mailType       = 'html';
-    }
-
     /**
      * The "user agent"
      */
