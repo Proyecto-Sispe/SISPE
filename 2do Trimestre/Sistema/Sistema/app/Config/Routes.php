@@ -13,6 +13,12 @@ $routes->get('logout', 'LoginController::logout');
 $routes->get('registro', 'RegistroController::registrar');
 $routes->post('guardar', 'RegistroController::guardar');
 
+// Recuperacion de contrasena (vistas web)
+$routes->get('olvide-password', 'PasswordController::olvide');
+$routes->post('olvide-password', 'PasswordController::enviarEnlace');
+$routes->get('reset-password', 'PasswordController::reset');
+$routes->post('reset-password', 'PasswordController::actualizar');
+
 
 $routes->get('personas', 'AdminPersonaController::index');                     // Lista y Filtros
 $routes->get('personas/crear', 'AdminPersonaController::crear');               // Vista Formulario Agregar
