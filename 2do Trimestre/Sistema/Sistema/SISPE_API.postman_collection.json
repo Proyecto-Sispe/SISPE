@@ -32,6 +32,38 @@
               "path": ["api", "login"]
             }
           }
+        },
+        {
+          "name": "Olvide mi contrasena (enviar correo)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@gmail.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/forgot-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "forgot-password"]
+            }
+          }
+        },
+        {
+          "name": "Restablecer contrasena (con codigo)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@gmail.com\",\n  \"codigo\": \"123456\",\n  \"password\": \"nueva1234\",\n  \"password_confirm\": \"nueva1234\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/reset-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reset-password"]
+            }
+          }
         }
       ]
     },

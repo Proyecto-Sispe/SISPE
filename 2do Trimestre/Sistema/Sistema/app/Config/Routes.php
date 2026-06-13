@@ -112,6 +112,10 @@ $routes->group('api', ['namespace' => 'App\Controllers\Api', 'filter' => 'cors']
     // Autenticacion
     $routes->post('login', 'AuthApi::login');
 
+    // Recuperacion de contrasena
+    $routes->post('forgot-password', 'AuthApi::forgotPassword');
+    $routes->post('reset-password', 'AuthApi::resetPassword');
+
     // Recursos CRUD
     $routes->resource('mesas',    ['controller' => 'MesaApi']);
     $routes->resource('menu',     ['controller' => 'MenuApi']);
