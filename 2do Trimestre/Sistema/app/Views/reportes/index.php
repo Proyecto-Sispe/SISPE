@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="<?php echo base_url('css/Logo 2.png'); ?>" type="image/png">
-    <link rel="stylesheet" href="<?php echo base_url('css/Inicio.Css'); ?>">
+    <link rel="stylesheet" href="<?php echo base_url('css/inicio.Css'); ?>">
     <style>
         .container-reportes {
             max-width: 1000px;

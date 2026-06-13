@@ -13,6 +13,11 @@ $routes->get('logout', 'LoginController::logout');
 $routes->get('registro', 'RegistroController::registrar');
 $routes->post('guardar', 'RegistroController::guardar');
 
+// Recuperacion de contrasena (vistas web)
+$routes->get('olvide-password', 'PasswordController::olvide');
+$routes->post('olvide-password', 'PasswordController::enviarEnlace');
+$routes->get('reset-password', 'PasswordController::reset');
+$routes->post('reset-password', 'PasswordController::actualizar');
 
 $routes->get('personas', 'AdminPersonaController::index');                     // Lista y Filtros
 $routes->get('personas/crear', 'AdminPersonaController::crear');               // Vista Formulario Agregar
@@ -93,3 +98,31 @@ $routes->get('menu/eliminar/(:any)', 'MenuController::eliminar/$1');
 $routes->get('menu_digital', 'MenuController::digital');
 
 $routes->post('menu/guardarCategoria', 'MenuController::guardarCategoria');
+
+/*
+|--------------------------------------------------------------------------
+| API REST (para consumir desde Postman)
+|--------------------------------------------------------------------------
+|
+| Ejemplos:
+|   POST   /api/login
+|   GET    /api/mesas        GET /api/mesas/1
+|   POST   /api/mesas        PUT /api/mesas/1    
+|   DELETE /api/mesas/1
+|   (igual para personas, menu, pedidos, facturas)
+*/
+$routes->group('api', ['namespace' => 'App\Controllers\Api', 'filter' => 'cors'], static function ($routes) {
+    // Autenticacion
+    $routes->post('login', 'AuthApi::login');
+
+    // Recuperacion de contrasena
+    $routes->post('forgot-password', 'AuthApi::forgotPassword');
+    $routes->post('reset-password', 'AuthApi::resetPassword');
+
+    // Recursos CRUD
+    $routes->resource('mesas',    ['controller' => 'MesaApi']);
+    $routes->resource('menu',     ['controller' => 'MenuApi']);
+    $routes->resource('pedidos',  ['controller' => 'PedidoApi']);
+    $routes->resource('facturas', ['controller' => 'FacturaApi']);
+    $routes->resource('personas', ['controller' => 'PersonaApi']);
+});

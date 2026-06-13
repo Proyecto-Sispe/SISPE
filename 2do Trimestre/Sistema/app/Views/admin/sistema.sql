@@ -28,6 +28,19 @@ CREATE TABLE Persona (
     PRIMARY KEY (id_usuario, pkfk_Tipo_doc)
 );
 
+CREATE TABLE password_resets (
+  id         INT(11)      NOT NULL AUTO_INCREMENT,
+  correo     VARCHAR(120) NOT NULL,
+  token      VARCHAR(64)  NOT NULL,   -- hash sha256 del token enviado por correo
+  codigo     VARCHAR(6)   NOT NULL,   -- codigo de 6 digitos enviado por correo
+  expira     DATETIME     NOT NULL,   -- fecha/hora de expiracion (15 min)
+  usado      TINYINT(1)   NOT NULL DEFAULT 0,
+  created_at DATETIME     NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY idx_correo (`correo`),
+  KEY idx_token  (`token`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE Persona_has_Rol (
     pkfk_Tipo_doc INT NOT NULL,
     pkfk_id_usuario INT NOT NULL,

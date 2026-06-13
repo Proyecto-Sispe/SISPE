@@ -51,6 +51,7 @@
 
         <div class="botones">
             <button type="submit" class="btn-login">Iniciar Sesión</button>
+            <p><a href="<?php echo base_url('olvide-password'); ?>">¿Olvidaste tu contraseña?</a></p>
             <p>¿No tienes cuenta? <a href="<?php echo base_url('registro'); ?>">Crea una aquí</a></p>
         </div>
     </form>
