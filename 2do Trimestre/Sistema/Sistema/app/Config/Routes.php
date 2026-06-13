@@ -93,3 +93,29 @@ $routes->get('menu/eliminar/(:any)', 'MenuController::eliminar/$1');
 $routes->get('menu_digital', 'MenuController::digital');
 
 $routes->post('menu/guardarCategoria', 'MenuController::guardarCategoria');
+
+
+/*
+|--------------------------------------------------------------------------
+| API REST (para consumir desde Postman)
+|--------------------------------------------------------------------------
+| Todas las rutas viven bajo el prefijo /api y devuelven JSON.
+| El filtro 'cors' permite el consumo desde el navegador (Postman lo ignora).
+|
+| Ejemplos:
+|   POST   /api/login
+|   GET    /api/mesas        GET /api/mesas/1
+|   POST   /api/mesas        PUT /api/mesas/1     DELETE /api/mesas/1
+|   (igual para personas, menu, pedidos, facturas)
+*/
+$routes->group('api', ['namespace' => 'App\Controllers\Api', 'filter' => 'cors'], static function ($routes) {
+    // Autenticacion
+    $routes->post('login', 'AuthApi::login');
+
+    // Recursos CRUD
+    $routes->resource('mesas',    ['controller' => 'MesaApi']);
+    $routes->resource('menu',     ['controller' => 'MenuApi']);
+    $routes->resource('pedidos',  ['controller' => 'PedidoApi']);
+    $routes->resource('facturas', ['controller' => 'FacturaApi']);
+    $routes->resource('personas', ['controller' => 'PersonaApi']);
+});

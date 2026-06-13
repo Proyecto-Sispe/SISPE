@@ -1,0 +1,297 @@
+{
+  "info": {
+    "name": "SISPE - API REST",
+    "description": "Coleccion para probar la API REST del sistema de restaurante SISPE (CodeIgniter 4). Configura la variable {{baseUrl}} (por defecto http://localhost:8080).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@gmail.com\",\n  \"password\": \"1234\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "login"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Mesas",
+      "item": [
+        {
+          "name": "Listar mesas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/mesas", "host": ["{{baseUrl}}"], "path": ["api", "mesas"] }
+          }
+        },
+        {
+          "name": "Ver mesa",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/mesas/1", "host": ["{{baseUrl}}"], "path": ["api", "mesas", "1"] }
+          }
+        },
+        {
+          "name": "Crear mesa",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_Mesa\": 5,\n  \"Capacidad\": 4,\n  \"Ubicacion\": \"Terraza\",\n  \"Estado\": 0\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/mesas", "host": ["{{baseUrl}}"], "path": ["api", "mesas"] }
+          }
+        },
+        {
+          "name": "Actualizar mesa",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Capacidad\": 6,\n  \"Ubicacion\": \"Segundo Piso\",\n  \"Estado\": 1\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/mesas/5", "host": ["{{baseUrl}}"], "path": ["api", "mesas", "5"] }
+          }
+        },
+        {
+          "name": "Eliminar mesa",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/mesas/5", "host": ["{{baseUrl}}"], "path": ["api", "mesas", "5"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Menu",
+      "item": [
+        {
+          "name": "Listar productos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/menu", "host": ["{{baseUrl}}"], "path": ["api", "menu"] }
+          }
+        },
+        {
+          "name": "Ver producto",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/menu/1", "host": ["{{baseUrl}}"], "path": ["api", "menu", "1"] }
+          }
+        },
+        {
+          "name": "Crear producto",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_menu\": 5,\n  \"Productos\": \"Hamburguesa BBQ\",\n  \"Precio\": 18000,\n  \"descripcion\": \"Carne, tocineta y salsa BBQ\",\n  \"pkfk_id_categoria\": 1\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/menu", "host": ["{{baseUrl}}"], "path": ["api", "menu"] }
+          }
+        },
+        {
+          "name": "Actualizar producto",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Productos\": \"Hamburguesa BBQ Doble\",\n  \"Precio\": 22000\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/menu/5", "host": ["{{baseUrl}}"], "path": ["api", "menu", "5"] }
+          }
+        },
+        {
+          "name": "Eliminar producto",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/menu/5", "host": ["{{baseUrl}}"], "path": ["api", "menu", "5"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Pedidos",
+      "item": [
+        {
+          "name": "Listar pedidos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/pedidos", "host": ["{{baseUrl}}"], "path": ["api", "pedidos"] }
+          }
+        },
+        {
+          "name": "Ver pedido",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/pedidos/1", "host": ["{{baseUrl}}"], "path": ["api", "pedidos", "1"] }
+          }
+        },
+        {
+          "name": "Crear pedido",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_mesa\": 1,\n  \"estado\": \"pendiente\",\n  \"prioridad\": \"normal\",\n  \"tiempo_estimado\": 15,\n  \"observaciones\": \"Sin cebolla\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/pedidos", "host": ["{{baseUrl}}"], "path": ["api", "pedidos"] }
+          }
+        },
+        {
+          "name": "Actualizar pedido",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"estado\": \"en_preparacion\",\n  \"prioridad\": \"urgente\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/pedidos/1", "host": ["{{baseUrl}}"], "path": ["api", "pedidos", "1"] }
+          }
+        },
+        {
+          "name": "Eliminar pedido",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/pedidos/1", "host": ["{{baseUrl}}"], "path": ["api", "pedidos", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Facturas",
+      "item": [
+        {
+          "name": "Listar facturas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/facturas?buscar=",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "facturas"],
+              "query": [{ "key": "buscar", "value": "" }]
+            }
+          }
+        },
+        {
+          "name": "Ver factura",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/facturas/1", "host": ["{{baseUrl}}"], "path": ["api", "facturas", "1"] }
+          }
+        },
+        {
+          "name": "Crear factura",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_pedido\": 1\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/facturas", "host": ["{{baseUrl}}"], "path": ["api", "facturas"] }
+          }
+        },
+        {
+          "name": "Eliminar factura",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/facturas/1", "host": ["{{baseUrl}}"], "path": ["api", "facturas", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Personas",
+      "item": [
+        {
+          "name": "Listar personas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/personas", "host": ["{{baseUrl}}"], "path": ["api", "personas"] }
+          }
+        },
+        {
+          "name": "Ver persona",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/personas/1002655550", "host": ["{{baseUrl}}"], "path": ["api", "personas", "1002655550"] }
+          }
+        },
+        {
+          "name": "Crear persona",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_usuario\": 1099999999,\n  \"pkfk_Tipo_doc\": 1,\n  \"Nom1_usu\": \"Pedro\",\n  \"Nom2_usu\": \"Andres\",\n  \"Ape1_usu\": \"Gonzalez\",\n  \"Ape2_usu\": \"Ruiz\",\n  \"Telefono\": 3201112233,\n  \"Correo_usu\": \"pedro@gmail.com\",\n  \"Password\": \"1234\",\n  \"estado\": 1\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/personas", "host": ["{{baseUrl}}"], "path": ["api", "personas"] }
+          }
+        },
+        {
+          "name": "Actualizar persona",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"Telefono\": 3209998877,\n  \"Correo_usu\": \"pedro.nuevo@gmail.com\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/personas/1099999999", "host": ["{{baseUrl}}"], "path": ["api", "personas", "1099999999"] }
+          }
+        },
+        {
+          "name": "Eliminar persona",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/personas/1099999999", "host": ["{{baseUrl}}"], "path": ["api", "personas", "1099999999"] }
+          }
+        }
+      ]
+    }
+  ]
+}
