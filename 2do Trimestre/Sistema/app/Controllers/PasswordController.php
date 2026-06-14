@@ -10,7 +10,7 @@ class PasswordController extends BaseController
     // Muestra el formulario para solicitar el enlace de recuperacion.
     public function olvide()
     {
-        return view('olvide_password');
+        return view('password/olvide_password');
     }
 
     // Genera token + codigo, los guarda en password_resets e intenta enviarlos
