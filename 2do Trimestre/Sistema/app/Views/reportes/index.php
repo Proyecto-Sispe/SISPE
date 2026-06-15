@@ -130,8 +130,7 @@
     <li><a href="<?= base_url('facturas') ?>">Facturas</a></li>
     <li><a href="<?= base_url('pedidos') ?>">Pedidos</a></li>
     <li><a href="<?= base_url('reportes') ?>">Reportes</a></li>
-    <li class="right"><a href="<?= base_url('login') ?>">Login</a></li>
-    <li><a href="<?= base_url('registro') ?>">Registro</a></li>
+
 
     <?php elseif (session('rol') === 'Mesero'): ?>
       <li><a href="<?php echo base_url('mesas'); ?>">Mesas</a></li>
@@ -150,10 +149,10 @@
 </nav>
 
 <div class="container-reportes">
-    <a href="<?php echo base_url('dashboard'); ?>" class="btn-volver">← Volver al Inicio</a>
+    <!--<a href="?php echo base_url('dashboard')" class="btn-volver">← Volver al Inicio</a>-->
 
     <div class="header-reportes">
-        <h1>📊 Centro de Reportes</h1>
+        <h1> Centro de Reportes</h1>
         <p>Descarga reportes en PDF de tu sistema</p>
     </div>
 

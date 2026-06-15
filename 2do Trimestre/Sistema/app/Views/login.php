@@ -15,11 +15,6 @@
             <img src="<?php echo base_url('css/Logo 2.png'); ?>" alt="Logo">
         </li>
         <li><a href="<?php echo base_url('/'); ?>">Inicio</a></li>
-        <li><a href="#">Personas</a></li>
-        <li><a href="#">Mesas</a></li>
-        <li><a href="#">Menú</a></li>
-        <li><a href="#">Facturas</a></li>
-        <li><a href="#">Pedidos</a></li>
         <li class="right"><a href="<?php echo base_url('registro'); ?>">Registro</a></li>
     </ul>
 </nav>

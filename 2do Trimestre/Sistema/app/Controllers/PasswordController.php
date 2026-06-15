@@ -17,6 +17,7 @@ class PasswordController extends BaseController
     // por correo. Si el correo no esta configurado, muestra el enlace en pantalla.
     public function enviarEnlace()
     {
+        
         $correo = trim((string) $this->request->getPost('email'));
 
         if (empty($correo)) {
@@ -41,7 +42,7 @@ class PasswordController extends BaseController
         $ahora      = date('Y-m-d H:i:s');
         $expira     = date('Y-m-d H:i:s', time() + 15 * 60); // 15 minutos
 
-        $db->query("UPDATE password_resets SET usado = 1 WHERE correo = ? AND usado = 0", [$correo]);
+            
 
         $db->query(
             "INSERT INTO password_resets (correo, token, codigo, expira, usado, created_at)
@@ -77,7 +78,7 @@ class PasswordController extends BaseController
             return redirect()->to('olvide-password')->with('error', 'El enlace es invalido o ha expirado. Solicita uno nuevo.');
         }
 
-        return view('reset_password', ['token' => $token]);
+        return view('password/reset_password', ['token' => $token]);
     }
 
     // Procesa el cambio de contrasena.

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Menú Digital</title>
     <style>
-        body { margin: 0; background-color: #FA7F72; font-family: Arial, sans-serif; }
+        body { margin: 0; background-color:rgb(116, 111, 111); font-family: Arial, sans-serif; }
         nav { width: 100%; background-color: gray; }
         .menu { display: flex; align-items: center; list-style: none; margin: 0; padding: 0 20px; height: 60px; }
         .logo img { height: 45px; }
