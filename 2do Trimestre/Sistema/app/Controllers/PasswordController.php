@@ -116,7 +116,7 @@ class PasswordController extends BaseController
 
         $db->query("UPDATE password_resets SET usado = 1 WHERE id = ?", [$registro['id']]);
 
-        return redirect()->to('/')->with('mensaje', 'Tu contrasena fue actualizada correctamente. Ya puedes iniciar sesion.');
+        return redirect()->to('login')->with('mensaje', 'Tu contrasena fue actualizada correctamente. Ya puedes iniciar sesion.');
     }
 
     // Busca una solicitud valida (no usada y no expirada) a partir del token plano.
