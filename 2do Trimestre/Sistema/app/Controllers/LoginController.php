@@ -20,7 +20,7 @@ class LoginController extends BaseController
         $password = trim($this->request->getPost('password'));
 
         if (empty($email) || empty($password)) {
-            return redirect()->to('/')->with('error', 'Por favor complete todos los campos.');
+            return redirect()->to('login')->with('error', 'Por favor complete todos los campos.');
         }
 
         $db = Config::connect();
@@ -49,17 +49,17 @@ class LoginController extends BaseController
 
                 return redirect()->to('/dashboard');
             } else {
-                return redirect()->to('/')->with('error', 'Contraseña incorrecta.');
+                return redirect()->to('login')->with('error', 'Contraseña incorrecta.');
             }
         } else {
-            return redirect()->to('/')->with('error', 'El usuario no existe o los datos son incorrectos.');
+            return redirect()->to('login')->with('error', 'El usuario no existe o los datos son incorrectos.');
         }
     }
 
     public function dashboard()
     {
         if (!session('logueado')) {
-            return redirect()->to('/');
+            return redirect()->to('login');
         }
         return view('dashboard');
     }

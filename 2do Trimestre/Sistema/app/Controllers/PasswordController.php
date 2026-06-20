@@ -116,8 +116,7 @@ class PasswordController extends BaseController
 
         $db->query("UPDATE password_resets SET usado = 1 WHERE id = ?", [$registro['id']]);
 
-        return redirect()->to('/')->with('mensaje', 'Tu contrasena fue actualizada correctamente. Ya puedes iniciar sesion.');
-    }
+        return redirect()->to('login')->with('mensaje', 'Tu contrasena fue actualizada correctamente. Ya puedes iniciar sesion.');    }
 
     // Busca una solicitud valida (no usada y no expirada) a partir del token plano.
     private function buscarSolicitudValida(string $tokenPlano): ?array
@@ -134,14 +133,21 @@ class PasswordController extends BaseController
     }
 
     // Envia el correo de recuperacion. Devuelve false si el SMTP no esta configurado.
+     // Envia el correo de recuperacion. Devuelve false si el SMTP no esta configurado
+    // o si el envio falla (en ese caso el motivo queda en writable/logs).
     private function enviarCorreo(string $correo, string $nombre, string $enlace, string $codigo): bool
     {
-        if (empty(env('email.SMTPUser')) || empty(env('email.SMTPPass'))) {
+        // Se lee la configuracion real (Config\Email ya carga los valores del .env).
+        $config = config('Email');
+
+        if (empty($config->SMTPUser) || empty($config->SMTPPass)) {
+            log_message('error', 'SMTP no configurado: revisa email.SMTPUser y email.SMTPPass en el archivo .env.');
             return false;
         }
 
         try {
-            $email = Services::email();
+            // Se pasa la config explicitamente para asegurar que use las credenciales del .env.
+            $email = Services::email($config);
 
             $mensaje = '<div style="font-family:Arial,sans-serif;max-width:520px;margin:auto">'
                 . '<h2>Recuperacion de contrasena - SISPE</h2>'
@@ -156,7 +162,13 @@ class PasswordController extends BaseController
             $email->setSubject('Recuperacion de contrasena - SISPE');
             $email->setMessage($mensaje);
 
-            return (bool) $email->send();
+            if ($email->send(false)) {
+                return true;
+            }
+
+            // Si falla, se registra el motivo exacto del servidor SMTP para diagnostico.
+            log_message('error', 'Fallo el envio SMTP: ' . $email->printDebugger(['headers']));
+            return false;
         } catch (\Throwable $e) {
             log_message('error', 'Error enviando correo de recuperacion: ' . $e->getMessage());
             return false;
