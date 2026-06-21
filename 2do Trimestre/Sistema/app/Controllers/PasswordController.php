@@ -63,15 +63,18 @@ class PasswordController extends BaseController
             ->with('mensaje', 'No se pudo enviar el correo (SMTP no configurado). Como respaldo, te llevamos directamente al formulario. Tu codigo de verificacion es: ' . $codigo);
     }
 
-    // Muestra el formulario para escribir la nueva contrasena.
+       // Muestra el formulario para escribir la nueva contrasena.
     public function reset()
     {
         $token = (string) $this->request->getGet('token');
 
+        // Sin token: el usuario llego por "Ingresa aqui" para escribir el codigo
+        // manualmente. Se muestra el formulario que pide correo + codigo.
         if (empty($token)) {
-            return redirect()->to('olvide-password')->with('error', 'Enlace invalido. Solicita uno nuevo.');
+            return view('password/reset_password', ['token' => '']);
         }
 
+        // Con token (enlace del correo): se valida que siga vigente.
         $registro = $this->buscarSolicitudValida($token);
 
         if (! $registro) {
@@ -85,12 +88,10 @@ class PasswordController extends BaseController
     public function actualizar()
     {
         $token     = (string) $this->request->getPost('token');
+        $correo    = trim((string) $this->request->getPost('email'));
+        $codigo    = trim((string) $this->request->getPost('codigo'));
         $password  = (string) $this->request->getPost('password');
         $password2 = (string) $this->request->getPost('password_confirm');
-
-        if (empty($token)) {
-            return redirect()->to('olvide-password')->with('error', 'Enlace invalido. Solicita uno nuevo.');
-        }
 
         if (empty($password) || strlen($password) < 4) {
             return redirect()->back()->with('error', 'La contrasena debe tener al menos 4 caracteres.');
@@ -100,10 +101,24 @@ class PasswordController extends BaseController
             return redirect()->back()->with('error', 'Las contrasenas no coinciden.');
         }
 
-        $registro = $this->buscarSolicitudValida($token);
+        // Se busca la solicitud por token (enlace del correo) o por correo + codigo
+        // (cuando el usuario lo escribio manualmente con "Ingresa aqui").
+        if (! empty($token)) {
+            $registro = $this->buscarSolicitudValida($token);
 
-        if (! $registro) {
-            return redirect()->to('olvide-password')->with('error', 'El enlace es invalido o ha expirado. Solicita uno nuevo.');
+            if (! $registro) {
+                return redirect()->to('olvide-password')->with('error', 'El enlace es invalido o ha expirado. Solicita uno nuevo.');
+            }
+        } else {
+            if (empty($correo) || empty($codigo)) {
+                return redirect()->back()->with('error', 'Ingresa tu correo y el codigo de verificacion.');
+            }
+
+            $registro = $this->buscarSolicitudPorCodigo($correo, $codigo);
+
+            if (! $registro) {
+                return redirect()->back()->with('error', 'El codigo es incorrecto o ha expirado. Verificalo o solicita uno nuevo.');
+            }
         }
 
         $db = Config::connect();
@@ -125,8 +140,22 @@ class PasswordController extends BaseController
         $tokenHash = hash('sha256', $tokenPlano);
 
         $registro = $db->query(
-            "SELECT * FROM password_resets WHERE token = ? AND usado = 0 AND expira >= ? LIMIT 1",
+              "SELECT * FROM password_resets WHERE token = ? AND usado = 0 AND expira >= ? LIMIT 1",
             [$tokenHash, date('Y-m-d H:i:s')]
+        )->getRowArray();
+
+        return $registro ?: null;
+    }
+
+    // Busca una solicitud valida (no usada y no expirada) a partir del correo y el
+    // codigo de 6 digitos que el usuario escribio manualmente.
+    private function buscarSolicitudPorCodigo(string $correo, string $codigo): ?array
+    {
+        $db = Config::connect();
+
+        $registro = $db->query(
+            "SELECT * FROM password_resets WHERE correo = ? AND codigo = ? AND usado = 0 AND expira >= ? ORDER BY id DESC LIMIT 1",
+            [$correo, $codigo, date('Y-m-d H:i:s')]
         )->getRowArray();
 
         return $registro ?: null;
@@ -138,7 +167,7 @@ class PasswordController extends BaseController
     private function enviarCorreo(string $correo, string $nombre, string $enlace, string $codigo): bool
     {
         // Se lee la configuracion real (Config\Email ya carga los valores del .env).
-        $config = config('Email');
+        $config = \Config\Services::email();
 
         if (empty($config->SMTPUser) || empty($config->SMTPPass)) {
             log_message('error', 'SMTP no configurado: revisa email.SMTPUser y email.SMTPPass en el archivo .env.');
