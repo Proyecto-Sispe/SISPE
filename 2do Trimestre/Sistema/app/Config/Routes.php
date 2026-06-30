@@ -79,6 +79,7 @@ $routes->get('invoices/delete/(:num)', 'InvoiceController::delete/$1');
 
 // routes for PDF reports
 $routes->get('reportes', 'ReporteController::index');
+$routes->get('reportes/generar', 'ReporteController::generar');
 $routes->get('reportes/pdf', 'ReporteController::pdfVentas');
 $routes->get('reportes/productos', 'ReporteController::pdfProductos');
 $routes->get('reportes/usuarios', 'ReporteController::pdfUsuarios');
