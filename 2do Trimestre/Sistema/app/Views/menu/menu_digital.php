@@ -40,6 +40,34 @@
         }
         .btn-next:hover { background-color: #e96b5e; }
         .form-pedir { margin: 0; }
+
+        /* Deja espacio para que el carrito fijo no tape las tarjetas */
+        .contenedor-principal { padding-right: 40px; }
+
+        /* PANEL DEL CARRITO */
+        .carrito {
+            position: fixed; top: 80px; right: 20px; width: 320px; max-height: 80vh;
+            overflow-y: auto; background-color: white; border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25); padding: 20px; z-index: 50;
+        }
+        .carrito h2 { margin: 0 0 5px 0; color: #222; font-size: 20px; }
+        .carrito .mesa { color: #888; font-size: 13px; margin: 0 0 15px 0; }
+        .carrito-vacio { color: #888; font-size: 14px; text-align: center; padding: 20px 0; }
+        .carrito-item { display: flex; justify-content: space-between; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid #eee; }
+        .carrito-item .info { font-size: 14px; color: #333; }
+        .carrito-item .info small { color: #888; display: block; }
+        .carrito-item .precio-item { font-weight: bold; color: #333; font-size: 14px; white-space: nowrap; }
+        .quitar { color: #FA7F72; font-size: 12px; text-decoration: none; }
+        .carrito-total { display: flex; justify-content: space-between; font-weight: bold; color: #222; margin: 15px 0; font-size: 16px; }
+        .carrito label { display: block; font-size: 13px; color: #555; margin-bottom: 6px; font-weight: bold; }
+        .carrito textarea { width: 100%; box-sizing: border-box; border: 1px solid #ddd; border-radius: 8px; padding: 10px; font-family: inherit; font-size: 13px; resize: vertical; min-height: 60px; }
+        .btn-hacer-pedido {
+            width: 100%; background-color: #2ecc71; color: white; border: none; padding: 14px;
+            border-radius: 8px; font-weight: bold; font-size: 15px; text-transform: uppercase;
+            cursor: pointer; margin-top: 12px;
+        }
+        .btn-hacer-pedido:hover { background-color: #27ae60; }
+        .btn-hacer-pedido:disabled { background-color: #bbb; cursor: not-allowed; }
     </style>
 </head>
 <body>
@@ -76,18 +104,58 @@
                         </div>
                         <div>
                             <div class="precio">$<?= number_format($p['Precio'], 0, ',', '.') ?></div>
-                            <form action="<?= base_url('cliente/guardar_pedido') ?>" method="POST" class="form-pedir">
+                            <form action="<?= base_url('cliente/agregar_carrito') ?>" method="POST" class="form-pedir">
                                 <input type="hidden" name="id_menu" value="<?= esc($p['id_menu']) ?>">
-                                <input type="hidden" name="cantidad" value="1">
                                 <button type="submit" class="btn-next">PEDIR</button>
                             </form>
                         </div>
                     </div>
-                <?php endforeach; ?>
-            </div>
-        </div>
+        <?php endforeach; ?>
     <?php endforeach; ?>
 </div>
+
+<?php
+    $carrito = $carrito ?? [];
+    $totalCarrito = 0;
+    $totalItems = 0;
+    foreach ($carrito as $item) {
+        $totalCarrito += $item['precio'] * $item['cantidad'];
+        $totalItems   += $item['cantidad'];
+    }
+?>
+<aside class="carrito">
+    <h2>Tu Pedido</h2>
+    <p class="mesa">Mesa <?= esc(session('id_mesa')) ?> &middot; <?= (int) $totalItems ?> item(s)</p>
+
+    <?php if (empty($carrito)): ?>
+        <p class="carrito-vacio">Aún no has agregado productos.<br>Presiona <strong>PEDIR</strong> en un plato.</p>
+    <?php else: ?>
+        <?php foreach ($carrito as $item): ?>
+            <div class="carrito-item">
+                <div class="info">
+                    <?= esc($item['cantidad']) ?>x <?= esc($item['nombre']) ?>
+                    <small>
+                        $<?= number_format($item['precio'], 0, ',', '.') ?> c/u
+                        &middot;
+                        <a class="quitar" href="<?= base_url('cliente/eliminar_carrito/' . $item['id_menu']) ?>">Quitar</a>
+                    </small>
+                </div>
+                <div class="precio-item">$<?= number_format($item['precio'] * $item['cantidad'], 0, ',', '.') ?></div>
+            </div>
+        <?php endforeach; ?>
+
+        <div class="carrito-total">
+            <span>Total</span>
+            <span>$<?= number_format($totalCarrito, 0, ',', '.') ?></span>
+        </div>
+
+        <form action="<?= base_url('cliente/confirmar_pedido') ?>" method="POST">
+            <label for="comentario">Comentario (opcional)</label>
+            <textarea id="comentario" name="comentario" placeholder="Ej: sin cebolla, término medio, con gaseosa..."></textarea>
+            <button type="submit" class="btn-hacer-pedido">Hacer Pedido</button>
+        </form>
+    <?php endif; ?>
+</aside>
 
 </body>
 </html>

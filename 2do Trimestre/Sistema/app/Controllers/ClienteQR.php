@@ -107,29 +107,83 @@ class ClienteQR extends BaseController
         return view('cliente/formulario_pedido', $data);
     }
 
-    // 4. Guarda las categorías, productos y observaciones elegidas por el cliente
-    public function guardarPedido()
+    // 4. Añade un producto al CARRITO en sesión (todavía no toca la base de datos)
+    public function agregarCarrito()
     {
         $session = session();
         $db = \Config\Database::connect();
-        
-        $id_pedido   = $session->get('id_pedido');
-        $id_producto = $this->request->getPost('id_menu'); // Producto del menú seleccionado
-        $cantidad    = $this->request->getPost('cantidad');
-        $observacion = $this->request->getPost('observacion'); // Ejemplo: "La quiero con papas y gaseosa..."
-        
-        // Traemos el precio real del producto desde tu tabla Menu
+
+        $id_producto = $this->request->getPost('id_menu');
+
+        // Traemos el producto real del menú
         $producto = $db->table('Menu')->where('id_menu', $id_producto)->get()->getRowArray();
-        
-        // Insertamos en tu tabla Detalle_Pedido real
-        $db->table('Detalle_Pedido')->insert([
-            'id_pedido'     => $id_pedido,
-            'id_menu'       => $id_producto,
-            'cantidad'      => $cantidad,
-            'valor_venta'   => $producto['Precio'],
-            'observaciones' => $observacion
-        ]);
-        
+        if (!$producto) {
+            return redirect()->to(base_url('menu_digital'));
+        }
+
+        // Carrito guardado en sesión, indexado por id_menu
+        $carrito = $session->get('carrito') ?? [];
+
+        if (isset($carrito[$id_producto])) {
+            // Si ya existe, solo sumamos una unidad
+            $carrito[$id_producto]['cantidad'] += 1;
+        } else {
+            $carrito[$id_producto] = [
+                'id_menu'  => $id_producto,
+                'nombre'   => $producto['Productos'],
+                'precio'   => $producto['Precio'],
+                'cantidad' => 1,
+            ];
+        }
+
+        $session->set('carrito', $carrito);
+
+        // Volvemos al menú para seguir eligiendo
+        return redirect()->to(base_url('menu_digital'));
+    }
+
+    // 4.1 Elimina un producto del carrito
+    public function eliminarCarrito($id_producto)
+    {
+        $session = session();
+        $carrito = $session->get('carrito') ?? [];
+
+        if (isset($carrito[$id_producto])) {
+            unset($carrito[$id_producto]);
+            $session->set('carrito', $carrito);
+        }
+
+        return redirect()->to(base_url('menu_digital'));
+    }
+
+    // 4.2 Confirma el pedido: pasa todo el carrito (con comentario) a la base de datos
+    public function confirmarPedido()
+    {
+        $session = session();
+        $db = \Config\Database::connect();
+
+        $id_pedido = $session->get('id_pedido');
+        $carrito   = $session->get('carrito') ?? [];
+        $comentario = $this->request->getPost('comentario'); // Comentario general del cliente
+
+        if (empty($carrito)) {
+            return redirect()->to(base_url('menu_digital'));
+        }
+
+        // Insertamos cada item del carrito en Detalle_Pedido
+        foreach ($carrito as $item) {
+            $db->table('Detalle_Pedido')->insert([
+                'id_pedido'     => $id_pedido,
+                'id_menu'       => $item['id_menu'],
+                'cantidad'      => $item['cantidad'],
+                'valor_venta'   => $item['precio'],
+                'observaciones' => $comentario,
+            ]);
+        }
+
+        // Vaciamos el carrito una vez confirmado
+        $session->remove('carrito');
+
         // Muestra la pantalla "Mi Pedido" con el estado y el detalle actualizado
         return redirect()->to(base_url('cliente/pedido'));
     }

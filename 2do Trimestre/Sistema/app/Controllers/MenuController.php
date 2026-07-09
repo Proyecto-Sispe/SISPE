@@ -68,7 +68,13 @@ class MenuController extends BaseController
             $menuCategorizado[$cat][] = $prod;
         }
 
-        return view('menu/menu_digital', ['menuCategorizado' => $menuCategorizado]);
+        // Carrito guardado en sesión para pintar el panel lateral
+        $carrito = session()->get('carrito') ?? [];
+
+        return view('menu/menu_digital', [
+            'menuCategorizado' => $menuCategorizado,
+            'carrito'          => $carrito,
+        ]);
     }
     // ... Todo el código anterior del controlador se mantiene igual ...
 
