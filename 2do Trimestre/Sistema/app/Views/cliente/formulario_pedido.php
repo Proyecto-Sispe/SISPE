@@ -54,7 +54,7 @@
         .nav-mesa { color: white; font-size: 14px; font-weight: bold; }
 
         /* ---- Layout ---- */
-        .contenedor { max-width: 1050px; margin: 0 auto; padding: 30px 20px 60px; }
+        .contenedor { width: 100%; margin: 0; padding: 30px 40px 60px; }
 
         .card-encabezado {
             display: flex; align-items: center; justify-content: space-between;
