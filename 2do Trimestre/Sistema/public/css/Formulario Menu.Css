@@ -6,14 +6,9 @@
 
 body {
     margin: 0;
-    background-color: #7f7f7f; 
+    background-color: #7f7f7f;
     font-family: Arial, sans-serif;
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
 }
 
 .contenedor-pedido {

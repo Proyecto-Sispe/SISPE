@@ -48,8 +48,11 @@ $routes->post('cliente/registrar_acceso', 'ClienteQR::registrarAcceso');
 // 3. Formulario de Pedidos para el Cliente (Tu Formulario Menu.Html)
 $routes->get('cliente/pedido', 'ClienteQR::pantallaPedido');
 
-// 4. Guarda el pedido y las observaciones/adiciones del menú en la base de datos
-$routes->post('cliente/guardar_pedido', 'ClienteQR::guardarPedido');
+// 4. Carrito del cliente: añadir, eliminar y confirmar el pedido
+$routes->post('cliente/agregar_carrito', 'ClienteQR::agregarCarrito');
+$routes->get('cliente/eliminar_carrito/(:any)', 'ClienteQR::eliminarCarrito/$1');
+$routes->post('cliente/confirmar_pedido', 'ClienteQR::confirmarPedido');
+$routes->get('cliente/cancelar_pedido', 'ClienteQR::cancelarPedido');
 
 // 5. Estado actual del pedido del cliente (Muestra el reporte del Cocinero)
 $routes->get('cliente/estado', 'ClienteQR::verEstado');
