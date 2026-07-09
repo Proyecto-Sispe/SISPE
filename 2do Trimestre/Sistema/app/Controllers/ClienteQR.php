@@ -59,8 +59,8 @@ class ClienteQR extends BaseController
                 'logged_in'    => true
             ]);
             
-            // Lo mandamos directo al formulario de pedidos
-            return redirect()->to(base_url('cliente/pedido'));
+            // Lo mandamos directo al Menú Digital para que arme su pedido
+            return redirect()->to(base_url('menu_digital'));
             
         } catch (\Exception $e) {
             return "Error al abrir la mesa: " . $e->getMessage();
@@ -76,12 +76,33 @@ class ClienteQR extends BaseController
         }
 
         $db = \Config\Database::connect();
-        
-        // Traemos las categorías y los productos reales de tu menú para pintarlos
-        $data['categorias'] = $db->table('Categoria')->get()->getResultArray();
-        $data['productos']  = $db->table('Menu')->get()->getResultArray();
+
+        $id_pedido = $session->get('id_pedido');
+
+        // Cabecera del pedido (estado, hora, tiempo estimado)
+        $pedido = $db->table('Pedido')->where('id_pedido', $id_pedido)->get()->getRowArray();
+
+        // Detalle del pedido cruzado con el menú real
+        $items = $db->table('Detalle_Pedido dp')
+                    ->select('dp.cantidad, dp.valor_venta, dp.observaciones, m.Productos, m.descripcion')
+                    ->join('Menu m', 'm.id_menu = dp.id_menu')
+                    ->where('dp.id_pedido', $id_pedido)
+                    ->get()->getResultArray();
+
+        // Totales
+        $total = 0;
+        $totalItems = 0;
+        foreach ($items as $it) {
+            $total      += $it['valor_venta'] * $it['cantidad'];
+            $totalItems += $it['cantidad'];
+        }
+
         $data['id_mesa']    = $session->get('id_mesa');
         $data['nombre']     = $session->get('nombre');
+        $data['pedido']     = $pedido;
+        $data['items']      = $items;
+        $data['total']      = $total;
+        $data['totalItems'] = $totalItems;
 
         return view('cliente/formulario_pedido', $data);
     }
@@ -109,8 +130,8 @@ class ClienteQR extends BaseController
             'observaciones' => $observacion
         ]);
         
-        // Redirecciona a la pantalla de éxito con el estado del cocinero
-        return redirect()->to(base_url('cliente/estado'));
+        // Muestra la pantalla "Mi Pedido" con el estado y el detalle actualizado
+        return redirect()->to(base_url('cliente/pedido'));
     }
 
     // 5. Pantalla final de Estado de Pedido (El reporte del cocinero)

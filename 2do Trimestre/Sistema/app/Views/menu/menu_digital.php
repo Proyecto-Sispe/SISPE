@@ -35,8 +35,11 @@
         .btn-next {
             background-color: #FA7F72; color: white; border: none; padding: 12px;
             border-radius: 8px; font-weight: bold; text-align: center; text-decoration: none;
-            font-size: 14px; text-transform: uppercase; display: block;
+            font-size: 14px; text-transform: uppercase; display: block; width: 100%;
+            cursor: pointer;
         }
+        .btn-next:hover { background-color: #e96b5e; }
+        .form-pedir { margin: 0; }
     </style>
 </head>
 <body>
@@ -73,7 +76,11 @@
                         </div>
                         <div>
                             <div class="precio">$<?= number_format($p['Precio'], 0, ',', '.') ?></div>
-                            <a href="#" class="btn-next">PEDIR</a>
+                            <form action="<?= base_url('cliente/guardar_pedido') ?>" method="POST" class="form-pedir">
+                                <input type="hidden" name="id_menu" value="<?= esc($p['id_menu']) ?>">
+                                <input type="hidden" name="cantidad" value="1">
+                                <button type="submit" class="btn-next">PEDIR</button>
+                            </form>
                         </div>
                     </div>
                 <?php endforeach; ?>
