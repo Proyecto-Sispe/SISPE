@@ -52,6 +52,7 @@ $routes->get('cliente/pedido', 'ClienteQR::pantallaPedido');
 $routes->post('cliente/agregar_carrito', 'ClienteQR::agregarCarrito');
 $routes->get('cliente/eliminar_carrito/(:any)', 'ClienteQR::eliminarCarrito/$1');
 $routes->post('cliente/confirmar_pedido', 'ClienteQR::confirmarPedido');
+$routes->get('cliente/cancelar_pedido', 'ClienteQR::cancelarPedido');
 
 // 5. Estado actual del pedido del cliente (Muestra el reporte del Cocinero)
 $routes->get('cliente/estado', 'ClienteQR::verEstado');

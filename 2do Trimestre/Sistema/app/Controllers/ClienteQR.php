@@ -188,6 +188,26 @@ class ClienteQR extends BaseController
         return redirect()->to(base_url('cliente/pedido'));
     }
 
+    // 4.3 Cancela el pedido, libera la mesa y muestra el agradecimiento
+    public function cancelarPedido()
+    {
+        $session = session();
+        $db = \Config\Database::connect();
+
+        $id_mesa = $session->get('id_mesa');
+
+        // Liberamos la mesa (Estado = 0 -> disponible)
+        if ($id_mesa) {
+            $db->table('Mesa')->where('id_Mesa', $id_mesa)->update(['Estado' => 0]);
+        }
+
+        // Cerramos la sesión del cliente por completo
+        $session->destroy();
+
+        // Pantalla de despedida
+        return view('cliente/gracias');
+    }
+
     // 5. Pantalla final de Estado de Pedido (El reporte del cocinero)
     public function verEstado()
     {
