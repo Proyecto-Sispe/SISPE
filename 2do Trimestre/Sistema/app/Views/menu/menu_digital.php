@@ -15,7 +15,9 @@
         h1 { text-align: center; color: white; margin-top: 30px; font-size: 32px; text-transform: uppercase; }
         .subtitulo { text-align: center; color: #fff0ee; margin-bottom: 40px; }
         
-        .contenedor-principal { max-width: 1100px; margin: 0 auto; padding: 0 20px 50px 20px; }
+        /* Layout de dos columnas: menú a la izquierda, carrito a la derecha */
+        .layout { max-width: 1300px; margin: 0 auto; padding: 0 20px 50px 20px; display: flex; align-items: flex-start; gap: 30px; }
+        .contenedor-principal { flex: 1; min-width: 0; }
         .bloque-seccion { margin-bottom: 50px; }
         .nombre-seccion { color: white; font-size: 24px; border-bottom: 3px solid white; padding-bottom: 8px; margin-bottom: 25px; text-transform: uppercase; }
         
@@ -41,14 +43,16 @@
         .btn-next:hover { background-color: #e96b5e; }
         .form-pedir { margin: 0; }
 
-        /* Deja espacio para que el carrito fijo no tape las tarjetas */
-        .contenedor-principal { padding-right: 40px; }
-
-        /* PANEL DEL CARRITO */
+        /* PANEL DEL CARRITO (columna lateral pegajosa, no tapa el contenido) */
         .carrito {
-            position: fixed; top: 80px; right: 20px; width: 320px; max-height: 80vh;
-            overflow-y: auto; background-color: white; border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.25); padding: 20px; z-index: 50;
+            flex: 0 0 320px; width: 320px; position: sticky; top: 20px;
+            max-height: calc(100vh - 40px); overflow-y: auto;
+            background-color: white; border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15); padding: 20px;
+        }
+        @media (max-width: 900px) {
+            .layout { flex-direction: column; }
+            .carrito { position: static; width: 100%; flex-basis: auto; max-height: none; }
         }
         .carrito h2 { margin: 0 0 5px 0; color: #222; font-size: 20px; }
         .carrito .mesa { color: #888; font-size: 13px; margin: 0 0 15px 0; }
@@ -90,6 +94,7 @@
 <h1>NUESTRO MENÚ SECCIONES</h1>
 <p class="subtitulo">Elige tus platos favoritos organizados por categorías</p>
 
+<div class="layout">
 <div class="contenedor-principal">
     <?php foreach($menuCategorizado as $seccion => $platos): ?>
         <div class="bloque-seccion">
@@ -110,7 +115,9 @@
                             </form>
                         </div>
                     </div>
-        <?php endforeach; ?>
+                <?php endforeach; ?>
+            </div>
+        </div>
     <?php endforeach; ?>
 </div>
 
@@ -156,6 +163,7 @@
         </form>
     <?php endif; ?>
 </aside>
+</div>
 
 </body>
 </html>
