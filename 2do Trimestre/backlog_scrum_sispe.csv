@@ -1,0 +1,39 @@
+Title,Body,Epic,Sprint,Labels,Estimate,Assignee,Pipeline
+Configurar repositorio Git y flujo de ramas (main/develop/feature),"Como equipo queremos un flujo de ramas definido para trabajar sin conflictos.",E1 - Configuracion e Infraestructura,Sprint 1,documentacion,2,Victor,Product Backlog
+Definir Product Backlog inicial y priorizar en Zenhub,"Cargar y priorizar todas las historias en el tablero de Zenhub.",E1 - Configuracion e Infraestructura,Sprint 1,documentacion,3,Victor,Product Backlog
+Crear base de datos y ejecutar script SQL de tablas base,"Crear la BD y ejecutar el script SQL con las tablas base del sistema.",E1 - Configuracion e Infraestructura,Sprint 1,base-de-datos,3,Adrian,Product Backlog
+Configurar conexion a BD y variables de entorno (.env) en CodeIgniter,"Configurar el archivo .env y la conexion a la base de datos en CodeIgniter 4.",E1 - Configuracion e Infraestructura,Sprint 1,backend,2,Adrian,Product Backlog
+Configurar proyecto Android base y cliente Retrofit,"Estructura base del proyecto Android en Kotlin con Retrofit para consumir la API.",E1 - Configuracion e Infraestructura,Sprint 1,android,3,Jerson,Product Backlog
+Definir estandar de codigo y estructura de carpetas,"Acordar convenciones de codigo y organizacion de carpetas del proyecto.",E1 - Configuracion e Infraestructura,Sprint 1,documentacion,1,Juan,Product Backlog
+Como usuario quiero iniciar sesion con correo y contrasena,"Autenticacion con correo y contrasena via API.",E2 - Autenticacion y Usuarios,Sprint 1,"backend,api",5,Adrian,Product Backlog
+Como usuario quiero registrarme en el sistema,"Registro de nuevos usuarios en el sistema.",E2 - Autenticacion y Usuarios,Sprint 2,backend,3,Adrian,Product Backlog
+Recuperacion / restablecimiento de contrasena,"Flujo para recuperar y restablecer la contrasena del usuario.",E2 - Autenticacion y Usuarios,Sprint 2,backend,3,Adrian,Product Backlog
+Vista web de login y registro,"Pantallas web para iniciar sesion y registrarse.",E2 - Autenticacion y Usuarios,Sprint 1,frontend-web,3,Juan,Product Backlog
+Pantalla de login en la app Android (consumo de API Auth),"Pantalla de login en Android consumiendo la API de autenticacion.",E2 - Autenticacion y Usuarios,Sprint 2,android,5,Jerson,Product Backlog
+Control de acceso por roles (admin / mesero / cocina / cliente),"Restringir accesos y funciones segun el rol del usuario.",E2 - Autenticacion y Usuarios,Sprint 2,backend,5,Adrian,Product Backlog
+CRUD de personas en backend (modelo + controlador),"Crear, leer, actualizar y eliminar personas en el backend.",E3 - Gestion de Personas,Sprint 2,backend,5,Adrian,Product Backlog
+Endpoints API de personas,"Exponer endpoints REST para el modulo de personas.",E3 - Gestion de Personas,Sprint 2,api,3,Adrian,Product Backlog
+Vista web para listar/agregar/editar personas,"Interfaz web para gestionar personas.",E3 - Gestion de Personas,Sprint 2,frontend-web,3,Juan,Product Backlog
+Pantalla Android CRUD de personas,"Pantalla Android para gestionar personas.",E3 - Gestion de Personas,Sprint 2,android,5,Jerson,Product Backlog
+CRUD de productos (backend + API),"Gestion completa de productos en backend y API.",E4 - Gestion de Productos y Menu,Sprint 2,"backend,api",5,Adrian,Product Backlog
+Gestion de menu y categorias,"Administrar el menu y sus categorias.",E4 - Gestion de Productos y Menu,Sprint 3,backend,5,Adrian,Product Backlog
+Vista web de productos y menu,"Interfaz web para productos y menu.",E4 - Gestion de Productos y Menu,Sprint 3,frontend-web,5,Juan,Product Backlog
+Pantalla Android de menu/productos,"Pantalla Android para ver menu y productos.",E4 - Gestion de Productos y Menu,Sprint 3,android,5,Jerson,Product Backlog
+CRUD de mesas y estados (libre/ocupada),"Gestion de mesas y su estado.",E5 - Gestion de Mesas y Pedidos,Sprint 3,"backend,api",5,Adrian,Product Backlog
+Crear y gestionar pedidos asociados a mesa,"Registrar y administrar pedidos por mesa.",E5 - Gestion de Mesas y Pedidos,Sprint 3,"backend,api",8,Adrian,Product Backlog
+Vista web de mesas y toma de pedidos,"Interfaz web para ver mesas y tomar pedidos.",E5 - Gestion de Mesas y Pedidos,Sprint 4,frontend-web,8,Juan,Product Backlog
+Pantalla Android de mesas y pedidos,"Pantalla Android para mesas y pedidos.",E5 - Gestion de Mesas y Pedidos,Sprint 4,android,8,Jerson,Product Backlog
+Modulo de cocina: ver pedidos entrantes en tiempo real,"Vista de cocina para ver pedidos entrantes.",E5 - Gestion de Mesas y Pedidos,Sprint 4,frontend-web,5,Juan,Product Backlog
+Generar codigo QR por mesa,"Generar un QR unico por mesa para pedidos del cliente.",E6 - Pedido por QR del Cliente,Sprint 4,backend,3,Adrian,Product Backlog
+Vista publica para que el cliente ordene desde el QR,"Pagina publica de pedido accesible por QR.",E6 - Pedido por QR del Cliente,Sprint 4,frontend-web,8,Juan,Product Backlog
+Confirmacion de pedido y pantalla de gracias,"Confirmar el pedido y mostrar pantalla final al cliente.",E6 - Pedido por QR del Cliente,Sprint 4,frontend-web,2,Juan,Product Backlog
+Generar factura a partir de un pedido,"Generar factura desde un pedido existente.",E7 - Facturacion y Reportes,Sprint 5,"backend,api",5,Adrian,Product Backlog
+Vista web de facturas y detalle,"Interfaz web de facturas y su detalle.",E7 - Facturacion y Reportes,Sprint 5,frontend-web,5,Juan,Product Backlog
+Reportes de ventas / pedidos / estadisticas,"Generar reportes de ventas, pedidos y estadisticas.",E7 - Facturacion y Reportes,Sprint 5,backend,5,Adrian,Product Backlog
+Vista web de reportes (tablas/graficos),"Interfaz web de reportes con tablas y graficos.",E7 - Facturacion y Reportes,Sprint 5,frontend-web,5,Juan,Product Backlog
+Consulta de facturas/reportes desde la app Android,"Consultar facturas y reportes desde Android.",E7 - Facturacion y Reportes,Sprint 5,android,5,Jerson,Product Backlog
+Pruebas de integracion API web <-> Android,"Verificar la integracion entre la API web y la app Android.",E8 - Pruebas Integracion y Entrega,Sprint 5,"qa,api",5,Jerson,Product Backlog
+Pruebas funcionales de cada modulo,"Ejecutar pruebas funcionales de todos los modulos.",E8 - Pruebas Integracion y Entrega,Sprint 6,qa,5,Todos,Product Backlog
+Correccion de bugs detectados,"Corregir los bugs encontrados en pruebas.",E8 - Pruebas Integracion y Entrega,Sprint 6,bug,5,Adrian/Juan,Product Backlog
+Manual de usuario y documentacion tecnica,"Elaborar manual de usuario y documentacion tecnica.",E8 - Pruebas Integracion y Entrega,Sprint 6,documentacion,3,Victor,Product Backlog
+Despliegue final y capacitacion,"Desplegar el sistema final y capacitar a los usuarios.",E8 - Pruebas Integracion y Entrega,Sprint 6,documentacion,3,Victor,Product Backlog
