@@ -299,7 +299,6 @@ class Boot
     {
         require_once SYSTEMPATH . 'Test/Mock/MockCommon.php';
     }
-
     /**
      * The autoloader allows all the pieces to work together in the framework.
      * We have to load it here, though, so that the config files can use the
