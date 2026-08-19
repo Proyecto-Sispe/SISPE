@@ -1,0 +1,3 @@
+package com.login.demo.service;
+import com.login.demo.model.entity.*; import com.login.demo.repository.PersonaRepository; import org.springframework.stereotype.Service; import java.util.*;
+@Service public class PersonaService { private final PersonaRepository repo; public PersonaService(PersonaRepository repo){this.repo=repo;} public List<Persona> listar(){return repo.findAllByOrderByPrimerNombreAsc();} public Persona guardar(Persona p){return repo.save(p);} public Optional<Persona> buscar(Integer id,Integer tipo){return repo.findById(new PersonaId(id,tipo));} public void eliminar(Integer id,Integer tipo){repo.deleteById(new PersonaId(id,tipo));} }
