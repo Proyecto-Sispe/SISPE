@@ -59,6 +59,12 @@
             <optional>true</optional>
         </dependency>
 
+        <!-- Seguridad y sesiones para login/roles -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+
         <!-- 7. DevTools (Recarga automática del servidor al hacer cambios) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

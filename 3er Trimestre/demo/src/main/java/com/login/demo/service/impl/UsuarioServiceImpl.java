@@ -41,7 +41,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     @Transactional(readOnly = true)
     public UsuarioDTO obtenerPorId(Long id) {
-        Usuario usuario = repository.findById(id)
+        Usuario usuario = repository.findById(new com.login.demo.model.UsuarioId(id, 1))
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con id: " + id));
         return mapper.toDTO(usuario);
     }
@@ -49,6 +49,6 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     @Transactional
     public void eliminar(Long id) {
-        repository.deleteById(id);
+        repository.deleteById(new com.login.demo.model.UsuarioId(id, 1));
     }
 }
