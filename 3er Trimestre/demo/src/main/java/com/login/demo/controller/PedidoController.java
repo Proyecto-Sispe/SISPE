@@ -16,4 +16,7 @@ public class PedidoController {
         model.addAttribute("pedidos", pedidos.findAll());
         return "pedidos/index";
     }
+
+    @GetMapping("/nuevo")
+    public String nuevo() { return "pedidos/nuevo"; }
 }

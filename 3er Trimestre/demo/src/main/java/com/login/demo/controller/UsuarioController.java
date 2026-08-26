@@ -29,7 +29,7 @@ public class UsuarioController {
     @GetMapping("/nuevo")
     public String formularioNuevo(Model model) {
         model.addAttribute("usuario", new UsuarioDTO());
-        return "usuarios/formulario";
+        return "usuarios/nuevo";
     }
 
     // Guardar con validaciones [JER-02]
@@ -38,7 +38,7 @@ public class UsuarioController {
                         BindingResult result, 
                         Model model) {
         if (result.hasErrors()) {
-            return "usuarios/formulario"; // Si hay error, recarga la vista con las alertas
+            return "usuarios/nuevo"; // Si hay error, recarga la vista con las alertas
         }
         usuarioService.guardar(dto);
         return "redirect:/usuarios";
