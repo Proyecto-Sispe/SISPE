@@ -48,6 +48,9 @@ public class MesaController {
     }
     @PostMapping("/mesas/guardar")
     public String guardar(@ModelAttribute Mesa mesa) { repository.save(mesa); return "redirect:/mesas"; }
+    @PostMapping("/mesas/actualizar/{id}")
+    public String actualizar(@PathVariable Integer id, @ModelAttribute Mesa mesa) { mesa.setId(id); repository.save(mesa); return "redirect:/mesas"; }
+
     @PostMapping("/mesas/eliminar/{id}")
     public String eliminar(@PathVariable Integer id) { repository.deleteById(id); return "redirect:/mesas"; }
 }

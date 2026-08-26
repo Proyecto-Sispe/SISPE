@@ -27,8 +27,9 @@ public class UsuarioController {
 
     // Formulario de creación
     @GetMapping("/nuevo")
-    public String formularioNuevo(Model model) {
+    public String formularioNuevo(@RequestParam(required = false) Long id, Model model) {
         model.addAttribute("usuario", new UsuarioDTO());
+        model.addAttribute("modoEdicion", id != null);
         return "usuarios/nuevo";
     }
 
@@ -45,9 +46,17 @@ public class UsuarioController {
     }
 
     // Eliminar registro
-    @GetMapping("/eliminar/{id}")
-    public String eliminar(@PathVariable Long id) {
-        usuarioService.eliminar(id);
+    @PostMapping("/actualizar/{id}")
+    public String actualizar(@PathVariable Long id, @Valid @ModelAttribute("usuario") UsuarioDTO dto, BindingResult result) {
+        if (result.hasErrors()) return "usuarios/nuevo";
+        dto.setId(id);
+        usuarioService.guardar(dto);
         return "redirect:/usuarios";
     }
+
+    @PostMapping("/eliminar/{id}")
+    public String eliminar(@PathVariable Long id) { usuarioService.eliminar(id); return "redirect:/usuarios"; }
+
+    @GetMapping("/eliminar/{id}")
+    public String eliminarCompatibilidad(@PathVariable Long id) { return eliminar(id); }
 }

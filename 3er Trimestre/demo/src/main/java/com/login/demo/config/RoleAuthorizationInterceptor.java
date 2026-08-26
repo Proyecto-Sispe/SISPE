@@ -18,7 +18,8 @@ public class RoleAuthorizationInterceptor implements HandlerInterceptor {
         String path = request.getRequestURI();
         if (path.startsWith("/css/") || path.startsWith("/js/") || path.startsWith("/images/")
                 || path.equals("/login") || path.startsWith("/cliente/escanear")
-                || path.startsWith("/registro") || path.startsWith("/password")) return true;
+                || path.startsWith("/registro") || path.startsWith("/password")
+                || path.equals("/menu/digital") || path.startsWith("/error")) return true;
 
         HttpSession session = request.getSession(false);
         Usuario usuario = session == null ? null : (Usuario) session.getAttribute("usuario");
@@ -27,9 +28,10 @@ public class RoleAuthorizationInterceptor implements HandlerInterceptor {
             return false;
         }
         String role = String.valueOf(session.getAttribute("rol"));
-        if (matches(path, admin) && !role.equals("Administrador") && !role.equals("Mesero")) return forbidden(response);
+        if (matches(path, admin) && !role.equals("Administrador")) return forbidden(response);
         if (matches(path, kitchen) && !role.equals("Cocinero") && !role.equals("Administrador")) return forbidden(response);
         if (matches(path, waiter) && !role.equals("Mesero") && !role.equals("Administrador")) return forbidden(response);
+        if (path.startsWith("/cliente/") && !role.equals("Cliente") && !role.equals("Mesero") && !role.equals("Administrador")) return forbidden(response);
         return true;
     }
 
