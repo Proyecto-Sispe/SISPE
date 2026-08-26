@@ -6,26 +6,23 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class UsuarioMapper {
-
-    // Entidad a DTO
     public UsuarioDTO toDTO(Usuario usuario) {
         if (usuario == null) return null;
-        return UsuarioDTO.builder()
-                .id(usuario.getId())
-                .nombre(usuario.getNombre())
-                .email(usuario.getEmail())
-                .edad(usuario.getEdad())
-                .build();
+        return new UsuarioDTO(usuario.getId(), usuario.getNombreCompleto(), usuario.getEmail(), null);
     }
 
-    // DTO a Entidad
     public Usuario toEntity(UsuarioDTO dto) {
         if (dto == null) return null;
+        String[] partes = dto.getNombre().trim().split("\\s+", 2);
         return Usuario.builder()
                 .id(dto.getId())
-                .nombre(dto.getNombre())
+                .tipoDocumento(1)
+                .primerNombre(partes[0])
+                .primerApellido(partes.length > 1 ? partes[1] : partes[0])
                 .email(dto.getEmail())
-                .edad(dto.getEdad())
+                .password("1234")
+                .telefono(0L)
+                .activo(true)
                 .build();
     }
 }

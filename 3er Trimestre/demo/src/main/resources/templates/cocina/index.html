@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Cocina | SISPE</title>
+    <link rel="stylesheet" href="/css/sispe.css">
+</head>
+
+<body>
+    <main class="shell">
+        <header>
+            <div><span class="eyebrow">OPERACIÓN</span>
+                <h1>Panel de cocina</h1>
+                <p>Pedidos pendientes y en preparación.</p>
+            </div><a class="logout" href="/dashboard">Volver al panel</a>
+        </header>
+        <section class="orders">
+            <article class="order" th:each="pedido : ${pedidos}">
+                <div class="order-top"><strong th:text="'Pedido #' + pedido.id">Pedido</strong><span class="badge"
+                        th:text="${pedido.estado}">pendiente</span></div>
+                <p th:text="${pedido.observaciones ?: 'Sin observaciones'}">Sin observaciones</p>
+                <form method="post" th:action="@{'/cocina/pedido/' + pedido.id + '/estado'}"><select name="estado">
+                        <option value="en_preparacion">En preparación</option>
+                        <option value="en_camino">En camino</option>
+                        <option value="entregado">Entregado</option>
+                    </select><button type="submit">Actualizar estado</button></form>
+            </article>
+            <p th:if="${#lists.isEmpty(pedidos)}">No hay pedidos activos.</p>
+        </section>
+    </main>
+</body>
+
+</html>
