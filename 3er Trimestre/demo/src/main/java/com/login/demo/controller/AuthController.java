@@ -25,10 +25,20 @@ public class AuthController {
         Usuario usuario = usuarios.findByEmailAndActivoTrue(email.trim()).orElse(null);
         if (usuario != null && (password.equals(usuario.getPassword()) || encoder.matches(password, usuario.getPassword()))) {
             session.setAttribute("usuario", usuario);
+            session.setAttribute("rol", rolDe(usuario));
             return "redirect:/dashboard";
         }
         model.addAttribute("error", "Correo o contraseña incorrectos.");
         return "login";
+    }
+
+    private String rolDe(Usuario usuario) {
+        return switch (usuario.getTipoDocumento()) {
+            case 1 -> "ADMIN";
+            case 2 -> "COCINA";
+            case 3 -> "CAJERO";
+            default -> "CLIENTE";
+        };
     }
 
     @GetMapping("/logout")

@@ -6,6 +6,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.math.BigDecimal;
 
@@ -21,8 +22,11 @@ public class ReporteController {
     }
 
     @GetMapping
-    public String index(Model model) {
-        var pedidosListado = pedidos.findAll();
+    public String index(@RequestParam(required = false) String estado, @RequestParam(required = false) String usuario, Model model) {
+        var pedidosListado = pedidos.findAll().stream()
+                .filter(p -> estado == null || estado.isBlank() || estado.equalsIgnoreCase(p.getEstado()))
+                .filter(p -> usuario == null || usuario.isBlank() || String.valueOf(p.getUsuarioId()).contains(usuario))
+                .toList();
         var facturasListado = facturas.findAll();
         var total = facturasListado.stream().map(f -> f.getTotal() == null ? BigDecimal.ZERO : f.getTotal())
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
