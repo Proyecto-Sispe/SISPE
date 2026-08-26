@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 
 <head>
     <meta charset="UTF-8">
@@ -13,15 +13,18 @@
         <header>
             <div>
                 <p class="eyebrow">SISPE / PANEL</p>
-                <h1>Centro de operaciones</h1>
-                <p>Gestiona el menú y las mesas del sistema.</p>
+                <h1 th:text="'Panel de ' + ${session.rol}">Centro de operaciones</h1>
+                <p>Acceso controlado según tu rol: <strong th:text="${session.rol}">usuario</strong>.</p>
             </div><a class="logout" href="/logout">Cerrar sesión</a>
         </header>
-        <section class="cards"><a href="/menu">Menú <span>Administrar productos</span></a><a href="/mesas">Mesas
-                <span>Ver disponibilidad</span></a><a href="/usuarios">Usuarios <span>Gestionar personas</span></a><a
-                href="/cocina">Cocina <span>Controlar pedidos activos</span></a><a href="/facturas">Facturas
-                <span>Consultar ventas</span></a><a href="/api/pedidos">API pedidos <span>Consultar integración
-                    REST</span></a></section>
+        <section class="cards">
+            <a th:if="${session.rol == 'Administrador' || session.rol == 'Mesero'}" href="/menu">Menú <span>Administrar productos</span></a>
+            <a th:if="${session.rol == 'Administrador' || session.rol == 'Mesero'}" href="/mesas">Mesas <span>Ver disponibilidad y QR</span></a>
+            <a th:if="${session.rol == 'Administrador'}" href="/usuarios">Usuarios <span>Gestionar personas</span></a>
+            <a th:if="${session.rol == 'Administrador' || session.rol == 'Cocinero'}" href="/cocina">Cocina <span>Controlar pedidos activos</span></a>
+            <a th:if="${session.rol == 'Administrador'}" href="/facturas">Facturas <span>Consultar ventas</span></a>
+            <a th:if="${session.rol == 'Cliente'}" href="/menu">Menú digital <span>Realizar pedido</span></a>
+        </section>
     </main>
 </body>
 

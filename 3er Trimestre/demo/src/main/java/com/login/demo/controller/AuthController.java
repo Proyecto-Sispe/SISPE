@@ -30,6 +30,9 @@ public class AuthController {
         if (usuario != null
                 && (password.equals(usuario.getPassword()) || encoder.matches(password, usuario.getPassword()))) {
             session.setAttribute("usuario", usuario);
+            java.util.List<String> roles = usuarios.findRoles(usuario.getId(), usuario.getTipoDocumento());
+            session.setAttribute("roles", roles);
+            session.setAttribute("rol", roles.isEmpty() ? "Cliente" : roles.get(0));
             return "redirect:/dashboard";
         }
         model.addAttribute("error", "Correo o contraseña incorrectos.");

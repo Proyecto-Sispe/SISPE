@@ -28,6 +28,8 @@
                     <p class="sub" th:text="${mesa.ubicacion}">Primer piso</p>
                     <p th:text="'Capacidad: ' + ${mesa.capacidad}">Capacidad</p><strong
                         th:text="${mesa.ocupada ? 'Ocupada' : 'Disponible'}">Disponible</strong>
+                    <div th:if="${!mesa.ocupada}" style="margin-top:14px"><img th:src="@{'/mesas/' + ${mesa.id} + '/qr'}" th:alt="'QR Mesa ' + ${mesa.id}" width="160" height="160"><p class="sub">Escanea para pedir</p></div>
+                    <form th:if="${mesa.ocupada}" th:action="@{'/mesas/' + ${mesa.id} + '/habilitar'}" method="post" style="margin-top:14px"><button class="btn" type="submit">Habilitar mesa</button></form>
                     <form th:action="@{'/mesas/eliminar/' + mesa.id}" method="post" style="margin-top:14px"><button
                             class="btn danger" type="submit">Eliminar</button></form>
                 </article>

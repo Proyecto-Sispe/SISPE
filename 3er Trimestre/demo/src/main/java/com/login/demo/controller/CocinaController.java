@@ -11,7 +11,11 @@ import java.util.List;
 @RequestMapping("/cocina")
 public class CocinaController {
     private final PedidoRepository pedidos;
-    public CocinaController(PedidoRepository pedidos) { this.pedidos = pedidos; }
+    private final com.login.demo.service.PedidoService pedidoService;
+    public CocinaController(PedidoRepository pedidos, com.login.demo.service.PedidoService pedidoService) {
+        this.pedidos = pedidos;
+        this.pedidoService = pedidoService;
+    }
 
     @GetMapping
     public String index(Model model) {
@@ -22,9 +26,7 @@ public class CocinaController {
 
     @PostMapping("/pedido/{id}/estado")
     public String cambiarEstado(@PathVariable Long id, @RequestParam String estado) {
-        Pedido pedido = pedidos.findById(id).orElseThrow();
-        pedido.setEstado(estado);
-        pedidos.save(pedido);
+        pedidoService.cambiarEstado(id, estado);
         return "redirect:/cocina";
     }
 }

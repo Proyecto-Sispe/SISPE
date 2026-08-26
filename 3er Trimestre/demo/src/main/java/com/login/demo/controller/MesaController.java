@@ -2,17 +2,43 @@ package com.login.demo.controller;
 
 import com.login.demo.model.Mesa;
 import com.login.demo.repository.MesaRepository;
+import com.login.demo.service.QrService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @Controller
 @RequiredArgsConstructor
 public class MesaController {
     private final MesaRepository repository;
+    private final QrService qrService;
+
     @GetMapping("/mesas")
-    public String index(Model model) { model.addAttribute("mesas", repository.findAll()); return "mesas/index"; }
+    public String index(Model model) {
+        model.addAttribute("mesas", repository.findAll());
+        return "mesas/index";
+    }
+
+    @PostMapping("/mesas/{id}/habilitar")
+    public String habilitar(@PathVariable Integer id, HttpServletRequest request) {
+        Mesa mesa = repository.findById(id).orElseThrow();
+        mesa.setOcupada(false);
+        repository.save(mesa);
+        return "redirect:/mesas";
+    }
+
+    @GetMapping("/mesas/{id}/qr")
+    @ResponseBody
+    public String qr(@PathVariable Integer id, HttpServletRequest request) {
+        if (!repository.existsById(id)) {
+            throw new ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND, "Mesa no encontrada");
+        }
+        String base = request.getRequestURL().toString().replace(request.getRequestURI(), "");
+        return qrService.generarDataUri(base + "/cliente/escanear/" + id);
+    }
     @PostMapping("/mesas/guardar")
     public String guardar(@ModelAttribute Mesa mesa) { repository.save(mesa); return "redirect:/mesas"; }
     @PostMapping("/mesas/eliminar/{id}")
