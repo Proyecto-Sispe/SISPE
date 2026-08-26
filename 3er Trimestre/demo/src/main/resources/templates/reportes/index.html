@@ -17,6 +17,10 @@
                 <p class="muted">Resumen de pedidos y ventas registrados en el sistema.</p>
             </div><a class="logout" href="/dashboard">Volver al panel</a>
         </header>
+        <form class="card report-filters" method="get" action="/reportes">
+            <h2>Informe multicriterio</h2>
+            <div class="filter-grid"><label>Estado<select name="estado"><option value="">Todos</option><option value="pendiente" th:selected="${estadoFiltro == 'pendiente'}">Pendiente</option><option value="en preparación" th:selected="${estadoFiltro == 'en preparación'}">En preparación</option><option value="listo" th:selected="${estadoFiltro == 'listo'}">Listo</option><option value="entregado" th:selected="${estadoFiltro == 'entregado'}">Entregado</option></select></label><label>Mesa<input type="number" name="mesa" min="1" th:value="${mesaFiltro}"></label><label>Desde<input type="date" name="desde" th:value="${desde}"></label><label>Hasta<input type="date" name="hasta" th:value="${hasta}"></label></div><div class="actions"><button class="btn" type="submit">Filtrar informe</button><a class="btn" href="/reportes">Limpiar</a></div>
+        </form>
         <section class="report-cards">
             <article><span>Pedidos registrados</span><strong th:text="${totalPedidos}">0</strong></article>
             <article><span>Ventas acumuladas</span><strong
