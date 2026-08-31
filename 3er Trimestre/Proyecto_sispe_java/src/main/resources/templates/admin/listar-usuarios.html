@@ -12,8 +12,14 @@
         .header a { padding: 0.6rem 1rem; background: #2563eb; color: white; text-decoration: none; border-radius: 6px; font-size: 0.9rem; font-weight: 600; }
         .header a:hover { background: #1d4ed8; }
         .alert { background: #dcfce7; color: #166534; padding: 0.9rem 1.2rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.9rem; }
-        table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .table-wrapper { overflow-x: auto; border-radius: 10px; }
+        table { width: 100%; min-width: 980px; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         th, td { padding: 0.9rem 1rem; text-align: left; font-size: 0.9rem; border-bottom: 1px solid #e2e8f0; }
+        .empty-state { background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); text-align: center; color: #64748b; }
+        .status { display: inline-block; padding: 0.25rem 0.6rem; border-radius: 999px; font-size: 0.78rem; font-weight: 600; }
+        .status.active { background: #dcfce7; color: #166534; }
+        .status.inactive { background: #fee2e2; color: #991b1b; }
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
         th { background: #0f172a; color: white; font-weight: 600; }
         tr:last-child td { border-bottom: none; }
         tr:hover td { background: #f1f5f9; }
@@ -32,4 +38,54 @@
         <a th:href="@{/inicio}">Volver al panel</a>
     </div>
 
-    <p class="alert" th:if="${param.actualizado}">Rol actualizado
+    <p class="alert" th:if="${param.actualizado}">Rol actualizado correctamente.</p>
+
+    <div th:if="${#lists.isEmpty(usuarios)}" class="empty-state">
+        No hay usuarios registrados para mostrar.
+    </div>
+
+    <div class="table-wrapper" th:unless="${#lists.isEmpty(usuarios)}">
+        <table>
+            <thead>
+                <tr>
+                    <th>Documento</th>
+                    <th>Nombre completo</th>
+                    <th>Teléfono</th>
+                    <th>Correo</th>
+                    <th>Estado</th>
+                    <th>Rol actual</th>
+                    <th>Cambiar rol</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="usuario : ${usuarios}">
+                    <td th:text="${usuario.tipoDocumento + ' - ' + usuario.idUsuario}">Documento</td>
+                    <td th:text="${usuario.primerNombre + ' ' + (usuario.segundoNombre ?: '') + ' ' + usuario.primerApellido + ' ' + (usuario.segundoApellido ?: '')}">Nombre completo</td>
+                    <td th:text="${usuario.telefono ?: 'No registrado'}">Teléfono</td>
+                    <td th:text="${usuario.correo ?: 'No registrado'}">Correo</td>
+                    <td>
+                        <span class="status" th:classappend="${usuario.estado == 1} ? ' active' : ' inactive'" th:text="${usuario.estado == 1 ? 'Activo' : 'Inactivo'}">Estado</span>
+                    </td>
+                    <td>
+                        <span th:if="${usuario.roles != null and !usuario.roles.isEmpty()}" th:each="rol : ${usuario.roles}" class="badge" th:text="${rol.nombre}">Rol</span>
+                        <span th:if="${usuario.roles == null or usuario.roles.isEmpty()}" class="sin-rol">Sin rol</span>
+                    </td>
+                    <td>
+                        <form th:action="@{/admin/usuarios/cambiar-rol}" method="post" class="rol-form">
+                            <input type="hidden" name="idUsuario" th:value="${usuario.idUsuario}">
+                            <input type="hidden" name="tipoDocumento" th:value="${usuario.tipoDocumento}">
+                            <label class="sr-only" th:for="${'rol-' + usuario.idUsuario + '-' + usuario.tipoDocumento}">Nuevo rol</label>
+                            <select name="idRol" th:id="${'rol-' + usuario.idUsuario + '-' + usuario.tipoDocumento}" required>
+                                <option value="" disabled selected>Seleccionar</option>
+                                <option th:each="rol : ${roles}" th:value="${rol.idRol}" th:text="${rol.nombre}">Rol</option>
+                            </select>
+                            <button type="submit">Guardar</button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</body>
+</html>
