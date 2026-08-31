@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificar código - SISPE</title>
+    <style>
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
+        body { background: #f8fafc; color: #334155; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 2rem 0; }
+        .card { background: white; padding: 2.5rem; border-radius: 10px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        h1 { margin-bottom: 0.5rem; color: #0f172a; text-align: center; font-size: 1.4rem; }
+        p.info { text-align: center; color: #64748b; font-size: 0.9rem; margin-bottom: 1.5rem; }
+        .form-group { margin-bottom: 1rem; }
+        label { display: block; margin-bottom: 0.4rem; font-size: 0.9rem; font-weight: 600; color: #475569; }
+        input { width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; }
+        input:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
+        button { width: 100%; padding: 0.75rem; background: #2563eb; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 0.5rem; font-size: 0.95rem; }
+        button:hover { background: #1d4ed8; }
+        .error { color: #ef4444; font-size: 0.85rem; margin-bottom: 1rem; text-align: center; }
+        .success { color: #16a34a; font-size: 0.85rem; margin-bottom: 1rem; text-align: center; }
+        .footer-link { text-align: center; margin-top: 1.5rem; font-size: 0.9rem; }
+        .footer-link a { color: #2563eb; text-decoration: none; font-weight: 600; }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <h1>Verifica tu código</h1>
+        <p class="info">Revisa tu correo, escribe el código de 6 dígitos y tu nueva contraseña.</p>
+
+        <p class="success" th:if="${mensaje}" th:text="${mensaje}">Mensaje</p>
+        <p class="error" th:if="${error}" th:text="${error}">Error</p>
+
+        <form th:action="@{/login/verificar}" method="post">
+            <div class="form-group">
+                <label>Correo:</label>
+                <input type="email" name="correo" th:value="${correo}" required>
+            </div>
+            <div class="form-group">
+                <label>Código de 6 dígitos:</label>
+                <input type="text" name="codigo" maxlength="6" pattern="[0-9]{6}" required autofocus>
+            </div>
+            <div class="form-group">
+                <label>Nueva contraseña:</label>
+                <input type="password" name="nuevaPassword" required minlength="4">
+            </div>
+            <button type="submit">Cambiar contraseña</button>
+        </form>
+
+        <div class="footer-link">
+            <a th:href="@{/login/olvide}">Solicitar un código nuevo</a> ·
+            <a th:href="@{/login}">Volver a iniciar sesión</a>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Persona con Rol - SISPE</title>
+    <style>
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
+        body { background: #f8fafc; color: #334155; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 2rem 0; }
+        .card { background: white; padding: 2.5rem; border-radius: 10px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); width: 100%; max-width: 450px; }
+        h1 { margin-bottom: 1.5rem; color: #0f172a; text-align: center; font-size: 1.5rem; }
+        .form-group { margin-bottom: 1rem; }
+        label { display: block; margin-bottom: 0.4rem; font-size: 0.9rem; font-weight: 600; color: #475569; }
+        input, select { width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; background: white; }
+        input:focus, select:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
+        button { width: 100%; padding: 0.75rem; background: #2563eb; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 1rem; font-size: 0.95rem; }
+        button:hover { background: #1d4ed8; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h1>Registrar Nuevo Empleado / Persona</h1>
+
+        <form th:action="@{/admin/usuarios/nuevo}" method="post" th:object="${persona}">
+
+            <div class="form-group">
+                <label>Tipo de Documento:</label>
+                <select th:field="*{tipoDocumento}" required>
+                    <option value="1">Cédula de ciudadanía</option>
+                    <option value="2">Tarjeta de identidad</option>
+                    <option value="3">Cédula de extranjería</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Número de Documento:</label>
+                <input type="number" th:field="*{idUsuario}" required>
+            </div>
+
+            <div class="form-group">
+                <label>Primer Nombre:</label>
+                <input type="text" th:field="*{primerNombre}" required>
+            </div>
+
+            <div class="form-group">
+                <label>Primer Apellido:</label>
+                <input type="text" th:field="*{primerApellido}" required>
+            </div>
+
+            <div class="form-group">
+                <label>Teléfono:</label>
+                <input type="number" th:field="*{telefono}" required>
+            </div>
+
+            <div class="form-group">
+                <label>Correo:</label>
+                <input type="email" th:field="*{correo}" required>
+            </div>
+
+            <div class="form-group">
+                <label>Contraseña:</label>
+                <input type="password" th:field="*{password}" required>
+            </div>
+
+            <!-- Selección Dinámica del Rol -->
+            <div class="form-group">
+                <label>Asignar Rol:</label>
+                <select name="idRol" required>
+                    <option value="" disabled selected>Seleccione un rol</option>
+                    <option th:each="rol : ${roles}"
+                            th:value="${rol.idRol}"
+                            th:text="${rol.nombre}">
+                    </option>
+                </select>
+            </div>
+
+            <button type="submit">Guardar Persona</button>
+        </form>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar sesión - SISPE</title>
+    <style>
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
+        body { background: #f8fafc; color: #334155; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 2rem 0; }
+        .card { background: white; padding: 2.5rem; border-radius: 10px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        h1 { margin-bottom: 1.5rem; color: #0f172a; text-align: center; font-size: 1.5rem; }
+        .form-group { margin-bottom: 1rem; }
+        label { display: block; margin-bottom: 0.4rem; font-size: 0.9rem; font-weight: 600; color: #475569; }
+        input { width: 100%; padding: 0.6rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; }
+        input:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
+        button { width: 100%; padding: 0.75rem; background: #2563eb; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 0.5rem; font-size: 0.95rem; }
+        button:hover { background: #1d4ed8; }
+        .error { color: #ef4444; font-size: 0.85rem; margin-top: 1rem; text-align: center; }
+        .success { color: #16a34a; font-size: 0.85rem; margin-top: 1rem; text-align: center; }
+        .footer-link { text-align: center; margin-top: 1.5rem; font-size: 0.9rem; }
+        .footer-link a { color: #2563eb; text-decoration: none; font-weight: 600; }
+        .footer-link a:hover { text-decoration: underline; }
+    </style>
+</head>
+
+<body>
+
+    <div class="card">
+        <h1>Iniciar sesión</h1>
+
+        <!-- 1. th:action genera la URL correcta e inyecta el token CSRF automáticamente -->
+        <form th:action="@{/login}" method="post">
+
+            <div class="form-group">
+                <label>Correo:</label>
+                <!-- 2. name="username" es el nombre que espera Spring Security por defecto -->
+                <input
+                    type="email"
+                    name="username"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label>Contraseña:</label>
+                <input
+                    type="password"
+                    name="password"
+                    required
+                >
+            </div>
+
+            <button type="submit">
+                Iniciar sesión
+            </button>
+
+        </form>
+
+        <!-- Manejo de mensajes de error de Spring Security -->
+        <p class="error" th:if="${param.error}">
+            Correo o contraseña incorrectos.
+        </p>
+
+        <p class="success" th:if="${param.logout}">
+            Has cerrado sesión correctamente.
+        </p>
+
+        <p class="success" th:if="${param.recuperado}">
+            Tu contraseña fue actualizada. Ya puedes iniciar sesión.
+        </p>
+
+        <div class="footer-link">
+            <a th:href="@{/login/olvide}">¿Olvidaste tu contraseña?</a>
+        </div>
+
+        <div class="footer-link">
+            ¿No tienes una cuenta?
+            <a th:href="@{/registro}">Registrarse</a>
+        </div>
+    </div>
+
+</body>
+
+</html>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Principal - SISPE</title>
+    <style>
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
+        body { background: #f8fafc; color: #334155; display: flex; min-height: 100vh; }
+        
+        /* Barra lateral */
+        .sidebar { width: 260px; background: #0f172a; color: white; padding: 2rem 1rem; display: flex; flex-direction: column; justify-content: space-between; }
+        .sidebar h2 { font-size: 1.5rem; text-align: center; margin-bottom: 2rem; color: #38bdf8; }
+        .menu a { display: block; padding: 0.8rem 1rem; color: #94a3b8; text-decoration: none; border-radius: 6px; margin-bottom: 0.5rem; transition: all 0.3s; }
+        .menu a:hover { background: #1e293b; color: white; }
+        
+        /* Contenido Principal */
+        .main-content { flex: 1; padding: 2.5rem; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; background: white; padding: 1.5rem; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .header h1 { font-size: 1.6rem; color: #0f172a; }
+        .header p { color: #64748b; font-size: 0.95rem; margin-top: 0.25rem; }
+        
+        /* Cuadrícula de Módulos */
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem; }
+        .card { background: white; padding: 1.5rem; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-top: 4px solid #2563eb; }
+        .card h3 { font-size: 1.1rem; margin-bottom: 0.5rem; color: #0f172a; }
+        .card p { color: #64748b; font-size: 0.9rem; margin-bottom: 1.2rem; line-height: 1.4; }
+        .card a { display: inline-block; padding: 0.5rem 1rem; background: #2563eb; color: white; text-decoration: none; border-radius: 5px; font-size: 0.85rem; font-weight: 600; margin-right: 0.5rem; margin-top: 0.5rem; }
+        
+        /* Botón de Logout */
+        .btn-logout { background: #ef4444; color: white; border: none; padding: 0.75rem 1rem; border-radius: 6px; cursor: pointer; text-decoration: none; text-align: center; display: block; width: 100%; font-weight: bold; }
+        .btn-logout:hover { background: #dc2626; }
+    </style>
+</head>
+<body>
+
+    <!-- Navegación Lateral -->
+    <div class="sidebar">
+        <div>
+            <h2>SISPE Panel</h2>
+            <nav class="menu">
+                <a th:href="@{/inicio}">Inicio</a>
+                <a sec:authorize="hasRole('ADMINISTRADOR')" th:href="@{/admin/usuarios/nuevo}">Crear Persona</a>
+                <a sec:authorize="hasRole('ADMINISTRADOR')" th:href="@{/admin/usuarios}">Ver Usuarios</a>
+                <a sec:authorize="hasRole('ADMINISTRADOR')" th:href="@{/menu}">Gestión de Menú</a>
+                <a sec:authorize="hasAnyRole('ADMINISTRADOR', 'COCINERO')" th:href="@{/cocina/pedidos}">Módulo Cocina</a>
+                <a sec:authorize="hasAnyRole('ADMINISTRADOR', 'MESERO')" th:href="@{/pedidos/mesas}">Toma de Pedidos</a>
+            </nav>
+        </div>
+        
+        <form th:action="@{/logout}" method="post">
+            <button type="submit" class="btn-logout">Cerrar Sesión</button>
+        </form>
+    </div>
+
+    <!-- Panel de Bienvenida y Módulos Protegidos -->
+    <div class="main-content">
+        <div class="header">
+            <div>
+                <h1>Bienvenido, 
+                    <span th:if="${persona != null}" th:text="${persona.primerNombre}">Persona</span>
+                    <span th:if="${persona == null}" sec:authentication="name">Persona</span>!
+                </h1>
+                <p>Correo activo: 
+                    <strong th:if="${persona != null}" th:text="${persona.correo}">correo@ejemplo.com</strong>
+                    <strong th:if="${persona == null}" sec:authentication="name">correo@ejemplo.com</strong>
+                </p>
+                <p style="margin-top: 0.5rem;">Rol(es) asignado(s): <strong sec:authentication="principal.authorities">[ROL]</strong></p>
+            </div>
+        </div>
+
+        <div class="card-grid">
+            <!-- Módulo Administrador -->
+            <div sec:authorize="hasRole('ADMINISTRADOR')" class="card" style="border-color: #8b5cf6;">
+                <h3>Administración del Sistema</h3>
+                <p>Control total de personas, roles, catálogo de productos y gestión global.</p>
+                <a th:href="@{/admin/usuarios/nuevo}" style="background: #8b5cf6;">Nuevo Persona</a>
+                <a th:href="@{/admin/usuarios}" style="background: #8b5cf6;">Ver Usuarios</a>
+                <a th:href="@{/menu}" style="background: #8b5cf6;">Gestión de Menú</a>
+            </div>
+
+            <!-- Módulo Cocina -->
+            <div sec:authorize="hasAnyRole('ADMINISTRADOR', 'COCINERO')" class="card" style="border-color: #f59e0b;">
+                <h3>Panel de Cocina</h3>
+                <p>Visualización e impresión de comandas en tiempo real para preparación.</p>
+                <a th:href="@{/cocina/pedidos}" style="background: #f59e0b;">Ver Pedidos Pendientes</a>
+            </div>
+
+            <!-- Módulo Mesero -->
+            <div sec:authorize="hasAnyRole('ADMINISTRADOR', 'MESERO')" class="card" style="border-color: #10b981;">
+                <h3>Atención y Pedidos</h3>
+                <p>Apertura de mesas, toma de comandas directas y control de estado.</p>
+                <a th:href="@{/pedidos/mesas}" style="background: #10b981;">Gestionar Mesas</a>
+            </div>
+
+            <!-- Módulo Cliente -->
+            <div sec:authorize="hasRole('CLIENTE')" class="card" style="border-color: #06b6d4;">
+                <h3>Mi Menú</h3>
+                <p>Explora el menú disponible, realiza tu pedido interactivo o consulta tus órdenes.</p>
+                <a th:href="@{/menu/digital}" style="background: #06b6d4;">Ver Menú</a>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

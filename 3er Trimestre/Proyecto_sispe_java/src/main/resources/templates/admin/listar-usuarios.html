@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Usuarios - SISPE</title>
+    <style>
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
+        body { background: #f8fafc; color: #334155; padding: 2.5rem; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; background: white; padding: 1.5rem; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .header h1 { font-size: 1.6rem; color: #0f172a; }
+        .header a { padding: 0.6rem 1rem; background: #2563eb; color: white; text-decoration: none; border-radius: 6px; font-size: 0.9rem; font-weight: 600; }
+        .header a:hover { background: #1d4ed8; }
+        .alert { background: #dcfce7; color: #166534; padding: 0.9rem 1.2rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.9rem; }
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        th, td { padding: 0.9rem 1rem; text-align: left; font-size: 0.9rem; border-bottom: 1px solid #e2e8f0; }
+        th { background: #0f172a; color: white; font-weight: 600; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: #f1f5f9; }
+        .badge { display: inline-block; padding: 0.25rem 0.6rem; border-radius: 999px; font-size: 0.78rem; font-weight: 600; background: #e0e7ff; color: #3730a3; margin-right: 0.25rem; }
+        .rol-form { display: flex; gap: 0.5rem; align-items: center; }
+        select { padding: 0.4rem 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.85rem; }
+        button { padding: 0.4rem 0.8rem; background: #2563eb; color: white; border: none; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
+        button:hover { background: #1d4ed8; }
+        .sin-rol { color: #94a3b8; font-style: italic; font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Usuarios registrados</h1>
+        <a th:href="@{/inicio}">Volver al panel</a>
+    </div>
+
+    <p class="alert" th:if="${param.actualizado}">Rol actualizado
