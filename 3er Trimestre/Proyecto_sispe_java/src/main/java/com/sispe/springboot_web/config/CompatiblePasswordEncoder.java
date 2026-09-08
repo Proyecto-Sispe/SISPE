@@ -5,7 +5,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.StringUtils;
 
 /**
- * Codifica y valida contraseñas exclusivamente con BCrypt.
+ * Permite autenticar temporalmente los registros existentes cuyo Password está
+ * almacenado en texto plano en el script SQL, y usa BCrypt para las nuevas claves.
+ * Recomendación: migrar las contraseñas existentes a BCrypt y eliminar el modo legacy.
  */
 public class CompatiblePasswordEncoder implements PasswordEncoder {
 
@@ -22,10 +24,11 @@ public class CompatiblePasswordEncoder implements PasswordEncoder {
             return false;
         }
 
-        if (!encodedPassword.startsWith("$2a$") && !encodedPassword.startsWith("$2b$") && !encodedPassword.startsWith("$2y$")) {
-            return false;
+        if (encodedPassword.startsWith("$2a$") || encodedPassword.startsWith("$2b$") || encodedPassword.startsWith("$2y$")) {
+            return bcrypt.matches(rawPassword, encodedPassword);
         }
 
-        return bcrypt.matches(rawPassword, encodedPassword);
+        // Compatibilidad temporal con los usuarios iniciales del SQL (ej. 1234).
+        return rawPassword != null && rawPassword.toString().equals(encodedPassword);
     }
 }

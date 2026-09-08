@@ -68,6 +68,18 @@
             box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
         }
 
+        input.is-invalid,
+        select.is-invalid {
+            border-color: #dc2626;
+        }
+
+        .error-message {
+            display: block;
+            color: #dc2626;
+            font-size: 0.8rem;
+            margin-top: 0.3rem;
+        }
+
         button {
             width: 100%;
             padding: 0.75rem;
@@ -91,16 +103,18 @@
 
     <div class="card">
         <h1>Registrar Nuevo Empleado / Persona</h1>
-
-        <form th:action="@{/admin/usuarios/nuevo}" method="post" th:object="${persona}">
+        <form th:action="@{/admin/usuarios/nuevo}" method="post" th:object="${personaDTO}">
 
             <div class="form-group">
                 <label>Tipo de Documento:</label>
-                <select th:field="*{tipoDocumento}" required>
+                <select th:field="*{tipoDocumento}"
+                        th:classappend="${#fields.hasErrors('tipoDocumento')} ? 'is-invalid' : ''"
+                        required>
                     <option value="1">Cédula de ciudadanía</option>
                     <option value="2">Tarjeta de identidad</option>
                     <option value="3">Cédula de extranjería</option>
                 </select>
+                <span class="error-message" th:if="${#fields.hasErrors('tipoDocumento')}" th:errors="*{tipoDocumento}"></span>
             </div>
 
             <div class="form-group">
@@ -110,27 +124,42 @@
 
             <div class="form-group">
                 <label>Primer Nombre:</label>
-                <input type="text" th:field="*{primerNombre}" required>
+                <input type="text" th:field="*{primerNombre}"
+                       th:classappend="${#fields.hasErrors('primerNombre')} ? 'is-invalid' : ''"
+                       required>
+                <span class="error-message" th:if="${#fields.hasErrors('primerNombre')}" th:errors="*{primerNombre}"></span>
             </div>
 
             <div class="form-group">
                 <label>Primer Apellido:</label>
-                <input type="text" th:field="*{primerApellido}" required>
+                <input type="text" th:field="*{primerApellido}"
+                       th:classappend="${#fields.hasErrors('primerApellido')} ? 'is-invalid' : ''"
+                       required>
+                <span class="error-message" th:if="${#fields.hasErrors('primerApellido')}" th:errors="*{primerApellido}"></span>
             </div>
 
             <div class="form-group">
                 <label>Teléfono:</label>
-                <input type="number" th:field="*{telefono}" required>
+                <input type="number" th:field="*{telefono}"
+                       th:classappend="${#fields.hasErrors('telefono')} ? 'is-invalid' : ''"
+                       required>
+                <span class="error-message" th:if="${#fields.hasErrors('telefono')}" th:errors="*{telefono}"></span>
             </div>
 
             <div class="form-group">
                 <label>Correo:</label>
-                <input type="email" th:field="*{correo}" required>
+                <input type="email" th:field="*{correo}"
+                       th:classappend="${#fields.hasErrors('correo')} ? 'is-invalid' : ''"
+                       required>
+                <span class="error-message" th:if="${#fields.hasErrors('correo')}" th:errors="*{correo}"></span>
             </div>
 
             <div class="form-group">
                 <label>Contraseña:</label>
-                <input type="password" th:field="*{password}" required>
+                <input type="password" th:field="*{password}"
+                       th:classappend="${#fields.hasErrors('password')} ? 'is-invalid' : ''"
+                       required>
+                <span class="error-message" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></span>
             </div>
 
             <!-- Selección Dinámica del Rol -->
