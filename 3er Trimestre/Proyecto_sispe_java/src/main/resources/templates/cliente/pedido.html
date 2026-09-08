@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Mi pedido | SISPE</title>
+    <link rel="stylesheet" th:href="@{/css/sispe.css}">
+</head>
+
+<body class="digital-page">
+    <main class="digital-content">
+        <a class="logout" th:href="@{/menu/digital}">Volver al menú</a>
+        <h1>Mi pedido</h1>
+        <div class="categoria" th:each="item : ${items}">
+            <div class="item">
+                <div>
+                    <h2 th:text="${item.menu.producto}">Producto</h2>
+                    <p class="precio" th:text="${item.valorVenta}">$0</p>
+                    <p th:text="'Cantidad: ' + ${item.cantidad}">Cantidad: 1</p>
+                </div>
+            </div>
+        </div>
+        <p th:if="${#lists.isEmpty(items)}">Tu pedido está vacío.</p>
+        <form method="post" th:action="@{/cliente/carrito/vaciar}"><button class="btn danger" type="submit">Vaciar pedido</button></form>
+    </main>
+</body>
+
+</html>

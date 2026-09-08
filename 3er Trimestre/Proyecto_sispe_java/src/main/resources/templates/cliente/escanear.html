@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Bienvenido | SISPE</title>
+    <link rel="stylesheet" th:href="@{/css/sispe.css}">
+</head>
+
+<body class="digital-page">
+    <main class="digital-content">
+        <h1>Mesa <span th:text="${mesa.id}">1</span></h1>
+        <p th:text="${mesa.ubicacion}">Ubicación</p>
+        <p th:if="${error}" th:text="${error}" style="color:#dc2626;font-weight:bold;"></p>
+        <form method="post" th:action="@{'/cliente/escanear/' + ${mesa.id}}" class="form">
+            <label>Tu nombre<input type="text" name="nombre" required></label>
+            <label>Tu cédula<input type="number" name="cedula" required></label>
+            <button class="btn" type="submit">Empezar a pedir</button>
+        </form>
+    </main>
+</body>
+
+</html>

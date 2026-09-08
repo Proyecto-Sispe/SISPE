@@ -17,6 +17,7 @@
         </div>
     </nav>
     <header class="digital-hero">
+        <p th:if="${error}" th:text="${error}" style="color:#dc2626;font-weight:bold;text-align:center;"></p>
         <p class="eyebrow">SISPE / MENÚ DIGITAL</p>
         <h1>Menú de comida rápida</h1>
         <p>Elige tus productos y agrégalos a tu pedido.</p>
