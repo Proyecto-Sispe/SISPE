@@ -1,17 +1,23 @@
 
 package com.sispe.springboot_web.Controller;
 
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.server.ResponseStatusException;
+
 import com.sispe.springboot_web.Model.Mesa;
 import com.sispe.springboot_web.Repository.MesaRepository;
 import com.sispe.springboot_web.Service.QrService;
+
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 
 @Controller
 @RequiredArgsConstructor
@@ -23,6 +29,11 @@ public class MesaController {
     public String index(Model model) {
         model.addAttribute("mesas", repository.findAll());
         return "mesas/index";
+    }
+
+    @GetMapping("/mesas/guardar")
+    public String formularioGuardar() {
+        return "redirect:/mesas";
     }
 
     @PostMapping("/mesas/{id}/habilitar")

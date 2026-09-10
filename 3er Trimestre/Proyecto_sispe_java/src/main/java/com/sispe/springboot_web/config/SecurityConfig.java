@@ -29,7 +29,10 @@ public class SecurityConfig {
     "/css/**",
     "/js/**",
     "/images/**",
-    "/menu/digital"
+    "/menu/digital",
+    "/cliente/escanear/**",
+    "/cliente/carrito/**",
+    "/cliente/pedido"
 ).permitAll()
 
 .requestMatchers("/admin/**").hasRole("ADMINISTRADOR")

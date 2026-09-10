@@ -14,6 +14,7 @@
         <p th:text="${mesa.ubicacion}">Ubicación</p>
         <p th:if="${error}" th:text="${error}" style="color:#dc2626;font-weight:bold;"></p>
         <form method="post" th:action="@{'/cliente/escanear/' + ${mesa.id}}" class="form">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
             <label>Tu nombre<input type="text" name="nombre" required></label>
             <label>Tu cédula<input type="number" name="cedula" required></label>
             <button class="btn" type="submit">Empezar a pedir</button>

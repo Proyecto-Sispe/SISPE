@@ -1,5 +1,16 @@
 package com.sispe.springboot_web.Service;
 
+import java.io.ByteArrayOutputStream;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.springframework.stereotype.Service;
+
 import com.lowagie.text.Document;
 import com.lowagie.text.Element;
 import com.lowagie.text.Font;
@@ -9,19 +20,14 @@ import com.lowagie.text.Phrase;
 import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
-import com.sispe.springboot_web.Model.*;
-import com.sispe.springboot_web.Repository.*;
-import org.springframework.stereotype.Service;
-import java.io.ByteArrayOutputStream;
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
+import com.sispe.springboot_web.Model.DetallePedido;
+import com.sispe.springboot_web.Model.Factura;
+import com.sispe.springboot_web.Model.Insumo;
+import com.sispe.springboot_web.Model.Pedido;
+import com.sispe.springboot_web.Repository.DetallePedidoRepository;
+import com.sispe.springboot_web.Repository.FacturaRepository;
+import com.sispe.springboot_web.Repository.InsumoRepository;
+import com.sispe.springboot_web.Repository.PedidoRepository;
 
 @Service
 public class ReporteService {
@@ -47,11 +53,20 @@ public class ReporteService {
      */
     public Map<String,Object> datos(LocalDate desde, LocalDate hasta, String estado) {
         List<Pedido> filtrados = pedidos.findAll().stream().filter(p -> dentroDelRango(p, desde, hasta) && coincideEstado(p, estado)).toList();
-        Set<Long> ids = filtrados.stream().map(Pedido::getId).filter(Objects::nonNull).collect(Collectors.toSet());
+        Set<Long> ids = new java.util.HashSet<>();
+        for (Pedido pedido : filtrados) {
+            if (pedido.getId() != null) {
+                ids.add(pedido.getId());
+            }
+        }
 
         List<Factura> facturasFiltradas = facturas.findAll().stream().filter(f -> ids.contains(f.getPedidoId())).toList();
         List<DetallePedido> detallesFiltrados = detalles.findAll().stream().filter(d -> ids.contains(d.getPedidoId())).toList();
-        BigDecimal totalVentas = facturasFiltradas.stream().map(f -> f.getTotal() == null ? BigDecimal.ZERO : f.getTotal()).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal totalVentas = BigDecimal.ZERO;
+        for (Factura factura : facturasFiltradas) {
+            BigDecimal total = factura.getTotal();
+            totalVentas = totalVentas.add(total == null ? BigDecimal.ZERO : total);
+        }
 
         Map<String,Object> datos = new LinkedHashMap<>();
         datos.put("pedidos", filtrados);
@@ -119,10 +134,14 @@ public class ReporteService {
         Map<String,BigDecimal> importes = new LinkedHashMap<>();
         for (DetallePedido d : detalles(datos)) {
             String producto = d.getMenu() == null ? "(sin producto)" : d.getMenu().getProducto();
-            int cantidad = d.getCantidad() == null ? 0 : d.getCantidad();
-            unidades.computeIfAbsent(producto, k -> new int[1])[0] += cantidad;
-            BigDecimal importe = d.getValorVenta() == null ? BigDecimal.ZERO : d.getValorVenta().multiply(BigDecimal.valueOf(cantidad));
-            importes.merge(producto, importe, BigDecimal::add);
+            Integer cantidadRegistrada = d.getCantidad();
+            Integer cantidad = cantidadRegistrada;
+            if (cantidad == null) {
+                cantidad = Integer.valueOf(0);
+            }
+            unidades.computeIfAbsent(producto, k -> new int[1])[0] += cantidad.intValue();
+            BigDecimal importe = d.getValorVenta() == null ? BigDecimal.ZERO : d.getValorVenta().multiply(BigDecimal.valueOf(cantidad.longValue()));
+            importes.put(producto, importes.getOrDefault(producto, BigDecimal.ZERO).add(importe));
         }
         PdfPTable tabla = tabla("Producto", "Unidades", "Importe");
         unidades.forEach((producto, cantidad) -> fila(tabla, producto, cantidad[0], importes.get(producto)));

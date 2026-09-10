@@ -1,5 +1,17 @@
 package com.sispe.springboot_web.Controller;
 
+import java.util.List;
+
+import org.springframework.dao.DataAccessException;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
 import com.sispe.springboot_web.Model.DetallePedido;
 import com.sispe.springboot_web.Model.Menu;
 import com.sispe.springboot_web.Model.Mesa;
@@ -7,15 +19,9 @@ import com.sispe.springboot_web.Repository.DetallePedidoRepository;
 import com.sispe.springboot_web.Repository.MenuRepository;
 import com.sispe.springboot_web.Repository.MesaRepository;
 import com.sispe.springboot_web.Service.SesionMesaService;
+
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataAccessException;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
-import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -46,6 +52,11 @@ public class ClienteController {
             attrs.addFlashAttribute("error", "Esta mesa ya está ocupada. Avisa a un mesero.");
             return "redirect:/cliente/escanear/" + idMesa;
         }
+    }
+
+    @GetMapping("/carrito/agregar")
+    public String formularioAgregar() {
+        return "redirect:/menu/digital";
     }
 
     @PostMapping("/carrito/agregar")

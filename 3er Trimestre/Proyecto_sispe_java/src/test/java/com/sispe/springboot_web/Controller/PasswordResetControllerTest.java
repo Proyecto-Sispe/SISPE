@@ -2,7 +2,6 @@ package com.sispe.springboot_web.Controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.doThrow;
 
 import org.junit.jupiter.api.BeforeEach;

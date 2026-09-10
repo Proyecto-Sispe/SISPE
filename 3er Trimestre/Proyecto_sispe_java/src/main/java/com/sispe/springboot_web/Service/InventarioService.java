@@ -1,11 +1,19 @@
 package com.sispe.springboot_web.Service;
 
-import com.sispe.springboot_web.Model.*;
-import com.sispe.springboot_web.Repository.*;
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.math.BigDecimal;
-import java.util.*;
+
+import com.sispe.springboot_web.Model.DetallePedido;
+import com.sispe.springboot_web.Model.Insumo;
+import com.sispe.springboot_web.Model.MenuInsumo;
+import com.sispe.springboot_web.Repository.DetallePedidoRepository;
+import com.sispe.springboot_web.Repository.InsumoRepository;
+import com.sispe.springboot_web.Repository.MenuInsumoRepository;
 
 @Service
 public class InventarioService {
@@ -29,7 +37,8 @@ public class InventarioService {
         for (DetallePedido detalle : detalles.findByPedidoId(pedidoId)) {
             for (MenuInsumo receta : recetas.findByMenu_Id(detalle.getMenu().getId())) {
                 BigDecimal total = receta.getCantidad().multiply(BigDecimal.valueOf(detalle.getCantidad()));
-                consumo.merge(receta.getInsumo().getId(), total, BigDecimal::add);
+                Long insumoId = receta.getInsumo().getId();
+                consumo.put(insumoId, consumo.getOrDefault(insumoId, BigDecimal.ZERO).add(total));
             }
         }
         Map<Long, Insumo> cargados = new HashMap<>();
