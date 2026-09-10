@@ -1,36 +1,23 @@
-// Controller/ReporteController.java
 package com.sispe.springboot_web.Controller;
 
-import com.sispe.springboot_web.Repository.FacturaRepository;
-import com.sispe.springboot_web.Repository.PedidoRepository;
+import com.sispe.springboot_web.Service.ReporteService;
+import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
+import java.time.LocalDate;
+import java.util.Map;
 
-import java.math.BigDecimal;
-
-@Controller
-@RequestMapping("/reportes")
+@Controller @RequestMapping("/reportes")
 public class ReporteController {
-    private final PedidoRepository pedidos;
-    private final FacturaRepository facturas;
-
-    public ReporteController(PedidoRepository pedidos, FacturaRepository facturas) {
-        this.pedidos = pedidos;
-        this.facturas = facturas;
+    private final ReporteService service;
+    public ReporteController(ReporteService service) { this.service = service; }
+    @GetMapping public String index(@RequestParam(required=false) LocalDate desde, @RequestParam(required=false) LocalDate hasta,
+            @RequestParam(required=false, defaultValue="") String tipo, @RequestParam(required=false, defaultValue="") String estado, Model model) {
+        Map<String,Object> datos = service.datos(desde, hasta, tipo, estado); model.addAllAttributes(datos); model.addAttribute("desde", desde); model.addAttribute("hasta", hasta); model.addAttribute("tipo", tipo); model.addAttribute("estado", estado); return "reportes/index";
     }
-
-    @GetMapping
-    public String index(Model model) {
-        var pedidosListado = pedidos.findAll();
-        var facturasListado = facturas.findAll();
-        var total = facturasListado.stream().map(f -> f.getTotal() == null ? BigDecimal.ZERO : f.getTotal())
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-        model.addAttribute("pedidos", pedidosListado);
-        model.addAttribute("facturas", facturasListado);
-        model.addAttribute("totalVentas", total);
-        model.addAttribute("totalPedidos", pedidosListado.size());
-        return "reportes/index";
+    @GetMapping("/pdf/{tipo}") public ResponseEntity<byte[]> pdf(@PathVariable String tipo, @RequestParam(required=false) LocalDate desde, @RequestParam(required=false) LocalDate hasta, @RequestParam(required=false) String estado) {
+        byte[] pdf = service.pdf("Reporte " + tipo, service.datos(desde, hasta, tipo, estado));
+        return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=reporte-" + tipo + ".pdf").contentType(MediaType.APPLICATION_PDF).body(pdf);
     }
 }
