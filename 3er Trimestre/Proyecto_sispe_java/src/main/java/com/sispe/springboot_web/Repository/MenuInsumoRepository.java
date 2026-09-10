@@ -9,9 +9,5 @@ import java.util.Optional;
 public interface MenuInsumoRepository extends JpaRepository<MenuInsumo, Long> {
 
     List<MenuInsumo> findByMenu_Id(Integer menuId);
-
-    Optional<MenuInsumo> findByMenu_IdAndInsumo_Id(
-            Integer menuId,
-            Long insumoId
-    );
+    Optional<MenuInsumo> findByMenu_IdAndInsumo_Id(Integer menuId, Long insumoId);
 }
