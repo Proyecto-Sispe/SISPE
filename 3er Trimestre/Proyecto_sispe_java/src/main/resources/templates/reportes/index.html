@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Reportes | SISPE</title>
     <link rel="stylesheet" th:href="@{/css/sispe.css}">
 </head>
@@ -13,38 +13,52 @@
         <header>
             <div>
                 <p class="eyebrow">SISPE / ANALÍTICA</p>
-                <h1>Reportes operativos</h1>
-                <p class="muted">Resumen de pedidos y ventas registrados en el sistema.</p>
-            </div><a class="logout" th:href="@{/inicio}">Volver al panel</a>
+                <h1>Reportes multicriterio</h1>
+                <p class="muted">Filtra y descarga cinco reportes generados en el servidor.</p>
+            </div><a class="logout" th:href="@{/inicio}">Volver</a>
         </header>
+        <section class="table-wrap">
+            <form method="get" th:action="@{/reportes}" class="form-grid"><label>Desde<input type="date" name="desde"
+                        th:value="${desde}"></label><label>Hasta<input type="date" name="hasta"
+                        th:value="${hasta}"></label><label>Estado<select name="estado">
+                        <option value="">Todos</option>
+                        <option value="pendiente">Pendiente</option>
+                        <option value="en_preparacion">En preparación</option>
+                        <option value="entregado">Entregado</option>
+                    </select></label><button type="submit">Aplicar filtros</button></form>
+        </section>
         <section class="report-cards">
-            <article><span>Pedidos registrados</span><strong th:text="${totalPedidos}">0</strong></article>
-            <article><span>Ventas acumuladas</span><strong
-                    th:text="${#numbers.formatDecimal(totalVentas, 1, 2)}">0.00</strong></article>
-            <article><span>Facturas emitidas</span><strong th:text="${#lists.size(facturas)}">0</strong></article>
+            <article><span>Pedidos</span><strong th:text="${totalPedidos}">0</strong></article>
+            <article><span>Ventas</span><strong th:text="${totalVentas}">0.00</strong></article>
+            <article><span>Insumos</span><strong th:text="${#lists.size(insumos)}">0</strong></article>
         </section>
         <section class="table-wrap">
-            <h2>Pedidos recientes</h2>
+            <h2>Descargas PDF</h2>
+            <div class="form-grid"><a th:each="nombre : ${ {'general','producto','usuarios','ventas','inventario'} }"
+                    class="button"
+                    th:href="@{'/reportes/pdf/' + ${nombre}(desde=${desde},hasta=${hasta},estado=${estado})}"
+                    th:text="'Descargar ' + ${nombre}">PDF</a></div>
+        </section>
+        <section class="table-wrap">
+            <h2>Pedidos filtrados</h2>
             <table>
                 <thead>
                     <tr>
                         <th>ID</th>
                         <th>Mesa</th>
                         <th>Estado</th>
-                        <th>Prioridad</th>
                         <th>Fecha</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr th:each="pedido : ${pedidos}">
-                        <td th:text="${pedido.id}">1</td>
-                        <td th:text="${pedido.mesaId}">1</td>
-                        <td><span class="badge" th:text="${pedido.estado}">pendiente</span></td>
-                        <td th:text="${pedido.prioridad}">normal</td>
-                        <td th:text="${pedido.fechaPedido}">2026-01-01</td>
+                    <tr th:each="p : ${pedidos}">
+                        <td th:text="${p.id}"></td>
+                        <td th:text="${p.mesaId}"></td>
+                        <td th:text="${p.estado}"></td>
+                        <td th:text="${p.fechaPedido}"></td>
                     </tr>
                     <tr th:if="${#lists.isEmpty(pedidos)}">
-                        <td colspan="5">No hay pedidos registrados.</td>
+                        <td colspan="4">No hay resultados.</td>
                     </tr>
                 </tbody>
             </table>

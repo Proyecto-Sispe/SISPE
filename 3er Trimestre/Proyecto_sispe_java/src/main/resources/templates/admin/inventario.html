@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Inventario | SISPE</title>
+    <link rel="stylesheet" th:href="@{/css/sispe.css}">
+</head>
+
+<body>
+    <main class="shell">
+        <header>
+            <div>
+                <p class="eyebrow">SISPE / ADMINISTRACIÓN</p>
+                <h1>Inventario y recetas</h1>
+                <p class="muted">Configura insumos reutilizables y cuánto consume cada producto.</p>
+            </div><a class="logout" th:href="@{/inicio}">Volver</a>
+        </header>
+        <section class="report-cards">
+            <article><span>Insumos</span><strong th:text="${#lists.size(insumos)}">0</strong></article>
+            <article><span>Recetas</span><strong th:text="${#lists.size(recetas)}">0</strong></article>
+        </section>
+        <section class="table-wrap">
+            <h2>Nuevo insumo</h2>
+            <form method="post" th:action="@{/admin/inventario/insumos}" class="form-grid"><input name="nombre"
+                    placeholder="Pan de hamburguesa" required><input name="unidad" placeholder="unidad / kg / litro"
+                    required><input name="stockActual" type="number" step="0.001" min="0" placeholder="Stock actual"
+                    required><input name="stockMinimo" type="number" step="0.001" min="0" placeholder="Stock mínimo"
+                    required><button type="submit">Guardar insumo</button></form>
+        </section>
+        <section class="table-wrap">
+            <h2>Agregar ingrediente a receta</h2>
+            <form method="post" th:action="@{/admin/inventario/recetas}" class="form-grid"><select name="menuId"
+                    required>
+                    <option value="">Producto</option>
+                    <option th:each="menu : ${menus}" th:value="${menu.id}" th:text="${menu.producto}"></option>
+                </select><select name="insumoId" required>
+                    <option value="">Insumo</option>
+                    <option th:each="insumo : ${insumos}" th:value="${insumo.id}" th:text="${insumo.nombre}"></option>
+                </select><input name="cantidad" type="number" step="0.001" min="0.001" placeholder="Cantidad por unidad"
+                    required><button type="submit">Guardar receta</button></form>
+        </section>
+        <section class="table-wrap">
+            <h2>Stock actual</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Insumo</th>
+                        <th>Stock</th>
+                        <th>Mínimo</th>
+                        <th>Unidad</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="i : ${insumos}">
+                        <td th:text="${i.nombre}"></td>
+                        <td th:text="${i.stockActual}"></td>
+                        <td th:text="${i.stockMinimo}"></td>
+                        <td th:text="${i.unidad}"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+</body>
+
+</html>

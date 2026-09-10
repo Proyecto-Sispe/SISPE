@@ -13,6 +13,6 @@ public class PasswordReset {
     @Column(nullable = false, unique = true) private String token;
     private String codigo;
     private LocalDateTime expira;
-    private Boolean usado = false;
+    @Builder.Default private Boolean usado = false;
     @Column(name = "created_at") private LocalDateTime createdAt;
 }

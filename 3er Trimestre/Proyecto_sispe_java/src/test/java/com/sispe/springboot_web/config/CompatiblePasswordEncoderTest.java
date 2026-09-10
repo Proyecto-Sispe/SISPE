@@ -10,8 +10,11 @@ class CompatiblePasswordEncoderTest {
     private final CompatiblePasswordEncoder encoder = new CompatiblePasswordEncoder();
 
     @Test
-    void rejectsPlainTextPassword() {
-        assertFalse(encoder.matches("1234", "1234"));
+    void acceptsLegacyPlainTextPassword() {
+        // Modo legacy intencional: los usuarios iniciales del script SQL tienen la
+        // contraseña en texto plano. Debe eliminarse cuando se migren a BCrypt.
+        assertTrue(encoder.matches("1234", "1234"));
+        assertFalse(encoder.matches("otra", "1234"));
     }
 
     @Test

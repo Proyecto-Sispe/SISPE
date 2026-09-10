@@ -2,6 +2,7 @@ package com.sispe.springboot_web.Controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -18,6 +19,10 @@ import com.sispe.springboot_web.Model.Rol;
 import com.sispe.springboot_web.Repository.PersonaRepository;
 import com.sispe.springboot_web.Repository.RolRepository;
 import com.sispe.springboot_web.Service.AuthService;
+import com.sispe.springboot_web.dto.PersonaDTO;
+import com.sispe.springboot_web.mapper.PersonaMapper;
+
+import org.springframework.validation.BindingResult;
 
 @ExtendWith(MockitoExtension.class)
 class AdminControllerTest {
@@ -32,13 +37,19 @@ class AdminControllerTest {
     private PersonaRepository personaRepository;
 
     @Mock
+    private PersonaMapper personaMapper;
+
+    @Mock
+    private BindingResult bindingResult;
+
+    @Mock
     private Model model;
 
     private AdminController controller;
 
     @BeforeEach
     void setUp() {
-        controller = new AdminController(authService, rolRepository, personaRepository);
+        controller = new AdminController(authService, rolRepository, personaRepository, personaMapper);
     }
 
     @Test
@@ -52,10 +63,27 @@ class AdminControllerTest {
 
     @Test
     void guardarPersonaRedirige() {
+        PersonaDTO dto = new PersonaDTO();
         Persona persona = new Persona();
+        when(bindingResult.hasErrors()).thenReturn(false);
+        when(personaMapper.toEntity(dto)).thenReturn(persona);
 
-        assertEquals("redirect:/inicio?creado", controller.guardarPersonaConRol(persona, 2));
+        assertEquals("redirect:/inicio?creado",
+                controller.guardarPersonaConRol(dto, bindingResult, 2, model));
         verify(authService).registrarConRol(persona, 2);
+    }
+
+    @Test
+    void guardarPersonaConErroresVuelveAlFormulario() {
+        PersonaDTO dto = new PersonaDTO();
+        List<Rol> roles = List.of(new Rol());
+        when(bindingResult.hasErrors()).thenReturn(true);
+        when(rolRepository.findAll()).thenReturn(roles);
+
+        assertEquals("admin/crear-usuario",
+                controller.guardarPersonaConRol(dto, bindingResult, 2, model));
+        verify(model).addAttribute("roles", roles);
+        verifyNoInteractions(authService);
     }
 
     @Test

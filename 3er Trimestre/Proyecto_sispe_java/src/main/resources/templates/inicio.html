@@ -165,6 +165,7 @@
                 <a sec:authorize="hasRole('ADMINISTRADOR')" th:href="@{/admin/usuarios/nuevo}">Crear Persona</a>
                 <a sec:authorize="hasRole('ADMINISTRADOR')" th:href="@{/admin/usuarios}">Ver Usuarios</a>
                 <a sec:authorize="hasRole('ADMINISTRADOR')" th:href="@{/menu}">Gestión de Menú</a>
+                <a sec:authorize="hasRole('ADMINISTRADOR')" th:href="@{/admin/inventario}">Inventario y recetas</a>
                 <a sec:authorize="hasRole('ADMINISTRADOR')" th:href="@{/facturas}">Facturación</a>
                 <a sec:authorize="hasRole('ADMINISTRADOR')" th:href="@{/reportes}">Reportes</a>
 
@@ -209,6 +210,7 @@
                 <a th:href="@{/admin/usuarios/nuevo}" style="background: #8b5cf6;">Nuevo Persona</a>
                 <a th:href="@{/admin/usuarios}" style="background: #8b5cf6;">Ver Usuarios</a>
                 <a th:href="@{/menu}" style="background: #8b5cf6;">Gestión de Menú</a>
+                <a th:href="@{/admin/inventario}" style="background: #8b5cf6;">Inventario y recetas</a>
             </div>
 
             <!-- Módulo Facturación y Reportes -->
