@@ -1,6 +1,6 @@
 package com.sispe.springboot_web.mapper;
 
-import com.sispe.springboot_web.Model.Persona;
+import com.sispe.springboot_web.model.Persona;
 import com.sispe.springboot_web.dto.PersonaDTO;
 import org.springframework.stereotype.Component;
 

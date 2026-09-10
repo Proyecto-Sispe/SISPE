@@ -12,9 +12,9 @@ public class JacocoReportConfig implements WebMvcConfigurer {
         registry.addResourceHandler(
             "/index.html",
                 "/jacoco-sessions.html",
-                "/com.sispe.springboot_web.Controller/**",
-                "/com.sispe.springboot_web.Model/**",
-                "/com.sispe.springboot_web.Service/**")
+                "/com.sispe.springboot_web.controller/**",
+                "/com.sispe.springboot_web.model/**",
+                "/com.sispe.springboot_web.service/**")
             .addResourceLocations("file:target/site/jacoco/");
 
         registry.addResourceHandler("/jacoco-resources/**")
