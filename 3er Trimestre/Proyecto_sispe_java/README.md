@@ -1,28 +1,6 @@
-# Documento Técnico de Entrega — SISPE
+# SISPE — Sistema de Gestión de Servicios
 
-## Información general
-
-| Campo | Detalle |
-|---|---|
-| Proyecto | SISPE — Sistema de Gestión de Servicios |
-| Tecnología | Java 17, Spring Boot, Spring MVC, Spring Data JPA, Thymeleaf |
-| Institución | SENA — Servicio Nacional de Aprendizaje |
-| Programa | Análisis y Desarrollo de Software (ADSO) |
-| Trimestre | Tercer trimestre |
-| Tipo de entrega | Diseño de aplicación Java estructurada |
-| Instructor / evaluador | Ing. William Ramón Flórez |
-
-## Equipo desarrollador
-
-- Juan David
-- Victor Solano
-- Adrian Arias
-- Jerson Carvajal
-
-## Descripción del producto
-
-SISPE es una aplicación web para la gestión integral de servicios de un establecimiento. El sistema administra autenticación y usuarios, menú, pedidos, mesas, insumos, facturación y reportes, aplicando una arquitectura por capas que facilita la lectura, las pruebas y el mantenimiento del código.
-
+Aplicación web desarrollada con Spring Boot para gestionar autenticación, usuarios, menú, pedidos, mesas, insumos, facturación y reportes.
 
 ## Requisitos
 
@@ -102,22 +80,6 @@ El informe se genera en `target/site/jacoco/index.html`. Para una revisión Sona
 - JavaDoc en el punto de entrada y documentación técnica reproducible.
 - Credenciales externas a código fuente mediante variables de entorno.
 - JaCoCo integrado al ciclo `verify`.
-
-## Lista de chequeo de entrega
-
-- [x] **Código fuente organizado:** paquetes separados por configuración, modelo, repositorios, servicios, controladores, DTO y mapeadores.
-- [x] **Documentación JavaDoc:** clase principal documentada con descripción, parámetros y responsabilidades.
-- [x] **Documento de arquitectura:** este README contiene la descripción funcional, estructura de paquetes y diagrama de arquitectura.
-- [x] **Patrón MVC / arquitectura en capas:** la interfaz, los controladores, la lógica de negocio y la persistencia están separadas.
-- [x] **Mantenibilidad:** nombres claros, paquetes normalizados en minúsculas y responsabilidades delimitadas.
-- [x] **Seguridad:** credenciales de base de datos y correo configuradas mediante variables de entorno.
-- [x] **Pruebas y calidad:** pruebas Maven y generación de cobertura JaCoCo integradas al proyecto.
-
-## Declaración del equipo
-
-El equipo desarrollador declara que el presente documento corresponde al proyecto SISPE construido durante el tercer trimestre y que la estructura descrita coincide con la implementación disponible en el código fuente.
-
-**Desarrolladores:** Juan David, Victor Solano, Adrian Arias y Jerson Carvajal.
 
 ## Estructura resumida
 
