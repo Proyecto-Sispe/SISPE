@@ -27,7 +27,7 @@ public class InventarioService {
     public void descontarPedido(Long pedidoId) {
         Map<Long, BigDecimal> consumo = new HashMap<>();
         for (DetallePedido detalle : detalles.findByPedidoId(pedidoId)) {
-            for (MenuInsumo receta : recetas.findByMenuId(detalle.getMenu().getId())) {
+            for (MenuInsumo receta : recetas.findByMenu_Id(detalle.getMenu().getId())) {
                 BigDecimal total = receta.getCantidad().multiply(BigDecimal.valueOf(detalle.getCantidad()));
                 consumo.merge(receta.getInsumo().getId(), total, BigDecimal::add);
             }
@@ -52,7 +52,7 @@ public class InventarioService {
      * (id_menu, id_insumo) y devolver un error al usuario.
      */
     @Transactional public MenuInsumo guardarReceta(MenuInsumo receta) {
-        return recetas.findByMenuIdAndInsumoId(receta.getMenu().getId(), receta.getInsumo().getId())
+        return recetas.findByMenu_IdAndInsumo_Id(receta.getMenu().getId(), receta.getInsumo().getId())
                 .map(existente -> { existente.setCantidad(receta.getCantidad()); return recetas.save(existente); })
                 .orElseGet(() -> recetas.save(receta));
     }
@@ -62,6 +62,6 @@ public class InventarioService {
     }
 
     public List<Insumo> listar() { return insumos.findByActivoTrueOrderByNombreAsc(); }
-    public List<MenuInsumo> receta(Integer menuId) { return recetas.findByMenuId(menuId); }
+    public List<MenuInsumo> receta(Integer menuId) { return recetas.findByMenu_Id(menuId); }
     public List<MenuInsumo> recetas() { return recetas.findAll(); }
 }

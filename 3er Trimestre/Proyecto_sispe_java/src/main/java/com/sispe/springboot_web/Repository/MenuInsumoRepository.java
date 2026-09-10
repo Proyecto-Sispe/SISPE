@@ -6,6 +6,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface MenuInsumoRepository extends JpaRepository<MenuInsumo, Long> {
-    List<MenuInsumo> findByMenuId(Integer menuId);
-    Optional<MenuInsumo> findByMenuIdAndInsumoId(Integer menuId, Long insumoId);
+    List<MenuInsumo> findByMenu_Id(Integer menuId);
+    Optional<MenuInsumo> findByMenu_IdAndInsumo_Id(Integer menuId, Long insumoId);
 }
