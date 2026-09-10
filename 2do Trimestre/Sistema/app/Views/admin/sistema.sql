@@ -1,5 +1,9 @@
-CREATE DATABASE sistema;
+CREATE DATABASE IF NOT EXISTS sistema;
 USE sistema;
+
+-- =========================================================
+-- 1. CREACIÓN DE TABLAS
+-- =========================================================
 
 CREATE TABLE Rol (
     idRol INT NOT NULL,
@@ -64,7 +68,7 @@ CREATE TABLE Categoria (
 
 CREATE TABLE Menu (
     id_menu INT NOT NULL,
-    Productos VARCHAR(50) NOT NULL,
+    Productos VARCHAR(100) NOT NULL,
     Precio FLOAT NOT NULL,
     descripcion TEXT NOT NULL,
     pkfk_id_categoria INT NOT NULL,
@@ -91,11 +95,11 @@ CREATE TABLE Pedido (
     cliente_id_usuario INT NULL,    -- NULL
     id_sesion_qr INT NULL,          -- Enlace directo a la Sesión activa del QR
     fecha_pedido DATETIME DEFAULT CURRENT_TIMESTAMP,
-    estado ENUM('pendiente', 'en_preparacion', 'en_camino', 'entregado') DEFAULT 'pendiente', -- Añadidos tus estados reales
+    estado ENUM('pendiente', 'en_preparacion', 'en_camino', 'entregado') DEFAULT 'pendiente',
     prioridad ENUM('normal', 'urgente') DEFAULT 'normal',
     cocinero_asignado INT DEFAULT NULL,
     tiempo_estimado INT DEFAULT 15,
-    observaciones TEXT              -- Aquí caen los detalles de las adiciones
+    observaciones TEXT              -- Detalles y adiciones
 );
 
 CREATE TABLE Detalle_Pedido (
@@ -137,6 +141,10 @@ CREATE TABLE Notificaciones (
     fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
     destinatario_rol INT
 );
+
+-- =========================================================
+-- 2. RESTRICCIONES DE CLAVES FORÁNEAS (FOREIGN KEYS)
+-- =========================================================
 
 ALTER TABLE Persona 
 ADD CONSTRAINT fk_persona_tipo_doc 
@@ -213,7 +221,12 @@ ADD CONSTRAINT fk_sesion_mesa_ref
 FOREIGN KEY (id_mesa) 
 REFERENCES Mesa(id_Mesa);
 
+-- =========================================================
+-- 3. INSERCIÓN DE DATOS MAESTROS Y BASE
+-- =========================================================
+
 INSERT INTO Rol VALUES (1,'Administrador'), (2,'Cocinero'), (3,'Mesero'), (4,'Cliente');
+
 INSERT INTO Tipo_doc VALUES (1,'Cedula de ciudadania',1), (2,'Tarjeta de identidad',1), (3, 'Cedula de extranjeria', 1);
 
 INSERT INTO Persona VALUES
@@ -224,14 +237,156 @@ INSERT INTO Persona VALUES
 (1070919081,1,'Carlos',NULL,'Hernandez','Morales',3046789012,'cocina2@gmail.com','1234',1),
 (1031422939,1,'Victor','Manuel','Solano','Niño',3134890742,'cliente@gmail.com','1234',1);
 
-INSERT INTO Persona_has_Rol VALUES (1,1002655550,1), (1,1053804357,3), (1,1053872530,2), (1,1152693247,3), (1,1070919081,2), (1,1031422939,4);
-INSERT INTO Mesa VALUES (1,4,'Primer Piso',0), (2,2,'Primer Piso',0), (3,6,'Segundo Piso',0), (4,4,'Terraza',0);
-INSERT INTO Categoria VALUES (1,'Hamburguesas'), (2,'Perros Calientes'), (3,'Salchipapa');
-INSERT INTO Menu VALUES (1,'Hamburguesa Divina',14000,'Carne, queso fundido y vegetales',1), (2,'Hamburguesa Soleada',16000,'Carne, huevo y queso fundido',1), (3,'Perro Nube',13000,'Salchicha y queso',2), (4,'Salchipapa Tentacion',10000,'Papas fritas y salchicha',3);
+INSERT INTO Persona_has_Rol VALUES 
+(1,1002655550,1), (1,1053804357,3), (1,1053872530,2), (1,1152693247,3), (1,1070919081,2), (1,1031422939,4);
+
+-- MESAS REGISTRADAS (TODAS LIBRES CON ESTADO = 0)
+INSERT INTO Mesa (id_Mesa, Capacidad, Ubicacion, Estado) VALUES 
+(1, 4, 'Primer Piso', 0),
+(2, 2, 'Primer Piso', 0),
+(3, 6, 'Segundo Piso', 0),
+(4, 4, 'Terraza', 0);
+
+-- CATEGORÍAS DEL MENÚ
+INSERT INTO Categoria (id_categoria, nom_categoria) VALUES 
+(1, 'Hamburguesas'),
+(2, 'Perros Calientes'),
+(3, 'Salchipapas'),
+(4, 'Entradas'),
+(5, 'Pizza'),
+(6, 'Burritos'),
+(7, 'Nachos y Dorilocos'),
+(8, 'Lasagna'),
+(9, 'Quesadillas'),
+(10, 'Arepas Rellenas'),
+(11, 'Mazorcada');
+
+-- =========================================================
+-- 4. INSERCIÓN DE PRODUCTOS DESDE LAS FOTOS DE LA CARTA
+-- =========================================================
+
+-- --- CATEGORÍA 1: HAMBURGUESAS ---
+INSERT INTO Menu (id_menu, Productos, Precio, descripcion, pkfk_id_categoria) VALUES 
+(1, 'Hamburguesa Clásica', 16000, 'Carne, queso fundido, papa chip, cebolla caramelizada, tomate, lechuga y salsas', 1),
+(2, 'Hamburguesa Soleada', 18000, 'Carne, huevo frito, queso fundido, papa chip, cebolla caramelizada, tomate, lechuga y salsas', 1),
+(3, 'Hamburguesa Verano', 18000, 'Carne, rodaja de piña asada, jamón, queso fundido, papa chip, tomate, lechuga y salsas', 1),
+(4, 'Hamburguesa Ritmo', 18000, 'Carne, plátano maduro, queso fundido, papa chip, cebolla caramelizada, tomate, lechuga y salsas', 1),
+(5, 'Hamburguesa Crispy Bacon', 19000, 'Carne, doble tocineta, queso fundido, papa chip, cebolla caramelizada, tomate, lechuga y salsas', 1),
+(6, 'Hamburguesa Paraíso Onion', 19000, 'Carne, aros de cebolla apanados, queso fundido, papa chip, cebolla caramelizada, tomate, lechuga y salsas', 1),
+(7, 'Hamburguesa Pasión', 19000, 'Carne, rodajas de pepperoni, queso fundido, papa chip, cebolla caramelizada, tomate, lechuga y salsas', 1),
+(8, 'Hamburguesa Paraíso Patacón', 19000, 'Patacón maduro en lugar de pan, carne, jamón, queso fundido, papa chip, cebolla caramelizada, tomate, lechuga y salsas', 1),
+(9, 'Hamburguesa Carnal', 19000, 'Carne, pico e gallo, nachos, guacamole, queso fundido, papa chip, cebolla caramelizada, tomate, lechuga y salsas', 1),
+(10, 'Hamburguesa Delirio', 20000, 'Carne, chorizo santarrosano, queso fundido, papa chip, cebolla caramelizada, tomate, lechuga y salsas', 1),
+(11, 'Hamburguesa Éxtasis', 20000, 'Carne, trozos de costilla de cerdo ahumada sin hueso, queso fundido, papa chip, cebolla caramelizada, tomate, lechuga y salsas', 1),
+(12, 'Hamburguesa Queso Fundido', 20000, 'Carne, trozo de queso mozzarella fundido (1.5 cm), papa chip, cebolla caramelizada, tomate, lechuga y salsas', 1),
+(13, 'Hamburguesa Doble Tentación', 22000, 'Doble carne, doble queso fundido, papa chip, cebolla caramelizada, tomate, lechuga y salsas', 1),
+(14, 'Hamburguesa Pecado', 22000, 'Carne, aros de cebolla, doble tocineta, queso fundido, papa chip, cebolla caramelizada, tomate, lechuga y salsas', 1),
+(15, 'Hamburguesa Fusión', 22000, 'Carne de res, pollo apanado, doble queso fundido, papa chip, cebolla caramelizada, tomate, lechuga y salsas', 1),
+(16, 'Hamburguesa Triple Placer', 27000, 'Triple carne, triple queso fundido, papa chip, cebolla caramelizada, tomate, lechuga y salsas', 1),
+(17, 'Hamburguesa Montañera', 27000, 'Carne, carne desmechada, huevo frito, queso fundido, papa chip, cebolla caramelizada, tomate, lechuga y salsas', 1),
+(18, 'Hamburguesa La Divina', 32000, 'Doble carne, trozos de costilla de cerdo ahumado sin hueso, doble tocineta, aros de cebolla, doble queso fundido, papa chip, cebolla caramelizada, tomate, lechuga y salsas', 1);
+
+-- --- CATEGORÍA 3: SALCHIPAPAS Y SUPER PAPAS ---
+INSERT INTO Menu (id_menu, Productos, Precio, descripcion, pkfk_id_categoria) VALUES 
+(19, 'Salchipapa Tentación', 12000, 'Papas fritas, rodajas de salchicha americana y dos huevos de codorniz', 3),
+(20, 'Salchipapa Edén', 12000, 'Papas fritas, rodajas de chorizo santarrosano y dos huevos de codorniz', 3),
+(21, 'Salchipapa Sabor Divino', 26000, 'Papas fritas, rodajas de salchicha americana, carne desmechada, pollo desmechado, queso fundido y dos huevos de codorniz', 3),
+(22, 'Salchipapa La Divina', 30000, 'Papas fritas, rodajas de salchicha americana, carne desmechada, pollo desmechado, doble tocineta, maíz tierno, queso fundido, huevos de codorniz y aguacate', 3),
+(23, 'Super Papas La Divina', 48000, 'Base de papas fritas, trozos de carne de res y pechuga de pollo a la plancha, tocineta, chorizo, lechuga, tomate, queso, maíz tierno, dos huevos de codorniz y salsas', 3);
+
+-- --- CATEGORÍA 4: ENTRADAS ---
+INSERT INTO Menu (id_menu, Productos, Precio, descripcion, pkfk_id_categoria) VALUES 
+(24, 'Empanaditas de Carne (x6)', 9000, 'Seis empanaditas de carne crujientes', 4),
+(25, 'Aros de Cebolla (x6)', 9000, 'Seis aros de cebolla apanados', 4),
+(26, 'Croquetas de Yuca (x6)', 10000, 'Seis croquetas de yuca crocantes', 4),
+(27, 'Patacones con Hogao (x5)', 13000, 'Cinco patacones crujientes acompañados con hogao tradicional', 4),
+(28, 'Nachos con Pico e Gallo', 13000, 'Nachos crujientes acompañados con pico e gallo, guacamole y queso cheddar', 4),
+(29, 'Papas con Cheddar y Tocineta', 16000, 'Papas fritas bañadas en salsa de queso cheddar y trozos de tocineta', 4),
+(30, 'Nachos con Queso Cheddar y Tocineta', 15000, 'Nachos con abundante queso cheddar fundido y tocineta', 4),
+(31, 'Nuggets de Pollo con Papas (x6)', 15000, 'Seis nuggets de pollo apanados acompañados con porción de papas fritas', 4),
+(32, 'Canastas de Patacón con Camarones (x3)', 20000, 'Tres canastillas de patacón rellenas de camarones preparados', 4);
+
+-- --- CATEGORÍA 5: PIZZAS (Precios por tamaño Personal) ---
+INSERT INTO Menu (id_menu, Productos, Precio, descripcion, pkfk_id_categoria) VALUES 
+(33, 'Pizza Pollo con Champiñones', 17000, 'Queso mozzarella, pollo desmechado y champiñones', 5),
+(34, 'Pizza Pepperoni', 17000, 'Queso mozzarella y rodajas de pepperoni', 5),
+(35, 'Pizza Jamón y Queso', 17000, 'Queso mozzarella y jamón fino', 5),
+(36, 'Pizza Pollo y Tocineta', 17000, 'Queso mozzarella, pollo desmechado y tocineta', 5),
+(37, 'Pizza Tocineta y Champiñón', 17000, 'Queso mozzarella, tocineta crujiente y champiñones', 5),
+(38, 'Pizza Papas al Horno', 17000, 'Queso mozzarella, papas a la francesa fritas cubiertas de salsa cheddar y páprika', 5),
+(39, 'Pizza Colombiana', 17000, 'Queso mozzarella, carne molida, chorizo y plátano maduro', 5),
+(40, 'Pizza Mexicana', 17000, 'Carne molida, pico e gallo y tostacos picantes', 5),
+(41, 'Pizza Primavera', 17000, 'Queso mozzarella, tocineta, maíz tierno y jamón', 5),
+(42, 'Pizza Vegetales', 17000, 'Queso mozzarella y mezcla de pimentones, champiñones y cebolla', 5),
+(43, 'Pizza BBQ', 17000, 'Queso mozzarella, trozos de costilla de cerdo ahumada con salsa BBQ', 5),
+(44, 'Pizza Criolla', 17000, 'Queso mozzarella, carne desmechada y maíz tierno', 5),
+(45, 'Pizza Napolitana', 17000, 'Queso mozzarella y tomates frescos cubiertos de orégano', 5),
+(46, 'Pizza Ranchera', 17000, 'Carne molida, chorizo y salsa BBQ', 5),
+(47, 'Pizza Carbonara', 17000, 'Queso mozzarella, tocineta y champiñones cubiertos en salsa bechamel', 5),
+(48, 'Pizza La Divina', 17000, 'Especialidad de la casa: Pollo, carne desmechada y trozos de costilla', 5),
+(49, 'Pizza Golden Chicken BBQ', 17000, 'Queso mozzarella, pollo desmechado, maíz tierno y salsa BBQ', 5),
+(50, 'Pizza Fresas con Chocolate', 17000, 'Pizza dulce con base de chocolate y fresas frescas', 5),
+(51, 'Pizza Hawaiana', 17000, 'Queso mozzarella, jamón y piña', 5),
+(52, 'Pizza Pepperoni con Piña', 17000, 'Queso mozzarella, pepperoni y piña', 5),
+(53, 'Pizza Veleña', 17000, 'Bocadillo veleño y queso mozzarella melted', 5),
+(54, 'Pizza Tropical', 17000, 'Queso mozzarella, uvas pasas, duraznos y cerezas en almíbar', 5);
+
+-- --- CATEGORÍA 6: BURRITOS ---
+INSERT INTO Menu (id_menu, Productos, Precio, descripcion, pkfk_id_categoria) VALUES 
+(55, 'Burrito El Bendito', 19500, 'Tortilla, carne desmechada, pollo desmechado, lechuga fresca, pico e gallo, queso y guacamole. Acompañado de nachos', 6),
+(56, 'Burrito Inmortal', 25000, 'Tortilla, carne desmechada, pollo desmechado, chorizo, tocineta, lechuga fresca, pico e gallo, queso y guacamole. Acompañado de nachos', 6),
+(57, 'Burrito Fit', 17500, 'Tortilla, lechuga fresca, maíz tierno, pimentón, champiñón, tomate, pico e gallo y guacamole. Acompañado de nachos', 6),
+(58, 'Burrito La Divina', 28000, 'Tortilla, carne desmechada, pollo desmechado, salsa de frijol, carne molida, lechuga fresca, pico e gallo, queso y guacamole. Acompañado de nachos', 6);
+
+-- --- CATEGORÍA 7: NACHOS Y DORILOCOS ---
+INSERT INTO Menu (id_menu, Productos, Precio, descripcion, pkfk_id_categoria) VALUES 
+(59, 'Dorilocos Carne', 22000, 'Doritos con pico e gallo, guacamole, queso cheddar, salsas, carne y cubierta de queso mozzarella', 7),
+(60, 'Dorilocos Pollo', 22000, 'Doritos con pico e gallo, guacamole, queso cheddar, salsas, pollo y cubierta de queso mozzarella', 7),
+(61, 'Dorilocos Carne y Pollo', 25000, 'Doritos con pico e gallo, guacamole, queso cheddar, salsas, combinación de carne y pollo, cubierta de mozzarella', 7),
+(62, 'Dorilocos Costillas de Cerdo Ahumadas', 24000, 'Doritos con pico e gallo, guacamole, queso cheddar, salsas, costilla ahumada y cubierta de queso mozzarella', 7),
+(63, 'Dorilocos La Divina', 28000, 'Doritos/Nachos con salsa de frijol, carne molida, carne desmechada, pico e gallo, queso mozzarella, guacamole y cheddar', 7),
+(64, 'Nachos de Maíz Carne', 19000, 'Nachos de maíz con pico e gallo, guacamole, queso cheddar, salsas, carne y cubierta de queso mozzarella', 7),
+(65, 'Nachos de Maíz Pollo', 19000, 'Nachos de maíz con pico e gallo, guacamole, queso cheddar, salsas, pollo y cubierta de queso mozzarella', 7),
+(66, 'Nachos de Maíz Carne y Pollo', 22000, 'Nachos de maíz con pico e gallo, guacamole, queso cheddar, salsas, carne y pollo', 7),
+(67, 'Nachos de Maíz Costillas Ahumadas', 21000, 'Nachos de maíz con pico e gallo, guacamole, queso cheddar, salsas y costilla ahumada', 7),
+(68, 'Nachos de Maíz La Divina', 36000, 'Nachos de maíz extra grandes con todas las proteínas, frijol, guacamole, pico e gallo y queso mozzarella', 7);
+
+-- --- CATEGORÍA 8: LASAGNA AL HORNO ---
+INSERT INTO Menu (id_menu, Productos, Precio, descripcion, pkfk_id_categoria) VALUES 
+(69, 'Lasagna Corazón', 25000, 'Capas de pasta fresca, carne molida en salsa boloñesa, pollo desmechado en salsa bechamel, champiñones, tocineta, jamón, queso gratinado y pan tostado', 8),
+(70, 'Lasagna Primavera', 27000, 'Capas de plátano maduro, carne molida en salsa boloñesa, pollo desmechado en salsa bechamel, champiñones, tocineta, jamón, queso gratinado y pan tostado', 8);
+
+-- --- CATEGORÍA 9: QUESADILLAS ---
+INSERT INTO Menu (id_menu, Productos, Precio, descripcion, pkfk_id_categoria) VALUES 
+(71, 'Quesadilla Carne', 15000, 'Tortilla de harina rellena de queso fundido y carne desmechada', 9),
+(72, 'Quesadilla Pollo', 15000, 'Tortilla de harina rellena de queso fundido y pollo desmechado', 9),
+(73, 'Quesadilla Carne y Pollo', 17000, 'Tortilla de harina rellena de queso fundido, carne y pollo', 9),
+(74, 'Quesadilla Pollo con Champiñones', 17000, 'Tortilla de harina rellena de queso fundido, pollo desmechado y champiñones', 9),
+(75, 'Quesadilla Nutella', 14000, 'Tortilla de harina rellena de Nutella derretida', 9),
+(76, 'Quesadilla Nutella y Fresas', 15000, 'Tortilla de harina rellena de Nutella y fresas frescas', 9);
+
+-- --- CATEGORÍA 10: AREPAS RELLENAS ---
+INSERT INTO Menu (id_menu, Productos, Precio, descripcion, pkfk_id_categoria) VALUES 
+(77, 'Arepa Encanto', 14500, 'Carne desmechada, queso y huevo de codorniz', 10),
+(78, 'Arepa Cañon', 14500, 'Pollo desmechado, queso y huevo de codorniz', 10),
+(79, 'Arepa Furia', 16500, 'Carne desmechada, pollo desmechado, queso y huevo de codorniz', 10),
+(80, 'Arepa Valiente', 17500, 'Carne desmechada, chorizo, queso y huevo de codorniz', 10),
+(81, 'Arepa La Divina', 18500, 'Carne desmechada, pollo desmechado, queso, jamón y huevo frito', 10);
+
+-- --- CATEGORÍA 11: MAZORCADA ---
+INSERT INTO Menu (id_menu, Productos, Precio, descripcion, pkfk_id_categoria) VALUES 
+(82, 'Mazorcada Azteca', 26000, 'Maíz tierno, carne desmechada, pollo desmechado, papa chip, queso y salsas', 11),
+(83, 'Mazorcada Espartana', 27000, 'Maíz tierno, carne desmechada, pollo desmechado, huevo frito, papa chip, queso y salsas', 11),
+(84, 'Mazorcada Suprema', 28000, 'Maíz tierno, carne desmechada, pollo desmechado, plátano maduro, papa chip, queso y salsas', 11),
+(85, 'Mazorcada La Divina', 31000, 'Maíz tierno, carne desmechada, pollo desmechado, chorizo, tocineta, papa chip, queso y salsas', 11);
+
+-- =========================================================
+-- 5. TRIGGERS
+-- =========================================================
 
 DELIMITER $$
 
--- Trigger 1: Cuando el cliente hace el pedido, la mesa se marca como ocupada (1)
+-- Trigger 1: Cambiar estado de la mesa a ocupada (1) al hacer pedido
 CREATE TRIGGER trg_ocupar_mesa
 AFTER INSERT ON Pedido
 FOR EACH ROW
@@ -239,7 +394,7 @@ BEGIN
     UPDATE Mesa SET Estado = 1 WHERE id_Mesa = NEW.id_mesa;
 END$$
 
--- Trigger 2: Cuando se genera la factura, se liquida el total sumando el detalle del pedido
+-- Trigger 2: Calcular total de factura desde el detalle del pedido
 CREATE TRIGGER trg_total_factura
 BEFORE INSERT ON Factura
 FOR EACH ROW
@@ -251,7 +406,7 @@ BEGIN
     );
 END$$
 
--- Trigger 3: Envía la alerta de notificación de forma automática a la Cocina (Rol 2)
+-- Trigger 3: Generar notificación automática para el personal de cocina
 CREATE TRIGGER trg_notificacion_nuevo_pedido
 AFTER INSERT ON Pedido
 FOR EACH ROW
@@ -262,7 +417,9 @@ END$$
 
 DELIMITER ;
 
--- Procedimientos RegistrarClienteYCrearPedido, DespacharPedidoYLiberarMesa y EliminarMesaSegura
+-- =========================================================
+-- 6. PROCEDIMIENTOS ALMACENADOS
+-- =========================================================
 
 DELIMITER $$
 
@@ -276,34 +433,25 @@ BEGIN
     DECLARE v_estado_mesa TINYINT;
     DECLARE v_id_sesion INT;
     
-    -- Verificar el estado de la mesa
     SELECT Estado INTO v_estado_mesa FROM Mesa WHERE id_Mesa = p_id_mesa;
     
     IF v_estado_mesa = 1 THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Mesa ocupada. No se puede escanear en este momento.';
     ELSE
-        -- 1. Crear la Sesión QR de este cliente temporal
         INSERT INTO Sesion_Mesa (id_mesa, codigo_acceso, nombre_cliente, cedula_cliente, activa)
         VALUES (p_id_mesa, SUBSTRING(MD5(RAND()), 1, 6), p_nombre, p_cedula, 1);
         
         SET v_id_sesion = LAST_INSERT_ID();
         
-        -- 2. Crear el Pedido Maestro asignando los valores nulos para el personal interno
         INSERT INTO Pedido (id_mesa, mesero_tipo_doc, mesero_id_usuario, cliente_tipo_doc, cliente_id_usuario, id_sesion_qr, estado)
         VALUES (p_id_mesa, NULL, NULL, NULL, NULL, v_id_sesion, 'pendiente');
         
         SET p_id_pedido_nuevo = LAST_INSERT_ID();
         
-        -- 3. Generar la Factura en blanco en el panel
         INSERT INTO Factura (id_pedido, Total) VALUES (p_id_pedido_nuevo, 0.0);
     END IF;
 END$$
-
-DELIMITER ;
-
-
-DELIMITER $$
 
 CREATE PROCEDURE DespacharPedidoYLiberarMesa(
     IN p_id_pedido INT
@@ -312,43 +460,22 @@ BEGIN
     DECLARE v_id_mesa INT;
     DECLARE v_id_sesion INT;
     
-    -- Consultar la mesa y sesión asociadas al pedido
     SELECT id_mesa, id_sesion_qr INTO v_id_mesa, v_id_sesion FROM Pedido WHERE id_pedido = p_id_pedido;
     
-    -- 1. Cambiar el estado del pedido al último nivel
     UPDATE Pedido SET estado = 'entregado' WHERE id_pedido = p_id_pedido;
-    
-    -- 2. Desactivar la sesión del QR
     UPDATE Sesion_Mesa SET activa = 0, fecha_fin = NOW() WHERE id_sesion = v_id_sesion;
-    
-    -- 3. Liberar la mesa para nuevos comensales
     UPDATE Mesa SET Estado = 0 WHERE id_Mesa = v_id_mesa;
 END$$
-
-DELIMITER ;
-
-
-DELIMITER $$
 
 CREATE PROCEDURE EliminarMesaSegura(
     IN p_id_mesa INT
 )
 BEGIN
-    -- 1. Borramos las facturas asociadas a los pedidos de esa mesa
     DELETE FROM Factura WHERE id_pedido IN (SELECT id_pedido FROM Pedido WHERE id_mesa = p_id_mesa);
-    
-    -- 2. Borramos los detalles de los pedidos de esa mesa
     DELETE FROM Detalle_Pedido WHERE id_pedido IN (SELECT id_pedido FROM Pedido WHERE id_mesa = p_id_mesa);
-    
-    -- 3. Borramos los pedidos de esa mesa
     DELETE FROM Pedido WHERE id_mesa = p_id_mesa;
-    
-    -- 4. Borramos las sesiones de QR de esa mesa
     DELETE FROM Sesion_Mesa WHERE id_mesa = p_id_mesa;
-    
-    -- 5. Finalmente, eliminamos la mesa de la tabla maestra
     DELETE FROM Mesa WHERE id_Mesa = p_id_mesa;
 END$$
 
 DELIMITER ;
-

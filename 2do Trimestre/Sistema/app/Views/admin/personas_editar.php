@@ -10,7 +10,7 @@
 <body>
 <nav>
   <ul class="menu">
-    <li class="logo"><img src="<?php echo base_url('img/Logo 2.png'); ?>" alt="Logo"></li>
+    <li class="logo"><img src="<?php echo base_url('css/Logo 2.png'); ?>" alt="Logo"></li>
     <li><a href="<?php echo base_url('dashboard'); ?>">Inicio</a></li>
     <li><a href="<?php echo base_url('personas'); ?>">Personas</a></li>
     <li class="right"><a href="<?php echo base_url('logout'); ?>">Cerrar Sesión</a></li>

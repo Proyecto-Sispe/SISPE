@@ -21,7 +21,6 @@
       <li><a href="<?= base_url('pedidos') ?>">Panel de Pedidos</a></li> 
 
       <li><a href="<?= base_url('gestion-menu') ?>">Menú (Admin)</a></li>
-      <li><a href="<?= base_url('menu_digital') ?>" target="_blank">Menú Digital</a></li>
 
       <li><a href="<?= base_url('productos') ?>">Productos</a></li>
       <li><a href="<?= base_url('facturas') ?>">Facturas</a></li>
