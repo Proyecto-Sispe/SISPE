@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title th:text="'Factura #' + ${factura.id} + ' | SISPE'">Factura</title>
+    <link rel="stylesheet" th:href="@{/css/sispe.css}">
+</head>
+
+<body>
+    <main class="shell">
+        <div class="factura-box">
+            <header class="factura-header">
+                <div>
+                    <h1>SISPE</h1>
+                    <p class="sub">Factura de venta</p>
+                </div>
+                <div class="factura-meta">
+                    <p><strong>Factura #</strong> <span th:text="${factura.id}">0</span></p>
+                    <p><strong>Fecha:</strong> <span th:text="${factura.fechaHora}">-</span></p>
+                    <p><strong>Mesa:</strong> <span th:text="${pedido.mesaId}">-</span></p>
+                </div>
+            </header>
+
+            <section class="factura-cliente" th:if="${sesion != null}">
+                <p><strong>Cliente:</strong> <span th:text="${sesion.nombreCliente}">-</span></p>
+                <p><strong>Cédula:</strong> <span th:text="${sesion.cedulaCliente}">-</span></p>
+            </section>
+
+            <table class="table factura-table">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Cant.</th>
+                        <th>Precio unit.</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="item : ${items}">
+                        <td>
+                            <span th:text="${item.menu.producto}">Producto</span>
+                            <div class="factura-extra" th:each="extra : ${adicionesRepo.findByDetallePedido_Id(item.id)}">
+                                <small th:text="'+ ' + ${extra.adicion.nombre}">Adición</small>
+                            </div>
+                            <div class="factura-extra" th:if="${item.observaciones}">
+                                <small th:text="'Nota: ' + ${item.observaciones}">Nota</small>
+                            </div>
+                        </td>
+                        <td th:text="${item.cantidad}">1</td>
+                        <td th:text="${#numbers.formatDecimal(item.valorVenta, 0, 'POINT', 0, 'COMMA') + ' $'}">$0</td>
+                        <td th:text="${#numbers.formatDecimal(item.valorVenta * item.cantidad, 0, 'POINT', 0, 'COMMA') + ' $'}">
+                            $0</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="factura-total">
+                <p th:if="${pago != null}"><strong>Método de pago:</strong>
+                    <span th:text="${pago.metodoPago.tipo}">-</span>
+                </p>
+                <p class="total-final"><strong>Total:</strong>
+                    <span th:text="${#numbers.formatDecimal(factura.total, 0, 'POINT', 0, 'COMMA') + ' $'}">$0</span>
+                </p>
+            </div>
+
+            <a class="btn secondary" th:href="@{/facturas}">← Volver</a>
+<a class="btn" th:href="@{'/facturas/' + ${factura.id} + '/pdf'}">⬇ Descargar PDF</a>
+        </div>
+    </main>
+</body>
+
+</html>

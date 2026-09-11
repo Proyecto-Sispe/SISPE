@@ -8,35 +8,65 @@
 </head>
 
 <body>
-    <main class="shell">
-        <header>
-            <div><span class="eyebrow">ADMINISTRACIÓN</span>
-                <h1>Facturación</h1>
-                <p>Historial de facturas generadas.</p>
-            </div><a class="logout" th:href="@{/inicio}">Volver al panel</a>
-        </header>
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Factura</th>
-                        <th>Pedido</th>
-                        <th>Fecha</th>
-                        <th>Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="factura : ${facturas}">
-                        <td th:text="${factura.id}">1</td>
-                        <td th:text="${factura.pedidoId}">1</td>
-                        <td th:text="${factura.fechaHora}">2026-01-01</td>
-                        <td th:text="${factura.total}">$0</td>
-                    </tr>
-                </tbody>
-            </table>
-            <p th:if="${#lists.isEmpty(facturas)}">No hay facturas registradas.</p>
-        </div>
-    </main>
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="brand">SISPE</div>
+            <nav class="nav">
+                <a th:href="@{/inicio}">← Volver al panel</a>
+                <a th:href="@{/menu}">Menú digital</a>
+                <a th:href="@{/mesas}">Mesas</a>
+                <a th:href="@{/pedidos}">Pedidos</a>
+                <a class="active" th:href="@{/facturas}">Facturación</a>
+                <a th:href="@{/reportes}">Reportes</a>
+            </nav>
+        </aside>
+        <main class="main">
+            <header class="top">
+                <div>
+                    <p class="eyebrow">ADMINISTRACIÓN</p>
+                    <h1 class="title">Facturación</h1>
+                    <p class="sub">Historial de todas las facturas generadas por los clientes.</p>
+                </div>
+            </header>
+
+            <section class="table-wrap">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Factura</th>
+                            <th>Mesa</th>
+                            <th>Cliente</th>
+                            <th>Fecha</th>
+                            <th>Método de pago</th>
+                            <th>Total</th>
+                            <th>Estado</th>
+                            <th>Detalle</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="fila : ${filas}">
+                            <td th:text="'#' + ${fila.facturaId}">#1</td>
+                            <td th:text="${fila.mesaId ?: '—'}">1</td>
+                            <td th:text="${fila.cliente}">Cliente</td>
+                            <td th:text="${fila.fecha}">2026-01-01</td>
+                            <td th:text="${fila.metodoPago}">Efectivo</td>
+                            <td th:text="${#numbers.formatDecimal(fila.total, 0, 'POINT', 0, 'COMMA') + ' $'}">$0</td>
+                            <td>
+                                <span class="badge" th:classappend="${fila.pagada} ? ' success' : ' warning'"
+                                      th:text="${fila.pagada} ? 'Pagada' : 'Pendiente'">Estado</span>
+                            </td>
+                            <td>
+                                <a class="btn secondary" th:href="@{'/facturas/' + ${fila.facturaId}}">Ver</a>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(filas)}">
+                            <td colspan="8">No hay facturas registradas.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
 </body>
 
 </html>

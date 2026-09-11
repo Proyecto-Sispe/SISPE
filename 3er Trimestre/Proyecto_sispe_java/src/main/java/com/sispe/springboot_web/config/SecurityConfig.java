@@ -35,11 +35,22 @@ public class SecurityConfig {
     "/cliente/pedido"
 ).permitAll()
 
-.requestMatchers("/admin/**").hasRole("ADMINISTRADOR")
-.requestMatchers("/menu/**", "/api/menu/**").hasRole("ADMINISTRADOR")
-.requestMatchers("/cocina/**").hasAnyRole("ADMINISTRADOR", "COCINERO")
-.requestMatchers("/pedidos/**").hasAnyRole("ADMINISTRADOR", "MESERO")
-.requestMatchers("/cliente/**").hasRole("CLIENTE")
+.requestMatchers(
+    "/login",
+    "/login/olvide",
+    "/login/verificar",
+    "/registro",
+    "/css/**",
+    "/js/**",
+    "/images/**",
+    "/uploads/**",
+    "/menu/digital",
+    "/cliente/escanear/**",
+    "/cliente/carrito/**",
+    "/cliente/pedido",
+    "/cliente/pago/**",
+    "/cliente/estado"
+).permitAll()
                 // Cualquier otra ruta requiere estar autenticado
                 .anyRequest().authenticated()
             )

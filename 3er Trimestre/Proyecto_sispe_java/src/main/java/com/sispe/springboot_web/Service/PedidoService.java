@@ -12,10 +12,12 @@ public class PedidoService {
     private static final Set<String> ESTADOS = Set.of("pendiente", "en_preparacion", "en_camino", "entregado");
     private final PedidoRepository repository;
     private final SesionMesaService sesionMesaService;
+    private final InventarioService inventarioService;
 
-    public PedidoService(PedidoRepository repository, SesionMesaService sesionMesaService) {
+    public PedidoService(PedidoRepository repository, SesionMesaService sesionMesaService, InventarioService inventarioService) {
         this.repository = repository;
         this.sesionMesaService = sesionMesaService;
+        this.inventarioService = inventarioService;
     }
 
     @Transactional
@@ -26,10 +28,20 @@ public class PedidoService {
             throw new IllegalStateException("Un pedido entregado no puede retroceder");
         }
         pedido.setEstado(estado);
+        if ("en_camino".equals(estado) || "entregado".equals(estado)) {
+            pedido.setPrioridad("normal"); // deja de verse "urgente" en el panel de cocina
+        }
         Pedido guardado = repository.save(pedido);
         if ("entregado".equals(estado)) {
             sesionMesaService.despacharPedido(id);
         }
         return guardado;
+    }
+
+    /** Lo usa el mesero: descuenta stock y marca el pedido como entregado, en una sola transacción. */
+    @Transactional
+    public Pedido entregarYDescontarStock(Long id) {
+        inventarioService.descontarPedido(id);
+        return cambiarEstado(id, "entregado");
     }
 }

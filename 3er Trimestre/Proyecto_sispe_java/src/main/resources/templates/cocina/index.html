@@ -16,15 +16,21 @@
             </div><a class="logout" th:href="@{/inicio}">Volver al panel</a>
         </header>
         <section class="orders">
-            <article class="order" th:each="pedido : ${pedidos}">
-                <div class="order-top"><strong th:text="'Pedido #' + pedido.id">Pedido</strong><span class="badge"
-                        th:text="${pedido.estado}">pendiente</span></div>
+            <article class="order" th:each="pedido : ${pedidos}"
+                      th:classappend="${pedido.prioridad == 'urgente'} ? ' urgente' : ''">
+                <div class="order-top">
+                    <strong th:text="'Pedido #' + ${pedido.id} + ' · Mesa ' + ${pedido.mesaId}">Pedido</strong>
+                    <span class="badge" th:text="${pedido.estado}">pendiente</span>
+                </div>
                 <p th:text="${pedido.observaciones ?: 'Sin observaciones'}">Sin observaciones</p>
-                <form method="post" th:action="@{'/cocina/pedido/' + pedido.id + '/estado'}"><select name="estado">
+                <form method="post" th:action="@{'/cocina/pedido/' + ${pedido.id} + '/estado'}">
+                    <select name="estado">
                         <option value="en_preparacion">En preparación</option>
                         <option value="en_camino">En camino</option>
                         <option value="entregado">Entregado</option>
-                    </select><button type="submit">Actualizar estado</button></form>
+                    </select>
+                    <button type="submit">Actualizar estado</button>
+                </form>
             </article>
             <p th:if="${#lists.isEmpty(pedidos)}">No hay pedidos activos.</p>
         </section>

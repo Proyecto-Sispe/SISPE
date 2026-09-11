@@ -17,30 +17,56 @@
         </div>
     </nav>
     <header class="digital-hero">
-        <p th:if="${error}" th:text="${error}" style="color:#dc2626;font-weight:bold;text-align:center;"></p>
-        <p class="eyebrow">SISPE / MENÚ DIGITAL</p>
-        <h1>Menú de comida rápida</h1>
-        <p>Elige tus productos y agrégalos a tu pedido.</p>
+        <div>
+            <p th:if="${error}" th:text="${error}" style="color:#ff8686;font-weight:bold;"></p>
+            <p class="eyebrow">SISPE / MENÚ DIGITAL</p>
+            <h1>Menú de comida rápida</h1>
+            <p>Elige tus productos, personalízalos con adiciones y agrégalos a tu pedido.</p>
+        </div>
     </header>
     <main class="digital-content">
         <div class="digital-stats"><span><strong th:text="${#lists.size(productos)}">0</strong> productos</span></div>
-        <section class="categoria" th:each="producto : ${productos}">
-            <div class="item">
-                <div>
+
+        <section class="product-grid">
+            <article class="product-card" th:each="producto : ${productos}">
+                <div class="product-foto">
+                    <img th:if="${producto.foto}" th:src="@{${producto.foto}}" alt="Foto del producto">
+                    <div class="product-foto placeholder" th:unless="${producto.foto}">🍔</div>
+                </div>
+                <div class="product-body">
                     <h2 th:text="${producto.producto}">Producto</h2>
                     <p class="desc" th:text="${producto.descripcion}">Descripción</p>
-                    <p class="precio"
-                        th:text="${#numbers.formatDecimal(producto.precio, 0, 'POINT', 0, 'COMMA') + ' $'}">$0</p>
+                    <p class="precio" th:text="${#numbers.formatDecimal(producto.precio, 0, 'POINT', 0, 'COMMA') + ' $'}">$0</p>
+
+                    <form method="post" th:action="@{/cliente/carrito/agregar}" class="add-form">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                        <input type="hidden" name="productoId" th:value="${producto.id}">
+
+                        <label class="qty-label">Cantidad
+                            <input class="qty-input" type="number" name="cantidad" value="1" min="1" max="20">
+                        </label>
+
+                        <div class="adiciones-check" th:if="${!#lists.isEmpty(adiciones)}">
+                            <p class="adiciones-title">Adiciones</p>
+                            <label class="chip" th:each="adicion : ${adiciones}">
+                                <input type="checkbox" name="adicionesIds" th:value="${adicion.id}">
+                                <span th:text="${adicion.nombre}">Extra</span>
+                                <span class="chip-precio"
+                                    th:text="'+' + ${#numbers.formatDecimal(adicion.precio, 0, 'POINT', 0, 'COMMA')}">+0</span>
+                            </label>
+                        </div>
+
+                        <textarea name="observaciones" placeholder="¿Alguna nota? Ej: sin cebolla, término medio..."></textarea>
+
+                        <button class="btn-agregar" type="submit">Agregar al pedido</button>
+                    </form>
                 </div>
-                <form method="post" th:action="@{/cliente/carrito/agregar}">
-                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                    <input type="hidden" name="productoId" th:value="${producto.id}">
-                    <button class="btn-agregar" type="submit">Agregar al pedido</button>
-                </form>
-            </div>
+            </article>
         </section>
         <p class="empty" th:if="${#lists.isEmpty(productos)}">No hay productos disponibles.</p>
     </main>
+
+    <a class="mini-cart-bar" th:href="@{/cliente/pedido}">🛒 Ver mi pedido</a>
 </body>
 
 </html>

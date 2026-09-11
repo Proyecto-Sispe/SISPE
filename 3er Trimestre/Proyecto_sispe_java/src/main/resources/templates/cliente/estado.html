@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Estado de tu pedido | SISPE</title>
+    <link rel="stylesheet" th:href="@{/css/sispe.css}">
+    <meta http-equiv="refresh" content="8">
+</head>
+
+<body class="digital-page">
+    <main class="digital-content">
+        <h1>¡Pedido enviado a cocina!</h1>
+        <div th:if="${pedido != null}" class="estado-box">
+            <p>Pedido <strong th:text="'#' + ${pedido.id}">#0</strong></p>
+            <p class="estado-actual" th:switch="${pedido.estado}">
+                <span th:case="'pendiente'">🕐 Recibido, esperando que cocina lo tome.</span>
+                <span th:case="'en_preparacion'">👨‍🍳 ¡Están preparando tu pedido!</span>
+                <span th:case="'en_camino'">🚶 Tu pedido va en camino a la mesa.</span>
+                <span th:case="'entregado'">✅ Pedido entregado. ¡Buen provecho!</span>
+                <span th:case="*" th:text="${pedido.estado}">Estado</span>
+            </p>
+        </div>
+        <p th:if="${pedido == null}">No encontramos un pedido activo.</p>
+    </main>
+</body>
+
+</html>

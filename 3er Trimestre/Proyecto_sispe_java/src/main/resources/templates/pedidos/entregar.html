@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Entregar pedidos | SISPE</title>
+    <link rel="stylesheet" th:href="@{/css/sispe.css}">
+</head>
+
+<body>
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="brand">SISPE</div>
+            <nav class="nav">
+                <a th:href="@{/inicio}">← Volver al panel</a>
+                <a th:href="@{/pedidos}">Pedidos</a>
+                <a class="active" th:href="@{/pedidos/entregar}">Entregar a mesa</a>
+                <a th:href="@{/facturas}">Facturación</a>
+            </nav>
+        </aside>
+        <main class="main">
+            <header class="top">
+                <div>
+                    <p class="eyebrow">SISPE / MESERO</p>
+                    <h1 class="title">Pedidos listos para entregar</h1>
+                    <p class="sub">Llévalos a la mesa junto con la factura y confirma la entrega para descontar
+                        inventario.</p>
+                </div>
+            </header>
+
+            <p th:if="${ok}" th:text="${ok}" style="color:var(--success);font-weight:700;"></p>
+            <p th:if="${error}" th:text="${error}" style="color:var(--danger);font-weight:700;"></p>
+
+            <section class="orders">
+                <article class="order" th:each="pedido : ${pedidos}">
+                    <div class="order-top">
+                        <strong th:text="'Pedido #' + ${pedido.id}">Pedido</strong>
+                        <span class="badge" th:text="'Mesa ' + ${pedido.mesaId}">Mesa</span>
+                    </div>
+                    <p th:text="${pedido.observaciones ?: 'Sin observaciones'}">Sin observaciones</p>
+                    <div class="order-actions">
+                        <a class="btn secondary small" th:if="${facturaPorPedido.get(pedido.id)} != null"
+                           th:href="@{'/facturas/' + ${facturaPorPedido.get(pedido.id)}}" target="_blank">Ver factura</a>
+                        <form method="post" th:action="@{'/pedidos/entregar/' + ${pedido.id}}"
+                            onsubmit="return confirm('¿Confirmas que el pedido ya llegó a la mesa?');">
+                            <button class="btn small" type="submit">Marcar entregado</button>
+                        </form>
+                    </div>
+                </article>
+                <p th:if="${#lists.isEmpty(pedidos)}">No hay pedidos en camino por ahora.</p>
+            </section>
+        </main>
+    </div>
+</body>
+
+</html>

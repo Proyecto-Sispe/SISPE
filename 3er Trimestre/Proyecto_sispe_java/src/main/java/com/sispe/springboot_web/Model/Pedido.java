@@ -23,4 +23,5 @@ public class Pedido {
     @Column(name = "cocinero_asignado") private Long cocineroAsignado;
     @Column(name = "tiempo_estimado") private Integer tiempoEstimado;
     private String observaciones;
+    @Builder.Default @Column(name = "confirmado", nullable = false) private Boolean confirmado = false;
 }

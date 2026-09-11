@@ -228,13 +228,15 @@
                 <a th:href="@{/cocina}" style="background: #f59e0b;">Ver Pedidos Pendientes</a>
             </div>
 
-            <!-- Módulo Mesero -->
-            <div sec:authorize="hasAnyRole('ADMINISTRADOR', 'MESERO')" class="card" style="border-color: #10b981;">
-                <h3>Atención y Pedidos</h3>
-                <p>Apertura de mesas, toma de comandas directas y control de estado.</p>
-                <a th:href="@{/mesas}" style="background: #10b981;">Gestionar Mesas</a>
-                <a th:href="@{/pedidos}" style="background: #10b981;">Ver Pedidos</a>
-            </div>
+           <!-- Módulo Mesero -->
+<div sec:authorize="hasAnyRole('ADMINISTRADOR', 'MESERO')" class="card" style="border-color: #10b981;">
+    <h3>Atención y Pedidos</h3>
+    <p>Apertura de mesas, toma de comandas directas y control de estado.</p>
+    <a th:href="@{/mesas}" style="background: #10b981;">Gestionar Mesas</a>
+    <a th:href="@{/pedidos}" style="background: #10b981;">Ver Pedidos</a>
+    <a th:href="@{/pedidos/entregar}" style="background: #10b981;">Entregar a Mesa</a>
+    <a th:href="@{/facturas}" style="background: #10b981;">Ver Facturas</a>
+</div>
 
             <!-- Módulo Cliente -->
             <div sec:authorize="hasRole('CLIENTE')" class="card" style="border-color: #06b6d4;">

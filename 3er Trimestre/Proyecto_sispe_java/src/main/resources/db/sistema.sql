@@ -558,3 +558,43 @@ BEGIN
 END$$
 
 DELIMITER ;
+
+
+USE sistema;
+
+-- 1. Foto del producto (se guarda la ruta, ej: /uploads/menu/xxxx.jpg)
+ALTER TABLE Menu ADD COLUMN foto VARCHAR(255) NULL;
+
+-- 2. El pedido queda "bloqueado" para edición una vez el cliente paga
+ALTER TABLE Pedido ADD COLUMN confirmado TINYINT(1) NOT NULL DEFAULT 0;
+
+-- 3. Catálogo de adiciones (extras que se le pueden agregar a cualquier producto)
+CREATE TABLE IF NOT EXISTS Adicion (
+    id_adicion INT AUTO_INCREMENT PRIMARY KEY,
+    nombre     VARCHAR(80)    NOT NULL,
+    precio     DECIMAL(10,2)  NOT NULL DEFAULT 0
+);
+
+-- 4. Relación: qué adiciones tiene cada línea del pedido
+CREATE TABLE IF NOT EXISTS Detalle_Pedido_Adicion (
+    id          INT AUTO_INCREMENT PRIMARY KEY,
+    id_detalle  INT NOT NULL,
+    id_adicion  INT NOT NULL,
+    cantidad    INT NOT NULL DEFAULT 1,
+    CONSTRAINT fk_dpa_detalle FOREIGN KEY (id_detalle) REFERENCES Detalle_Pedido(id_detalle) ON DELETE CASCADE,
+    CONSTRAINT fk_dpa_adicion FOREIGN KEY (id_adicion) REFERENCES Adicion(id_adicion)
+);
+
+-- 5. Métodos de pago que pediste: Efectivo, Tarjeta, Nequi
+INSERT INTO Metodo_pago (id_pago, Tipo_pago) VALUES
+    (1, 'Efectivo'),
+    (2, 'Tarjeta'),
+    (3, 'Nequi');
+
+-- 6. Adiciones de ejemplo (ajusta nombres y precios como quieras desde el panel admin más adelante)
+INSERT INTO Adicion (nombre, precio) VALUES
+    ('Queso extra', 3000),
+    ('Tocineta extra', 4000),
+    ('Sin cebolla', 0),
+    ('Papas grandes', 5000),
+    ('Salsa BBQ extra', 1500);

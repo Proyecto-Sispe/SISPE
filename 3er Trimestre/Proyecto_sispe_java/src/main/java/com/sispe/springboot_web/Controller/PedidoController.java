@@ -1,17 +1,30 @@
-// Controller/PedidoController.java
 package com.sispe.springboot_web.Controller;
 
+import com.sispe.springboot_web.Repository.FacturaRepository;
 import com.sispe.springboot_web.Repository.PedidoRepository;
+import com.sispe.springboot_web.Service.PedidoService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/pedidos")
 public class PedidoController {
     private final PedidoRepository pedidos;
-    public PedidoController(PedidoRepository pedidos) { this.pedidos = pedidos; }
+    private final PedidoService pedidoService;
+    private final FacturaRepository facturas;
+
+    public PedidoController(PedidoRepository pedidos, PedidoService pedidoService, FacturaRepository facturas) {
+        this.pedidos = pedidos;
+        this.pedidoService = pedidoService;
+        this.facturas = facturas;
+    }
+
     @GetMapping
     public String index(Model model) {
         model.addAttribute("pedidos", pedidos.findAll());
@@ -34,4 +47,28 @@ public class PedidoController {
 
     @PostMapping("/eliminar/{id}")
     public String eliminar(@PathVariable Long id) { pedidos.deleteById(id); return "redirect:/pedidos"; }
+
+    @GetMapping("/entregar")
+    public String entregar(Model model) {
+        List<com.sispe.springboot_web.Model.Pedido> listos =
+                pedidos.findByEstadoInOrderByFechaPedidoAsc(List.of("en_camino"));
+        Map<Long, Long> facturaPorPedido = new HashMap<>();
+        for (var p : listos) {
+            facturas.findByPedidoId(p.getId()).ifPresent(f -> facturaPorPedido.put(p.getId(), f.getId()));
+        }
+        model.addAttribute("pedidos", listos);
+        model.addAttribute("facturaPorPedido", facturaPorPedido);
+        return "pedidos/entregar";
+    }
+
+    @PostMapping("/entregar/{id}")
+    public String marcarEntregado(@PathVariable Long id, RedirectAttributes attrs) {
+        try {
+            pedidoService.entregarYDescontarStock(id);
+            attrs.addFlashAttribute("ok", "Pedido #" + id + " entregado. Stock descontado.");
+        } catch (IllegalStateException ex) {
+            attrs.addFlashAttribute("error", ex.getMessage());
+        }
+        return "redirect:/pedidos/entregar";
+    }
 }
