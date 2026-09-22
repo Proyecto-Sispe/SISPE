@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<body>
+    <!--
+        Mensajes de retroalimentación del sistema. Cualquier controlador puede mostrar un aviso
+        con addFlashAttribute("ok", ...) o addFlashAttribute("error", ...).
+        Uso:  <div th:replace="~{fragments/alertas :: alertas}"></div>
+    -->
+    <div th:fragment="alertas" class="alertas" aria-live="polite">
+        <p class="alert-success" role="status" th:if="${ok}" th:text="${ok}">Operación realizada</p>
+        <p class="alert-error" role="alert" th:if="${error}" th:text="${error}">Ocurrió un problema</p>
+    </div>
+</body>
+
+</html>

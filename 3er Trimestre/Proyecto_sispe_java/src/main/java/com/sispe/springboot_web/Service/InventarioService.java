@@ -66,6 +66,29 @@ public class InventarioService {
                 .orElseGet(() -> recetas.save(receta));
     }
 
+    /** Corrige el stock actual y el mínimo de un insumo (reposición o ajuste de inventario). */
+    @Transactional
+    public Insumo actualizar(Long insumoId, BigDecimal stockActual, BigDecimal stockMinimo) {
+        Insumo insumo = buscar(insumoId);
+        insumo.setStockActual(stockActual);
+        insumo.setStockMinimo(stockMinimo);
+        return insumos.save(insumo);
+    }
+
+    /** Baja lógica: el insumo deja de listarse y se retira de las recetas para no seguir descontándose. */
+    @Transactional
+    public void desactivar(Long insumoId) {
+        Insumo insumo = buscar(insumoId);
+        recetas.deleteByInsumo_Id(insumoId);
+        insumo.setActivo(false);
+        insumos.save(insumo);
+    }
+
+    @Transactional
+    public void eliminarReceta(Long recetaId) {
+        recetas.deleteById(recetaId);
+    }
+
     public Insumo buscar(Long insumoId) {
         return insumos.findById(insumoId).orElseThrow(() -> new IllegalArgumentException("Insumo no encontrado: " + insumoId));
     }

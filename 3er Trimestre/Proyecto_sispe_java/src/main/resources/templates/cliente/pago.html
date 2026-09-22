@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Método de pago | SISPE</title>
     <link rel="stylesheet" th:href="@{/css/sispe.css}">
+    <script th:src="@{/js/sispe.js}" defer></script>
 </head>
 
 <body class="digital-page">
@@ -13,14 +14,15 @@
         <a class="logout" th:href="@{/cliente/pedido}">← Volver a mi pedido</a>
         <h1>¿Cómo vas a pagar?</h1>
 
-        <p th:if="${error}" th:text="${error}" style="color:#ff8686;font-weight:bold;"></p>
+        <div th:replace="~{fragments/alertas :: alertas}"></div>
 
         <div class="cart-total">
             <span>Total a pagar</span>
             <strong th:text="${#numbers.formatDecimal(total, 0, 'POINT', 0, 'COMMA') + ' $'}">$0</strong>
         </div>
 
-        <form method="post" th:action="@{/cliente/pago/confirmar}" class="pay-options">
+        <form method="post" th:action="@{/cliente/pago/confirmar}" class="pay-options"
+              data-confirm="Al confirmar, tu pedido se enviará a cocina y ya no podrás modificarlo. ¿Continuar?">
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
             <label class="pay-option" th:each="metodo : ${metodos}">
                 <input type="radio" name="metodoPagoId" th:value="${metodo.id}" required>

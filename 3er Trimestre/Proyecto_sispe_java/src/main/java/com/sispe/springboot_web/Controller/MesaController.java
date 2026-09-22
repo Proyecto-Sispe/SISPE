@@ -1,6 +1,7 @@
 
 package com.sispe.springboot_web.Controller;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.sispe.springboot_web.Model.Mesa;
 import com.sispe.springboot_web.Repository.MesaRepository;
@@ -59,10 +61,49 @@ public class MesaController {
         return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).header("Content-Disposition", "attachment; filename=mesa-" + id + ".png").body(qr.getBody());
     }
     @PostMapping("/mesas/guardar")
-    public String guardar(@ModelAttribute Mesa mesa) { repository.save(mesa); return "redirect:/mesas"; }
+    public String guardar(@ModelAttribute Mesa mesa, RedirectAttributes attrs) {
+        String problema = validar(mesa);
+        if (problema != null) {
+            attrs.addFlashAttribute("error", problema);
+        } else if (mesa.getId() != null && repository.existsById(mesa.getId())) {
+            attrs.addFlashAttribute("error", "Ya existe la mesa " + mesa.getId() + ". Usa «Actualizar» para modificarla.");
+        } else {
+            repository.save(mesa);
+            attrs.addFlashAttribute("ok", "Mesa " + mesa.getId() + " creada correctamente.");
+        }
+        return "redirect:/mesas";
+    }
+
     @PostMapping("/mesas/actualizar/{id}")
-    public String actualizar(@PathVariable Integer id, @ModelAttribute Mesa mesa) { mesa.setId(id); repository.save(mesa); return "redirect:/mesas"; }
+    public String actualizar(@PathVariable Integer id, @ModelAttribute Mesa mesa, RedirectAttributes attrs) {
+        mesa.setId(id);
+        String problema = validar(mesa);
+        if (problema != null) {
+            attrs.addFlashAttribute("error", problema);
+        } else {
+            repository.save(mesa);
+            attrs.addFlashAttribute("ok", "Mesa " + id + " actualizada.");
+        }
+        return "redirect:/mesas";
+    }
 
     @PostMapping("/mesas/eliminar/{id}")
-    public String eliminar(@PathVariable Integer id) { repository.deleteById(id); return "redirect:/mesas"; }
+    public String eliminar(@PathVariable Integer id, RedirectAttributes attrs) {
+        try {
+            repository.deleteById(id);
+            attrs.addFlashAttribute("ok", "Mesa " + id + " eliminada.");
+        } catch (DataAccessException ex) {
+            attrs.addFlashAttribute("error", "No se puede eliminar la mesa " + id + " porque tiene pedidos o sesiones asociados.");
+        }
+        return "redirect:/mesas";
+    }
+
+    private String validar(Mesa mesa) {
+        if (mesa.getId() == null || mesa.getId() < 1) return "El número de mesa debe ser mayor que cero.";
+        if (mesa.getCapacidad() == null || mesa.getCapacidad() < 1) return "La capacidad debe ser de al menos 1 persona.";
+        if (mesa.getUbicacion() == null || mesa.getUbicacion().isBlank()) return "La ubicación es obligatoria.";
+        if (mesa.getUbicacion().length() > 50) return "La ubicación admite máximo 50 caracteres.";
+        if (mesa.getOcupada() == null) mesa.setOcupada(false);
+        return null;
+    }
 }

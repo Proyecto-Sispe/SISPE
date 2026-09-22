@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Menú digital | SISPE</title>
     <link rel="stylesheet" th:href="@{/css/sispe.css}">
+    <script th:src="@{/js/sispe.js}" defer></script>
 </head>
 
 <body class="digital-page">
@@ -18,22 +19,27 @@
     </nav>
     <header class="digital-hero">
         <div>
-            <p th:if="${error}" th:text="${error}" style="color:#ff8686;font-weight:bold;"></p>
+            <div th:replace="~{fragments/alertas :: alertas}"></div>
             <p class="eyebrow">SISPE / MENÚ DIGITAL</p>
-            <h1>Menú de comida rápida</h1>
+            <h1>¿Qué se te antoja hoy? 🔥</h1>
             <p>Elige tus productos, personalízalos con adiciones y agrégalos a tu pedido.</p>
         </div>
     </header>
     <main class="digital-content">
         <div class="digital-stats"><span><strong th:text="${#lists.size(productos)}">0</strong> productos</span></div>
 
-        <section class="product-grid">
-            <article class="product-card" th:each="producto : ${productos}">
+        <!-- Los tabs se arman solos con JS a partir de las categorías presentes en el menú -->
+        <div class="category-tabs" id="category-tabs"></div>
+
+        <section class="product-grid" id="product-grid">
+            <article class="product-card" th:each="producto : ${productos}"
+                      th:attr="data-categoria=${producto.categoria != null ? producto.categoria.nombre : 'Otros'}">
                 <div class="product-foto">
                     <img th:if="${producto.foto}" th:src="@{${producto.foto}}" alt="Foto del producto">
                     <div class="product-foto placeholder" th:unless="${producto.foto}">🍔</div>
                 </div>
                 <div class="product-body">
+                    <span class="product-cat" th:text="${producto.categoria != null ? producto.categoria.nombre : 'Otros'}">Categoría</span>
                     <h2 th:text="${producto.producto}">Producto</h2>
                     <p class="desc" th:text="${producto.descripcion}">Descripción</p>
                     <p class="precio" th:text="${#numbers.formatDecimal(producto.precio, 0, 'POINT', 0, 'COMMA') + ' $'}">$0</p>
@@ -48,12 +54,20 @@
 
                         <div class="adiciones-check" th:if="${!#lists.isEmpty(adiciones)}">
                             <p class="adiciones-title">Adiciones</p>
-                            <label class="chip" th:each="adicion : ${adiciones}">
-                                <input type="checkbox" name="adicionesIds" th:value="${adicion.id}">
-                                <span th:text="${adicion.nombre}">Extra</span>
-                                <span class="chip-precio"
-                                    th:text="'+' + ${#numbers.formatDecimal(adicion.precio, 0, 'POINT', 0, 'COMMA')}">+0</span>
-                            </label>
+                            <div class="stepper-row" th:each="adicion : ${adiciones}">
+                                <input type="hidden" name="adicionesIds" th:value="${adicion.id}">
+                                <div class="stepper-info">
+                                    <span class="stepper-label" th:text="${adicion.nombre}">Extra</span>
+                                    <span class="stepper-precio"
+                                        th:text="'+' + ${#numbers.formatDecimal(adicion.precio, 0, 'POINT', 0, 'COMMA')}">+0</span>
+                                </div>
+                                <div class="stepper">
+                                    <button type="button" class="stepper-btn" onclick="cambiarCantidad(this, -1)">−</button>
+                                    <input type="number" name="cantidadesAdicion" value="0" min="0" max="10"
+                                           class="stepper-input" readonly>
+                                    <button type="button" class="stepper-btn" onclick="cambiarCantidad(this, 1)">+</button>
+                                </div>
+                            </div>
                         </div>
 
                         <textarea name="observaciones" placeholder="¿Alguna nota? Ej: sin cebolla, término medio..."></textarea>
@@ -67,6 +81,51 @@
     </main>
 
     <a class="mini-cart-bar" th:href="@{/cliente/pedido}">🛒 Ver mi pedido</a>
+
+    <script>
+        // Stepper de cantidad para adiciones: sube/baja el input readonly asociado.
+        function cambiarCantidad(boton, delta) {
+            const contenedor = boton.closest('.stepper');
+            const input = contenedor.querySelector('.stepper-input');
+            let valor = parseInt(input.value || '0', 10) + delta;
+            const min = parseInt(input.min, 10);
+            const max = parseInt(input.max, 10);
+            if (valor < min) valor = min;
+            if (valor > max) valor = max;
+            input.value = valor;
+        }
+
+        // Arma los tabs de categoría a partir de lo que realmente hay en el menú.
+        (function () {
+            const grid = document.getElementById('product-grid');
+            const tabsBar = document.getElementById('category-tabs');
+            const tarjetas = Array.from(grid.querySelectorAll('.product-card'));
+            const categorias = [...new Set(tarjetas.map(t => t.dataset.categoria))];
+
+            function filtrar(categoria) {
+                tarjetas.forEach(t => {
+                    t.style.display = (categoria === 'Todo' || t.dataset.categoria === categoria) ? '' : 'none';
+                });
+                tabsBar.querySelectorAll('.tab-btn').forEach(b => {
+                    b.classList.toggle('active', b.dataset.cat === categoria);
+                });
+            }
+
+            function crearTab(nombre) {
+                const boton = document.createElement('button');
+                boton.type = 'button';
+                boton.className = 'tab-btn';
+                boton.dataset.cat = nombre;
+                boton.textContent = nombre;
+                boton.addEventListener('click', () => filtrar(nombre));
+                tabsBar.appendChild(boton);
+            }
+
+            crearTab('Todo');
+            categorias.forEach(crearTab);
+            filtrar('Todo');
+        })();
+    </script>
 </body>
 
 </html>

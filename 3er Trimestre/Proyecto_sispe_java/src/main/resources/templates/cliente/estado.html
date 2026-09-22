@@ -11,14 +11,42 @@
 
 <body class="digital-page">
     <main class="digital-content">
-        <h1>¡Pedido enviado a cocina!</h1>
-        <div th:if="${pedido != null}" class="estado-box">
-            <p>Pedido <strong th:text="'#' + ${pedido.id}">#0</strong></p>
-            <p class="estado-actual" th:switch="${pedido.estado}">
-                <span th:case="'pendiente'">🕐 Recibido, esperando que cocina lo tome.</span>
-                <span th:case="'en_preparacion'">👨‍🍳 ¡Están preparando tu pedido!</span>
-                <span th:case="'en_camino'">🚶 Tu pedido va en camino a la mesa.</span>
-                <span th:case="'entregado'">✅ Pedido entregado. ¡Buen provecho!</span>
+        <h1>¡Tu pedido va en camino! 🍽️</h1>
+
+        <div th:if="${pedido != null}" class="estado-box"
+             th:with="paso=${pedido.estado == 'pendiente'} ? 1 : (${pedido.estado == 'en_preparacion'} ? 2 : (${pedido.estado == 'en_camino'} ? 3 : 4))">
+            <p class="estado-pedido-id">Pedido <strong th:text="'#' + ${pedido.id}">#0</strong></p>
+
+            <div class="progreso">
+                <div class="progreso-paso" th:classappend="${paso >= 1} ? ' activo'">
+                    <span class="progreso-circulo">🧾</span>
+                    <span class="progreso-label">Recibido</span>
+                </div>
+                <div class="progreso-linea" th:classappend="${paso >= 2} ? ' activa'"></div>
+
+                <div class="progreso-paso" th:classappend="${paso >= 2} ? ' activo'">
+                    <span class="progreso-circulo">👨‍🍳</span>
+                    <span class="progreso-label">En preparación</span>
+                </div>
+                <div class="progreso-linea" th:classappend="${paso >= 3} ? ' activa'"></div>
+
+                <div class="progreso-paso" th:classappend="${paso >= 3} ? ' activo'">
+                    <span class="progreso-circulo">🚶</span>
+                    <span class="progreso-label">En camino</span>
+                </div>
+                <div class="progreso-linea" th:classappend="${paso >= 4} ? ' activa'"></div>
+
+                <div class="progreso-paso" th:classappend="${paso >= 4} ? ' activo'">
+                    <span class="progreso-circulo">✅</span>
+                    <span class="progreso-label">Entregado</span>
+                </div>
+            </div>
+
+            <p class="estado-mensaje" th:switch="${pedido.estado}">
+                <span th:case="'pendiente'">Recibimos tu pedido, cocina lo va a tomar en un momento.</span>
+                <span th:case="'en_preparacion'">¡Lo están preparando ahora mismo!</span>
+                <span th:case="'en_camino'">Ya va en camino a tu mesa.</span>
+                <span th:case="'entregado'">Entregado. ¡Buen provecho!</span>
                 <span th:case="*" th:text="${pedido.estado}">Estado</span>
             </p>
         </div>

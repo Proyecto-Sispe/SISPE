@@ -78,6 +78,7 @@ public class ClienteController {
                            @RequestParam(defaultValue = "1") Integer cantidad,
                            @RequestParam(required = false) String observaciones,
                            @RequestParam(required = false, name = "adicionesIds") List<Long> adicionesIds,
+                           @RequestParam(required = false, name = "cantidadesAdicion") List<Integer> cantidadesAdicion,
                            HttpSession session, RedirectAttributes attrs) {
         Long idPedido = (Long) session.getAttribute("pedidoActivoId");
         if (idPedido == null) {
@@ -90,7 +91,11 @@ public class ClienteController {
         }
         if (cantidad == null || cantidad < 1) cantidad = 1;
 
-        Menu producto = menuRepository.findById(productoId).orElseThrow();
+        Menu producto = menuRepository.findById(productoId).orElse(null);
+        if (producto == null) {
+            attrs.addFlashAttribute("error", "Ese producto ya no está disponible en el menú.");
+            return "redirect:/menu/digital";
+        }
         DetallePedido detalle = DetallePedido.builder()
                 .pedidoId(idPedido)
                 .menu(producto)
@@ -100,17 +105,26 @@ public class ClienteController {
                 .build();
         detalle = detalleRepository.save(detalle);
 
+        // Cada adición viaja emparejada por posición con su cantidad elegida en el stepper.
+        // Si el cliente dejó una adición en 0, simplemente no se guarda.
         if (adicionesIds != null) {
-            for (Long adicionId : adicionesIds) {
+            for (int i = 0; i < adicionesIds.size(); i++) {
+                Long adicionId = adicionesIds.get(i);
+                Integer cantidadAdicion = (cantidadesAdicion != null && i < cantidadesAdicion.size())
+                        ? cantidadesAdicion.get(i) : 0;
+                if (cantidadAdicion == null || cantidadAdicion < 1) continue;
+
                 Adicion adicion = adicionRepository.findById(adicionId).orElse(null);
                 if (adicion == null) continue;
+
                 detalleAdicionRepository.save(DetallePedidoAdicion.builder()
                         .detallePedido(detalle)
                         .adicion(adicion)
-                        .cantidad(1)
+                        .cantidad(cantidadAdicion)
                         .build());
             }
         }
+        attrs.addFlashAttribute("ok", producto.getProducto() + " se agregó a tu pedido.");
         return "redirect:/menu/digital";
     }
 
@@ -122,8 +136,17 @@ public class ClienteController {
             attrs.addFlashAttribute("error", "Ese producto no pertenece a tu pedido.");
             return "redirect:/cliente/pedido";
         }
-        detalleAdicionRepository.deleteByDetallePedido_Id(idDetalle);
-        detalleRepository.deleteById(idDetalle);
+        if (pedidoRepository.findById(idPedido).map(Pedido::getConfirmado).orElse(false)) {
+            attrs.addFlashAttribute("error", "Tu pedido ya fue enviado a cocina, no puedes quitar productos.");
+            return "redirect:/cliente/pedido";
+        }
+        try {
+            detalleAdicionRepository.deleteByDetallePedido_Id(idDetalle);
+            detalleRepository.deleteById(idDetalle);
+            attrs.addFlashAttribute("ok", "Quitaste " + detalle.getMenu().getProducto() + " de tu pedido.");
+        } catch (DataAccessException ex) {
+            attrs.addFlashAttribute("error", "No se pudo quitar el producto. Inténtalo de nuevo.");
+        }
         return "redirect:/cliente/pedido";
     }
 
@@ -152,9 +175,22 @@ public class ClienteController {
     }
 
     @PostMapping("/carrito/vaciar")
-    public String vaciar(HttpSession session) {
+    public String vaciar(HttpSession session, RedirectAttributes attrs) {
         Long idPedido = (Long) session.getAttribute("pedidoActivoId");
-        if (idPedido != null) detalleRepository.deleteByPedidoId(idPedido);
+        if (idPedido == null) {
+            attrs.addFlashAttribute("error", "No hay un pedido activo.");
+            return "redirect:/menu/digital";
+        }
+        if (pedidoRepository.findById(idPedido).map(Pedido::getConfirmado).orElse(false)) {
+            attrs.addFlashAttribute("error", "Tu pedido ya fue enviado a cocina, no se puede vaciar.");
+            return "redirect:/cliente/pedido";
+        }
+        try {
+            detalleRepository.deleteByPedidoId(idPedido);
+            attrs.addFlashAttribute("ok", "Tu pedido quedó vacío.");
+        } catch (DataAccessException ex) {
+            attrs.addFlashAttribute("error", "No se pudo vaciar el pedido. Inténtalo de nuevo.");
+        }
         return "redirect:/cliente/pedido";
     }
 

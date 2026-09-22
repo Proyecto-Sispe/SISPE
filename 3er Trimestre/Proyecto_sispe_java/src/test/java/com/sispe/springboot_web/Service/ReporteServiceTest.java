@@ -6,7 +6,6 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.lenient;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -88,7 +87,7 @@ class ReporteServiceTest {
     @Test
     void datosFiltraPorFechaEstadoYRelacionaFacturas() {
         Map<String, Object> resultado = reporteService.datos(
-                LocalDate.of(2026, 9, 1), LocalDate.of(2026, 9, 30), "ENTREGADO");
+                LocalDateTime.of(2026, 9, 1, 0, 0), LocalDateTime.of(2026, 9, 30, 23, 59), "ENTREGADO");
 
         assertEquals(List.of(pedido), resultado.get("pedidos"));
         assertEquals(List.of(factura), resultado.get("facturas"));
@@ -98,9 +97,19 @@ class ReporteServiceTest {
     }
 
     @Test
+    void datosFiltraPorHoraExactaDentroDelMismoDia() {
+        // El pedido de prueba quedó a las 12:00. Una ventana de 14:00 a 18:00 debe excluirlo,
+        // aunque sea el mismo día, porque ahora el filtro sí distingue la hora.
+        Map<String, Object> fueraDeHorario = reporteService.datos(
+                LocalDateTime.of(2026, 9, 10, 14, 0), LocalDateTime.of(2026, 9, 10, 18, 0), null);
+
+        assertTrue(((List<?>) fueraDeHorario.get("pedidos")).isEmpty());
+    }
+
+    @Test
     void datosExcluyePedidoFueraDeRangoOConEstadoDistinto() {
         Map<String, Object> fueraDeRango = reporteService.datos(
-                LocalDate.of(2026, 10, 1), null, null);
+                LocalDateTime.of(2026, 10, 1, 0, 0), null, null);
         Map<String, Object> estadoDistinto = reporteService.datos(null, null, "pendiente");
 
         assertTrue(((List<?>) fueraDeRango.get("pedidos")).isEmpty());

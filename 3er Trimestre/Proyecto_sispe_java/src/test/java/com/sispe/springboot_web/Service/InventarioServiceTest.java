@@ -1,9 +1,12 @@
 package com.sispe.springboot_web.Service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -132,5 +135,57 @@ class InventarioServiceTest {
                 () -> inventarioService.buscar(99L));
 
         assertEquals("Insumo no encontrado: 99", error.getMessage());
+    }
+
+    @Test
+    void actualizarCorrigeStockActualYMinimo() {
+        when(insumos.findById(9L)).thenReturn(Optional.of(insumo));
+        when(insumos.save(insumo)).thenReturn(insumo);
+
+        Insumo actualizado = inventarioService.actualizar(9L, new BigDecimal("25.000"), new BigDecimal("5.000"));
+
+        assertEquals(new BigDecimal("25.000"), actualizado.getStockActual());
+        assertEquals(new BigDecimal("5.000"), actualizado.getStockMinimo());
+        verify(insumos).save(insumo);
+    }
+
+    @Test
+    void actualizarRechazaInsumoDesconocido() {
+        when(insumos.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class,
+                () -> inventarioService.actualizar(99L, BigDecimal.TEN, BigDecimal.ONE));
+        verify(insumos, never()).save(any());
+    }
+
+    @Test
+    void desactivarMarcaInactivoYQuitaElInsumoDeTodasLasRecetas() {
+        when(insumos.findById(9L)).thenReturn(Optional.of(insumo));
+        when(insumos.save(insumo)).thenReturn(insumo);
+
+        inventarioService.desactivar(9L);
+
+        assertFalse(insumo.isActivo());
+        verify(recetas).deleteByInsumo_Id(9L);
+        verify(insumos).save(insumo);
+    }
+
+    @Test
+    void eliminarRecetaDelegaEnElRepositorio() {
+        inventarioService.eliminarReceta(42L);
+
+        verify(recetas).deleteById(42L);
+    }
+
+    @Test
+    void guardarRecetaCreaUnaNuevaSiElInsumoAunNoEstabaEnEseProducto() {
+        MenuInsumo nueva = MenuInsumo.builder().menu(menu).insumo(insumo).cantidad(new BigDecimal("3")).build();
+        when(recetas.findByMenu_IdAndInsumo_Id(5, 9L)).thenReturn(Optional.empty());
+        when(recetas.save(nueva)).thenReturn(nueva);
+
+        MenuInsumo creada = inventarioService.guardarReceta(nueva);
+
+        assertSame(nueva, creada);
+        verify(recetas, times(1)).save(nueva);
     }
 }

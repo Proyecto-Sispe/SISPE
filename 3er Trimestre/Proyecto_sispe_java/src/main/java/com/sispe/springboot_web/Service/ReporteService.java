@@ -2,7 +2,7 @@ package com.sispe.springboot_web.Service;
 
 import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -51,8 +51,22 @@ public class ReporteService {
      * los detalles se acotan a los pedidos que superaron el filtro, para que todos los
      * totales de la pantalla hablen del mismo conjunto.
      */
-    public Map<String,Object> datos(LocalDate desde, LocalDate hasta, String estado) {
-        List<Pedido> filtrados = pedidos.findAll().stream().filter(p -> dentroDelRango(p, desde, hasta) && coincideEstado(p, estado)).toList();
+    public Map<String,Object> datos(LocalDateTime desde, LocalDateTime hasta, String estado) {
+        return datos(desde, hasta, estado, null, null);
+    }
+
+    /** Fila del resumen de ventas por producto que se muestra en pantalla. */
+    public record FilaProducto(String producto, int unidades, BigDecimal importe) { }
+
+    /**
+     * Igual que {@link #datos(LocalDateTime, LocalDateTime, String)} pero con dos criterios más:
+     * mesa y prioridad. Los cinco filtros se combinan con AND y cualquiera puede venir vacío.
+     */
+    public Map<String,Object> datos(LocalDateTime desde, LocalDateTime hasta, String estado, Long mesaId, String prioridad) {
+        List<Pedido> filtrados = pedidos.findAll().stream()
+                .filter(p -> dentroDelRango(p, desde, hasta) && coincideEstado(p, estado)
+                        && coincideMesa(p, mesaId) && coincidePrioridad(p, prioridad))
+                .toList();
         Set<Long> ids = new java.util.HashSet<>();
         for (Pedido pedido : filtrados) {
             if (pedido.getId() != null) {
@@ -73,15 +87,40 @@ public class ReporteService {
         datos.put("facturas", facturasFiltradas);
         datos.put("detalles", detallesFiltrados);
         datos.put("insumos", insumos.findAll());
+        datos.put("ventasPorProducto", ventasPorProducto(detallesFiltrados));
         datos.put("totalPedidos", filtrados.size());
         datos.put("totalVentas", totalVentas);
         return datos;
     }
 
-    private boolean dentroDelRango(Pedido pedido, LocalDate desde, LocalDate hasta) {
+    private List<FilaProducto> ventasPorProducto(List<DetallePedido> lista) {
+        Map<String, int[]> unidades = new LinkedHashMap<>();
+        Map<String, BigDecimal> importes = new LinkedHashMap<>();
+        for (DetallePedido d : lista) {
+            String producto = d.getMenu() == null ? "(sin producto)" : d.getMenu().getProducto();
+            int cantidad = d.getCantidad() == null ? 0 : d.getCantidad();
+            unidades.computeIfAbsent(producto, k -> new int[1])[0] += cantidad;
+            BigDecimal precio = d.getValorVenta() == null ? BigDecimal.ZERO : d.getValorVenta();
+            importes.merge(producto, precio.multiply(BigDecimal.valueOf(cantidad)), BigDecimal::add);
+        }
+        List<FilaProducto> filas = new ArrayList<>();
+        unidades.forEach((producto, cantidad) -> filas.add(new FilaProducto(producto, cantidad[0], importes.get(producto))));
+        filas.sort((a, b) -> Integer.compare(b.unidades(), a.unidades()));
+        return filas;
+    }
+
+    private boolean dentroDelRango(Pedido pedido, LocalDateTime desde, LocalDateTime hasta) {
         if (pedido.getFechaPedido() == null) return true;
-        LocalDate fecha = pedido.getFechaPedido().toLocalDate();
+        LocalDateTime fecha = pedido.getFechaPedido();
         return (desde == null || !fecha.isBefore(desde)) && (hasta == null || !fecha.isAfter(hasta));
+    }
+
+    private boolean coincideMesa(Pedido pedido, Long mesaId) {
+        return mesaId == null || mesaId.equals(pedido.getMesaId());
+    }
+
+    private boolean coincidePrioridad(Pedido pedido, String prioridad) {
+        return prioridad == null || prioridad.isBlank() || prioridad.equalsIgnoreCase(pedido.getPrioridad());
     }
 
     private boolean coincideEstado(Pedido pedido, String estado) {

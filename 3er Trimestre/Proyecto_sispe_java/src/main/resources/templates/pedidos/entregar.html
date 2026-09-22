@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <title>Entregar pedidos | SISPE</title>
     <link rel="stylesheet" th:href="@{/css/sispe.css}">
+    <script th:src="@{/js/sispe.js}" defer></script>
 </head>
 
 <body>
@@ -28,8 +29,7 @@
                 </div>
             </header>
 
-            <p th:if="${ok}" th:text="${ok}" style="color:var(--success);font-weight:700;"></p>
-            <p th:if="${error}" th:text="${error}" style="color:var(--danger);font-weight:700;"></p>
+            <div th:replace="~{fragments/alertas :: alertas}"></div>
 
             <section class="orders">
                 <article class="order" th:each="pedido : ${pedidos}">
@@ -42,7 +42,7 @@
                         <a class="btn secondary small" th:if="${facturaPorPedido.get(pedido.id)} != null"
                            th:href="@{'/facturas/' + ${facturaPorPedido.get(pedido.id)}}" target="_blank">Ver factura</a>
                         <form method="post" th:action="@{'/pedidos/entregar/' + ${pedido.id}}"
-                            onsubmit="return confirm('¿Confirmas que el pedido ya llegó a la mesa?');">
+                            data-confirm="¿Confirmas que el pedido ya llegó a la mesa?">
                             <button class="btn small" type="submit">Marcar entregado</button>
                         </form>
                     </div>

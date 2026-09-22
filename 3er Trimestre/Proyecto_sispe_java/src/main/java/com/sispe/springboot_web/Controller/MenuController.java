@@ -5,7 +5,9 @@ import com.sispe.springboot_web.Service.MenuService;
 import com.sispe.springboot_web.Repository.CategoriaRepository;
 import com.sispe.springboot_web.Repository.AdicionRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataAccessException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.mvc.support.RedirectAttributesModelMap;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -54,11 +56,26 @@ public class MenuController {
             service.buscarPorId(menu.getId()).ifPresent(actual -> menu.setFoto(actual.getFoto()));
         }
         service.guardar(menu);
+        attributes.addFlashAttribute("ok", "Producto guardado correctamente.");
         return "redirect:/menu";
     }
 
     @PostMapping("/menu/eliminar/{id}")
-    public String eliminar(@PathVariable Integer id) { service.eliminar(id); return "redirect:/menu"; }
+    public String eliminar(@PathVariable Integer id, RedirectAttributes attributes) {
+        try {
+            service.eliminar(id);
+            attributes.addFlashAttribute("ok", "Producto eliminado del menú.");
+        } catch (DataAccessException ex) {
+            attributes.addFlashAttribute("error",
+                    "No se puede eliminar el producto porque ya aparece en pedidos o recetas registrados.");
+        }
+        return "redirect:/menu";
+    }
+
+    /** Variante sin mensajes, conservada por compatibilidad con quien llame al método directamente. */
+    public String eliminar(Integer id) {
+        return eliminar(id, new RedirectAttributesModelMap());
+    }
 
     @PostMapping("/menu/actualizar/{id}")
     public String actualizar(@PathVariable Integer id, @ModelAttribute Menu menu,

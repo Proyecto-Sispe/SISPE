@@ -1313,5 +1313,342 @@ h3 {
         transition: none !important;
         animation: none !important;
     }
-    
+    /* ============ TEMA CÁLIDO PARA EL CLIENTE (menú, carrito, pago, estado) ============ */
+/* Redefine las variables SOLO dentro de .digital-page: el panel admin conserva navy/dorado */
+
+.digital-page {
+    --navy: #7a0c1a;
+    --navy-2: #b3261e;
+    --gold: #ffb703;
+    --gold-2: #fb8500;
+    background: linear-gradient(160deg, #7a0c1a 0%, #d62828 45%, #f77f00 100%);
+}
+
+.digital-hero h1 {
+    color: #ffe8a3;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, .25);
+}
+
+/* ============ TABS DE CATEGORÍA ============ */
+
+.category-tabs {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 22px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+}
+
+.tab-btn {
+    border: 1px solid rgba(255, 255, 255, .25);
+    background: rgba(255, 255, 255, .08);
+    color: #fff;
+    padding: 9px 18px;
+    border-radius: 999px;
+    font-weight: 800;
+    font-size: 13px;
+    white-space: nowrap;
+    transition: .2s;
+}
+
+.tab-btn:hover {
+    background: rgba(255, 255, 255, .18);
+}
+
+.tab-btn.active {
+    background: var(--gold);
+    color: #4a1400;
+    border-color: var(--gold);
+}
+
+/* ============ ETIQUETA DE CATEGORÍA EN LA TARJETA ============ */
+
+.product-cat {
+    align-self: flex-start;
+    background: rgba(255, 183, 3, .18);
+    color: var(--gold);
+    font-size: 10.5px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    padding: 3px 10px;
+    border-radius: 999px;
+}
+
+/* ============ STEPPER DE CANTIDAD (adiciones) ============ */
+
+.stepper-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 6px 2px;
+}
+
+.stepper-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.stepper-label {
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.stepper-precio {
+    font-size: 11.5px;
+    color: #ffd699;
+}
+
+.stepper {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.stepper-btn {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, .3);
+    background: rgba(255, 255, 255, .1);
+    color: #fff;
+    font-weight: 900;
+    font-size: 15px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: .15s;
+}
+
+.stepper-btn:hover {
+    background: var(--gold);
+    color: #4a1400;
+    border-color: var(--gold);
+}
+
+.stepper-input {
+    width: 30px;
+    text-align: center;
+    background: transparent;
+    border: 0;
+    color: #fff;
+    font-weight: 800;
+    font-size: 14px;
+}
+
+/* ============ BARRA DE PROGRESO DEL PEDIDO (cliente/estado) ============ */
+
+.estado-pedido-id {
+    color: #ffe8a3;
+    font-weight: 700;
+    margin-bottom: 18px;
+}
+
+.progreso {
+    display: flex;
+    align-items: center;
+    margin: 10px 0 22px;
+}
+
+.progreso-paso {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    flex: none;
+    opacity: .4;
+    transition: opacity .3s;
+}
+
+.progreso-paso.activo {
+    opacity: 1;
+}
+
+.progreso-circulo {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .1);
+    border: 2px solid rgba(255, 255, 255, .25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+
+.progreso-paso.activo .progreso-circulo {
+    background: var(--gold);
+    border-color: var(--gold);
+}
+
+.progreso-label {
+    font-size: 10.5px;
+    font-weight: 800;
+    text-align: center;
+    max-width: 78px;
+    color: #ffe8cc;
+}
+
+.progreso-linea {
+    flex: 1;
+    height: 4px;
+    background: rgba(255, 255, 255, .15);
+    margin: 0 -4px 24px;
+    border-radius: 4px;
+    transition: background .3s;
+}
+
+.progreso-linea.activa {
+    background: var(--gold);
+}
+
+.estado-mensaje {
+    font-size: 17px;
+    font-weight: 700;
+    color: #fff;
+}
+
+/* ============ PANTALLA DE BIENVENIDA / ESCANEAR ============ */
+
+.escanear-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 84px);
+}
+
+.escanear-card {
+    background: rgba(255, 255, 255, .1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, .2);
+    border-radius: 20px;
+    padding: 38px 34px;
+    width: min(420px, 100%);
+    text-align: center;
+    box-shadow: var(--shadow-lg);
+}
+
+.escanear-card h1 {
+    font-size: 30px;
+    color: #ffe8a3;
+    margin: 6px 0 10px;
+}
+
+.escanear-mesa {
+    color: #ffe0cc;
+    margin-bottom: 22px;
+}
+
+.escanear-error {
+    background: rgba(0, 0, 0, .25);
+    border: 1px solid rgba(255, 255, 255, .25);
+    color: #ffd6d6;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-weight: 700;
+    margin-bottom: 16px;
+}
+
+.escanear-form label {
+    text-align: left;
+    color: #ffe8cc;
+}
+
+@media(max-width:680px) {
+    .progreso-label {
+        max-width: 58px;
+        font-size: 9.5px;
+    }
+
+    .progreso-circulo {
+        width: 34px;
+        height: 34px;
+        font-size: 15px;
+    }
+}
+}
+
+/* ============ RETROALIMENTACIÓN AL USUARIO (avisos, acciones, estados) ============ */
+
+.alertas > p {
+    margin: 0 0 14px;
+    border-left: 5px solid currentColor;
+    box-shadow: var(--shadow);
+    transition: opacity .5s ease;
+}
+
+.alertas > p.alerta-oculta {
+    opacity: 0;
+}
+
+/* En las páginas oscuras del cliente el aviso conserva su fondo claro para mantener el contraste. */
+.digital-page .alertas {
+    max-width: 960px;
+    margin: 0 auto 14px;
+}
+
+button[disabled],
+.btn[disabled] {
+    opacity: .65;
+    cursor: wait;
+}
+
+/* Insumos por debajo del stock mínimo */
+tr.stock-bajo td {
+    background: #fdebed;
+}
+
+.inline-edit {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.inline-edit input {
+    width: 110px;
+}
+
+.filtros-ayuda {
+    margin-top: 8px;
+    font-size: 12.5px;
+    color: var(--muted);
+}
+
+/* Productos de cada pedido en el panel de cocina */
+.cocina-productos {
+    list-style: none;
+    margin: 10px 0;
+    padding: 0;
+    display: grid;
+    gap: 8px;
+}
+
+.cocina-productos li {
+    padding: 8px 10px;
+    border-left: 4px solid var(--gold);
+    background: var(--soft);
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.cocina-adiciones {
+    font-size: 13px;
+    color: var(--info);
+}
+
+.cocina-nota {
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.cocina-vacio {
+    border-left-color: var(--line);
+    color: var(--muted);
 }

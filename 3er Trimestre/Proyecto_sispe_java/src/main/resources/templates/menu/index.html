@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Menú | SISPE</title>
     <link rel="stylesheet" th:href="@{/css/sispe.css}">
+    <script th:src="@{/js/sispe.js}" defer></script>
 </head>
 
 <body>
@@ -33,7 +34,7 @@
                 </div>
             </header>
 
-            <p th:if="${error}" style="color:#ef4444; font-weight:600;" th:text="${error}">Error</p>
+            <div th:replace="~{fragments/alertas :: alertas}"></div>
 
             <section class="table-wrap">
                 <table class="table">

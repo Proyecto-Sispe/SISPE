@@ -15,15 +15,7 @@ CREATE TABLE IF NOT EXISTS Insumo (
     CONSTRAINT uq_insumo_nombre UNIQUE (nombre)
 );
 
-CREATE TABLE IF NOT EXISTS Menu_Insumo (
-    id_menu_insumo BIGINT AUTO_INCREMENT PRIMARY KEY,
-    id_menu        INT           NOT NULL,
-    id_insumo      BIGINT        NOT NULL,
-    cantidad       DECIMAL(12,3) NOT NULL,
-    CONSTRAINT uq_menu_insumo UNIQUE (id_menu, id_insumo),
-    CONSTRAINT fk_menu_insumo_menu   FOREIGN KEY (id_menu)   REFERENCES Menu(id_menu),
-    CONSTRAINT fk_menu_insumo_insumo FOREIGN KEY (id_insumo) REFERENCES Insumo(id_insumo)
-);
+-- (Menu_Insumo se crea al final del script, porque depende de la tabla Menu.)
 
 
 CREATE TABLE Rol (
@@ -598,3 +590,15 @@ INSERT INTO Adicion (nombre, precio) VALUES
     ('Sin cebolla', 0),
     ('Papas grandes', 5000),
     ('Salsa BBQ extra', 1500);
+
+-- 7. Recetas: cuánto de cada insumo consume un producto del menú.
+--    Va al final porque su llave foránea necesita que la tabla Menu ya exista.
+CREATE TABLE IF NOT EXISTS Menu_Insumo (
+    id_menu_insumo BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id_menu        INT           NOT NULL,
+    id_insumo      BIGINT        NOT NULL,
+    cantidad       DECIMAL(12,3) NOT NULL,
+    CONSTRAINT uq_menu_insumo UNIQUE (id_menu, id_insumo),
+    CONSTRAINT fk_menu_insumo_menu   FOREIGN KEY (id_menu)   REFERENCES Menu(id_menu),
+    CONSTRAINT fk_menu_insumo_insumo FOREIGN KEY (id_insumo) REFERENCES Insumo(id_insumo)
+);

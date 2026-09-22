@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Reporte multitabla | SISPE</title>
+    <link rel="stylesheet" th:href="@{/css/sispe.css}">
+    <script th:src="@{/js/sispe.js}" defer></script>
+</head>
+
+<body>
+    <main class="shell">
+        <header>
+            <div>
+                <p class="eyebrow">SISPE / ANALÍTICA / REPORTES</p>
+                <h1>Reporte multitabla</h1>
+                <p class="muted">Cruza pedidos, mesas, clientes, meseros, productos, categorías, adiciones, facturas y
+                    métodos de pago. Filtra por cualquiera de esos criterios y descarga el resultado.</p>
+            </div>
+            <div>
+                <a class="logout" th:href="@{/reportes}">Reportes básicos</a>
+                <a class="logout" th:href="@{/inicio}">Volver</a>
+            </div>
+        </header>
+
+        <div th:replace="~{fragments/alertas :: alertas}"></div>
+
+        <section class="table-wrap">
+            <h2>Filtros</h2>
+            <form method="get" th:action="@{/reportes/multitabla}" class="form-grid" data-no-lock>
+                <label>Desde
+                    <input type="date" name="desde" th:value="${f.desde}">
+                </label>
+                <label>Hasta
+                    <input type="date" name="hasta" th:value="${f.hasta}">
+                </label>
+                <label>Estado del pedido
+                    <select name="estado">
+                        <option value="">Todos</option>
+                        <option value="pendiente" th:selected="${f.estado == 'pendiente'}">Pendiente</option>
+                        <option value="en_preparacion" th:selected="${f.estado == 'en_preparacion'}">En preparación</option>
+                        <option value="en_camino" th:selected="${f.estado == 'en_camino'}">En camino</option>
+                        <option value="entregado" th:selected="${f.estado == 'entregado'}">Entregado</option>
+                    </select>
+                </label>
+                <label>Prioridad
+                    <select name="prioridad">
+                        <option value="">Todas</option>
+                        <option value="normal" th:selected="${f.prioridad == 'normal'}">Normal</option>
+                        <option value="urgente" th:selected="${f.prioridad == 'urgente'}">Urgente</option>
+                    </select>
+                </label>
+                <label>Mesa
+                    <input type="number" name="mesa" min="1" placeholder="Todas" th:value="${f.mesa}">
+                </label>
+                <label>Categoría
+                    <select name="categoria">
+                        <option value="">Todas</option>
+                        <option th:each="c : ${categorias}" th:value="${c.id()}" th:text="${c.nombre()}"
+                                th:selected="${f.categoria != null and f.categoria == c.id()}"></option>
+                    </select>
+                </label>
+                <label>Producto
+                    <select name="producto">
+                        <option value="">Todos</option>
+                        <option th:each="p : ${productos}" th:value="${p.id()}" th:text="${p.nombre()}"
+                                th:selected="${f.producto != null and f.producto == p.id()}"></option>
+                    </select>
+                </label>
+                <label>Método de pago
+                    <select name="metodoPago">
+                        <option value="">Todos</option>
+                        <option th:each="m : ${metodos}" th:value="${m.id()}" th:text="${m.nombre()}"
+                                th:selected="${f.metodoPago != null and f.metodoPago == m.id()}"></option>
+                    </select>
+                </label>
+                <button type="submit">Aplicar filtros</button>
+                <a class="button" th:href="@{/reportes/multitabla}">Limpiar</a>
+            </form>
+            <p class="filtros-ayuda">Los criterios se combinan entre sí (todos deben cumplirse). Las fechas son
+                inclusivas: «Hasta» abarca el día completo.</p>
+        </section>
+
+        <section class="report-cards" th:if="${resumen != null}">
+            <article><span>Pedidos</span><strong th:text="${resumen.pedidos()}">0</strong></article>
+            <article><span>Unidades vendidas</span><strong th:text="${resumen.unidades()}">0</strong></article>
+            <article><span>Total de líneas</span><strong
+                    th:text="${#numbers.formatDecimal(resumen.totalLineas(), 0, 'POINT', 0, 'COMMA') + ' $'}">0</strong></article>
+            <article><span>Total facturado</span><strong
+                    th:text="${#numbers.formatDecimal(resumen.totalFacturado(), 0, 'POINT', 0, 'COMMA') + ' $'}">0</strong></article>
+        </section>
+
+        <section class="table-wrap" th:if="${resumen != null}">
+            <h2>Descargar este resultado</h2>
+            <div class="form-grid">
+                <a class="button"
+                   th:href="@{/reportes/multitabla/pdf(desde=${f.desde},hasta=${f.hasta},estado=${f.estado},prioridad=${f.prioridad},mesa=${f.mesa},categoria=${f.categoria},producto=${f.producto},metodoPago=${f.metodoPago})}">Descargar PDF</a>
+                <a class="button"
+                   th:href="@{/reportes/multitabla/excel(desde=${f.desde},hasta=${f.hasta},estado=${f.estado},prioridad=${f.prioridad},mesa=${f.mesa},categoria=${f.categoria},producto=${f.producto},metodoPago=${f.metodoPago})}">Descargar Excel</a>
+            </div>
+        </section>
+
+        <section class="table-wrap">
+            <h2>Resultados</h2>
+            <p class="filtros-ayuda" th:if="${truncado}"
+               th:text="'Se muestran solo las primeras ' + ${maxPantalla} + ' filas. Afina los filtros o descarga el PDF/Excel para ver más.'"></p>
+            <div style="overflow-x:auto">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Pedido</th>
+                            <th>Fecha</th>
+                            <th>Estado</th>
+                            <th>Prioridad</th>
+                            <th>Mesa</th>
+                            <th>Cliente</th>
+                            <th>Mesero</th>
+                            <th>Categoría</th>
+                            <th>Producto</th>
+                            <th>Cant.</th>
+                            <th>Precio</th>
+                            <th>Subtotal</th>
+                            <th>Adiciones</th>
+                            <th>Factura</th>
+                            <th>Pago</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="r : ${filas}">
+                            <td th:text="${r.pedidoId()}"></td>
+                            <td th:text="${r.fecha() != null ? #temporals.format(r.fecha(), 'yyyy-MM-dd HH:mm') : ''}"></td>
+                            <td th:text="${r.estado()}"></td>
+                            <td th:text="${r.prioridad()}"></td>
+                            <td th:text="${r.mesa()} + ' · ' + ${r.ubicacionMesa()}"></td>
+                            <td th:text="${r.cliente() ?: '—'}"></td>
+                            <td th:text="${r.mesero() ?: '—'}"></td>
+                            <td th:text="${r.categoria() ?: '—'}"></td>
+                            <td th:text="${r.producto() ?: '(sin productos)'}"></td>
+                            <td th:text="${r.cantidad()}"></td>
+                            <td th:text="${r.precioUnitario() != null ? #numbers.formatDecimal(r.precioUnitario(), 0, 'POINT', 0, 'COMMA') : ''}"></td>
+                            <td th:text="${r.subtotal() != null ? #numbers.formatDecimal(r.subtotal(), 0, 'POINT', 0, 'COMMA') : ''}"></td>
+                            <td th:text="${r.adiciones() ?: ''}"></td>
+                            <td th:text="${r.facturaId() != null ? '#' + r.facturaId() + ' · ' + #numbers.formatDecimal(r.totalFactura(), 0, 'POINT', 0, 'COMMA') : '—'}"></td>
+                            <td th:text="${r.metodoPago() ?: '—'}"></td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(filas)}">
+                            <td colspan="15">No hay resultados para los filtros aplicados.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</body>
+
+</html>

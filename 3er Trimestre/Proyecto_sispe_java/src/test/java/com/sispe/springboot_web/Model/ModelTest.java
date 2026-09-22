@@ -42,7 +42,7 @@ class ModelTest {
     @Test
     void entidadesLombokMantienenValores() {
         Categoria categoria = new Categoria(2, "Bebidas");
-        Menu menu = new Menu(3, "Cafe", BigDecimal.valueOf(5000), "Caliente", categoria);
+        Menu menu = new Menu(3, "Cafe", BigDecimal.valueOf(5000), "Caliente", null, categoria);
         PasswordReset reset = new PasswordReset();
         reset.setCorreo("ana@test.com");
         reset.setToken("token");

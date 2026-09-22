@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <title>Cocina | SISPE</title>
     <link rel="stylesheet" th:href="@{/css/sispe.css}">
+    <script th:src="@{/js/sispe.js}" defer></script>
 </head>
 
 <body>
@@ -15,6 +16,7 @@
                 <p>Pedidos pendientes y en preparación.</p>
             </div><a class="logout" th:href="@{/inicio}">Volver al panel</a>
         </header>
+        <div th:replace="~{fragments/alertas :: alertas}"></div>
         <section class="orders">
             <article class="order" th:each="pedido : ${pedidos}"
                       th:classappend="${pedido.prioridad == 'urgente'} ? ' urgente' : ''">
@@ -22,6 +24,17 @@
                     <strong th:text="'Pedido #' + ${pedido.id} + ' · Mesa ' + ${pedido.mesaId}">Pedido</strong>
                     <span class="badge" th:text="${pedido.estado}">pendiente</span>
                 </div>
+                <ul class="cocina-productos">
+                    <li th:each="linea : ${productosPorPedido.get(pedido.id)}">
+                        <strong th:text="${linea.cantidad()} + ' x ' + ${linea.producto()}">2 x Hamburguesa</strong>
+                        <span class="cocina-adiciones" th:if="${!#lists.isEmpty(linea.adiciones())}"
+                              th:text="'+ ' + ${#strings.listJoin(linea.adiciones(), ', ')}">+ 1x Queso</span>
+                        <em class="cocina-nota" th:if="${linea.nota() != null}" th:text="'Nota: ' + ${linea.nota()}">Nota</em>
+                    </li>
+                    <li th:if="${#lists.isEmpty(productosPorPedido.get(pedido.id))}" class="cocina-vacio">
+                        El cliente aún no ha agregado productos.
+                    </li>
+                </ul>
                 <p th:text="${pedido.observaciones ?: 'Sin observaciones'}">Sin observaciones</p>
                 <form method="post" th:action="@{'/cocina/pedido/' + ${pedido.id} + '/estado'}">
                     <select name="estado">

@@ -6,39 +6,122 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Reportes | SISPE</title>
     <link rel="stylesheet" th:href="@{/css/sispe.css}">
+    <script th:src="@{/js/sispe.js}" defer></script>
 </head>
 
 <body>
     <main class="shell">
         <header>
             <div>
-                <p class="eyebrow">SISPE / ANALÍTICA</p>
+                <p class="eyebrow">SISPE / ANALÍTICA / REPORTES</p>
                 <h1>Reportes multicriterio</h1>
-                <p class="muted">Filtra y descarga cinco reportes generados en el servidor.</p>
-            </div><a class="logout" th:href="@{/inicio}">Volver</a>
+                <p class="muted">Filtra por fecha, estado, mesa y prioridad; la pantalla y los PDF usan siempre el mismo
+                    conjunto de datos filtrado.</p>
+            </div>
+            <div>
+                <a class="logout" th:href="@{/reportes/multitabla}">Reporte multitabla</a>
+                <a class="logout" th:href="@{/inicio}">Volver</a>
+            </div>
         </header>
+
+        <div th:replace="~{fragments/alertas :: alertas}"></div>
+
         <section class="table-wrap">
-            <form method="get" th:action="@{/reportes}" class="form-grid"><label>Desde<input type="date" name="desde"
-                        th:value="${desde}"></label><label>Hasta<input type="date" name="hasta"
-                        th:value="${hasta}"></label><label>Estado<select name="estado">
+            <h2>Filtros</h2>
+            <form method="get" th:action="@{/reportes}" class="form-grid" data-no-lock>
+                <label>Desde
+                    <input type="date" name="desde" th:value="${desde}">
+                </label>
+                <label>Hasta
+                    <input type="date" name="hasta" th:value="${hasta}">
+                </label>
+                <label>Estado
+                    <select name="estado">
                         <option value="">Todos</option>
-                        <option value="pendiente">Pendiente</option>
-                        <option value="en_preparacion">En preparación</option>
-                        <option value="entregado">Entregado</option>
-                    </select></label><button type="submit">Aplicar filtros</button></form>
+                        <option value="pendiente" th:selected="${estado == 'pendiente'}">Pendiente</option>
+                        <option value="en_preparacion" th:selected="${estado == 'en_preparacion'}">En preparación</option>
+                        <option value="en_camino" th:selected="${estado == 'en_camino'}">En camino</option>
+                        <option value="entregado" th:selected="${estado == 'entregado'}">Entregado</option>
+                    </select>
+                </label>
+                <label>Mesa
+                    <input type="number" name="mesa" min="1" placeholder="Todas" th:value="${mesa}">
+                </label>
+                <label>Prioridad
+                    <select name="prioridad">
+                        <option value="">Todas</option>
+                        <option value="normal" th:selected="${prioridad == 'normal'}">Normal</option>
+                        <option value="urgente" th:selected="${prioridad == 'urgente'}">Urgente</option>
+                    </select>
+                </label>
+                <button type="submit">Aplicar filtros</button>
+                <a class="button" th:href="@{/reportes}">Limpiar</a>
+            </form>
+            <p class="filtros-ayuda">Las fechas son inclusivas: «Hasta» abarca el día completo. Deja un campo vacío para no filtrar por ese criterio.</p>
         </section>
+
         <section class="report-cards">
             <article><span>Pedidos</span><strong th:text="${totalPedidos}">0</strong></article>
-            <article><span>Ventas</span><strong th:text="${totalVentas}">0.00</strong></article>
+            <article><span>Ventas</span><strong th:text="${#numbers.formatDecimal(totalVentas, 0, 'POINT', 0, 'COMMA') + ' $'}">0</strong></article>
             <article><span>Insumos</span><strong th:text="${#lists.size(insumos)}">0</strong></article>
         </section>
+
         <section class="table-wrap">
             <h2>Descargas PDF</h2>
             <div class="form-grid"><a th:each="nombre : ${ {'general','producto','usuarios','ventas','inventario'} }"
                     class="button"
-                    th:href="@{'/reportes/pdf/' + ${nombre}(desde=${desde},hasta=${hasta},estado=${estado})}"
+                    th:href="@{'/reportes/pdf/' + ${nombre}(desde=${desde},hasta=${hasta},estado=${estado},mesa=${mesa},prioridad=${prioridad})}"
                     th:text="'Descargar ' + ${nombre}">PDF</a></div>
         </section>
+
+        <section class="table-wrap">
+            <h2>Ventas por producto</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Unidades</th>
+                        <th>Importe</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="v : ${ventasPorProducto}">
+                        <td th:text="${v.producto()}"></td>
+                        <td th:text="${v.unidades()}"></td>
+                        <td th:text="${#numbers.formatDecimal(v.importe(), 0, 'POINT', 0, 'COMMA') + ' $'}"></td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(ventasPorProducto)}">
+                        <td colspan="3">No hay ventas para los filtros aplicados.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="table-wrap">
+            <h2>Facturas del periodo</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Factura</th>
+                        <th>Pedido</th>
+                        <th>Fecha</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="f : ${facturas}">
+                        <td th:text="${f.id}"></td>
+                        <td th:text="${f.pedidoId}"></td>
+                        <td th:text="${f.fechaHora}"></td>
+                        <td th:text="${f.total != null ? #numbers.formatDecimal(f.total, 0, 'POINT', 0, 'COMMA') + ' $' : '—'}"></td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(facturas)}">
+                        <td colspan="4">No hay facturas para los filtros aplicados.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
         <section class="table-wrap">
             <h2>Pedidos filtrados</h2>
             <table>
@@ -47,6 +130,7 @@
                         <th>ID</th>
                         <th>Mesa</th>
                         <th>Estado</th>
+                        <th>Prioridad</th>
                         <th>Fecha</th>
                     </tr>
                 </thead>
@@ -55,10 +139,11 @@
                         <td th:text="${p.id}"></td>
                         <td th:text="${p.mesaId}"></td>
                         <td th:text="${p.estado}"></td>
+                        <td th:text="${p.prioridad ?: 'normal'}"></td>
                         <td th:text="${p.fechaPedido}"></td>
                     </tr>
                     <tr th:if="${#lists.isEmpty(pedidos)}">
-                        <td colspan="4">No hay resultados.</td>
+                        <td colspan="5">No hay resultados.</td>
                     </tr>
                 </tbody>
             </table>

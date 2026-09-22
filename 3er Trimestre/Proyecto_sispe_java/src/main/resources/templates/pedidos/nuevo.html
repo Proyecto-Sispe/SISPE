@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Registrar pedido | SISPE</title>
     <link rel="stylesheet" th:href="@{/css/sispe.css}">
+    <script th:src="@{/js/sispe.js}" defer></script>
 </head>
 
 <body>
@@ -25,26 +26,27 @@
             <header class="top">
                 <div>
                     <p class="eyebrow">SISPE / OPERACIÓN</p>
-                    <h1 class="title">Registrar nuevo pedido</h1>
-                    <p class="sub">Crea un pedido nuevo para una mesa.</p>
+                    <h1 class="title" th:text="${pedido.id == null ? 'Registrar nuevo pedido' : 'Editar pedido #' + pedido.id}">Registrar nuevo pedido</h1>
+                    <p class="sub" th:text="${pedido.id == null ? 'Crea un pedido nuevo para una mesa.' : 'Modifica los datos del pedido y guarda los cambios.'}">Crea un pedido nuevo para una mesa.</p>
                 </div><a class="btn" th:href="@{/pedidos}">Volver</a>
             </header>
+            <div th:replace="~{fragments/alertas :: alertas}"></div>
             <section class="form-card">
-                <form method="post" th:action="@{/pedidos/guardar}" class="form-grid" th:object="${pedido}"><label>Mesa<input
-                            type="number" th:field="*{mesaId}" required></label><label>Documento cliente<input
-                            type="number" th:field="*{clienteId}"></label><label>Estado<select th:field="*{estado}">
+                <form method="post" th:action="@{${pedido.id == null ? '/pedidos/guardar' : '/pedidos/actualizar/' + pedido.id}}" class="form-grid" th:object="${pedido}"><label>Mesa<input
+                            type="number" min="1" th:field="*{mesaId}" required></label><label>Documento cliente<input
+                            type="number" min="1" th:field="*{clienteId}"></label><label>Estado<select th:field="*{estado}">
                             <option value="pendiente">Pendiente</option>
                             <option value="en_preparacion">En preparación</option>
                             <option value="en_camino">En camino</option>
                             <option value="entregado">Entregado</option>
                         </select></label><label>Prioridad<select th:field="*{prioridad}">
                             <option value="normal">Normal</option>
-                            <option value="alta">Alta</option>
+                            <option value="urgente">Urgente</option>
                         </select></label><label>Observaciones<textarea
-                            th:field="*{observaciones}"></textarea></label><label>Tiempo estimado<input type="number"
+                            th:field="*{observaciones}" maxlength="500"></textarea></label><label>Tiempo estimado<input type="number"
                             th:field="*{tiempoEstimado}" min="0"></label>
                     <div class="form-actions"><a class="btn secondary" th:href="@{/pedidos}">Cancelar</a><button class="btn"
-                            type="submit">Guardar pedido</button></div>
+                            type="submit" th:text="${pedido.id == null ? 'Guardar pedido' : 'Guardar cambios'}">Guardar pedido</button></div>
                 </form>
             </section>
         </main>

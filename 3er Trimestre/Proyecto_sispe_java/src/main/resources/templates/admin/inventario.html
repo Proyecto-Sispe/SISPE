@@ -6,58 +6,127 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <title>Inventario | SISPE</title>
     <link rel="stylesheet" th:href="@{/css/sispe.css}">
+    <script th:src="@{/js/sispe.js}" defer></script>
 </head>
 
 <body>
     <main class="shell">
         <header>
             <div>
-                <p class="eyebrow">SISPE / ADMINISTRACIÓN</p>
+                <p class="eyebrow">SISPE / ADMINISTRACIÓN / INVENTARIO</p>
                 <h1>Inventario y recetas</h1>
-                <p class="muted">Configura insumos reutilizables y cuánto consume cada producto.</p>
+                <p class="muted">Configura insumos reutilizables y cuánto consume cada producto. El stock se descuenta
+                    automáticamente cuando un pedido pasa a «entregado».</p>
             </div><a class="logout" th:href="@{/inicio}">Volver</a>
         </header>
+
+        <div th:replace="~{fragments/alertas :: alertas}"></div>
+
         <section class="report-cards">
             <article><span>Insumos</span><strong th:text="${#lists.size(insumos)}">0</strong></article>
             <article><span>Recetas</span><strong th:text="${#lists.size(recetas)}">0</strong></article>
+            <article><span>Bajo el mínimo</span><strong
+                    th:text="${#lists.size(insumos.?[stockActual.compareTo(stockMinimo) lt 0])}">0</strong></article>
         </section>
+
         <section class="table-wrap">
             <h2>Nuevo insumo</h2>
-            <form method="post" th:action="@{/admin/inventario/insumos}" class="form-grid"><input name="nombre"
-                    placeholder="Pan de hamburguesa" required><input name="unidad" placeholder="unidad / kg / litro"
-                    required><input name="stockActual" type="number" step="0.001" min="0" placeholder="Stock actual"
-                    required><input name="stockMinimo" type="number" step="0.001" min="0" placeholder="Stock mínimo"
-                    required><button type="submit">Guardar insumo</button></form>
+            <form method="post" th:action="@{/admin/inventario/insumos}" class="form-grid">
+                <input name="nombre" placeholder="Pan de hamburguesa" maxlength="100" required>
+                <input name="unidad" placeholder="unidad / kg / litro" maxlength="20" required>
+                <input name="stockActual" type="number" step="0.001" min="0" placeholder="Stock actual" required>
+                <input name="stockMinimo" type="number" step="0.001" min="0" placeholder="Stock mínimo" required>
+                <button type="submit">Guardar insumo</button>
+            </form>
         </section>
+
         <section class="table-wrap">
             <h2>Agregar ingrediente a receta</h2>
-            <form method="post" th:action="@{/admin/inventario/recetas}" class="form-grid"><select name="menuId"
-                    required>
+            <form method="post" th:action="@{/admin/inventario/recetas}" class="form-grid">
+                <select name="menuId" required>
                     <option value="">Producto</option>
                     <option th:each="menu : ${menus}" th:value="${menu.id}" th:text="${menu.producto}"></option>
-                </select><select name="insumoId" required>
+                </select>
+                <select name="insumoId" required>
                     <option value="">Insumo</option>
                     <option th:each="insumo : ${insumos}" th:value="${insumo.id}" th:text="${insumo.nombre}"></option>
-                </select><input name="cantidad" type="number" step="0.001" min="0.001" placeholder="Cantidad por unidad"
-                    required><button type="submit">Guardar receta</button></form>
+                </select>
+                <input name="cantidad" type="number" step="0.001" min="0.001" placeholder="Cantidad por unidad" required>
+                <button type="submit">Guardar receta</button>
+            </form>
+            <p class="filtros-ayuda">Si el producto ya usa ese insumo, la cantidad se actualiza en lugar de duplicarse.</p>
         </section>
+
         <section class="table-wrap">
             <h2>Stock actual</h2>
             <table>
                 <thead>
                     <tr>
                         <th>Insumo</th>
-                        <th>Stock</th>
-                        <th>Mínimo</th>
                         <th>Unidad</th>
+                        <th>Stock actual y mínimo (editable)</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr th:each="i : ${insumos}">
+                    <tr th:each="i : ${insumos}"
+                        th:classappend="${i.stockActual.compareTo(i.stockMinimo) lt 0} ? 'stock-bajo' : ''">
                         <td th:text="${i.nombre}"></td>
-                        <td th:text="${i.stockActual}"></td>
-                        <td th:text="${i.stockMinimo}"></td>
                         <td th:text="${i.unidad}"></td>
+                        <td>
+                            <form method="post" th:action="@{'/admin/inventario/insumos/' + ${i.id} + '/actualizar'}"
+                                  class="inline-edit">
+                                <input name="stockActual" type="number" step="0.001" min="0" th:value="${i.stockActual}"
+                                       aria-label="Stock actual" required>
+                                <input name="stockMinimo" type="number" step="0.001" min="0" th:value="${i.stockMinimo}"
+                                       aria-label="Stock mínimo" required>
+                                <button type="submit">Guardar</button>
+                            </form>
+                        </td>
+                        <td>
+                            <span class="badge danger" th:if="${i.stockActual.compareTo(i.stockMinimo) lt 0}">Bajo el mínimo</span>
+                            <span class="badge success" th:unless="${i.stockActual.compareTo(i.stockMinimo) lt 0}">OK</span>
+                        </td>
+                        <td>
+                            <form method="post" th:action="@{'/admin/inventario/insumos/' + ${i.id} + '/desactivar'}"
+                                  data-confirm="¿Eliminar este insumo? También se retirará de todas las recetas.">
+                                <button class="btn danger" type="submit">Eliminar</button>
+                            </form>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(insumos)}">
+                        <td colspan="5">Aún no hay insumos. Crea el primero con el formulario de arriba.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="table-wrap">
+            <h2>Recetas registradas</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Insumo</th>
+                        <th>Cantidad por unidad</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="r : ${recetas}">
+                        <td th:text="${r.menu.producto}"></td>
+                        <td th:text="${r.insumo.nombre}"></td>
+                        <td th:text="${r.cantidad} + ' ' + ${r.insumo.unidad}"></td>
+                        <td>
+                            <form method="post" th:action="@{'/admin/inventario/recetas/' + ${r.id} + '/eliminar'}"
+                                  data-confirm="¿Quitar este ingrediente de la receta?">
+                                <button class="btn danger" type="submit">Quitar</button>
+                            </form>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(recetas)}">
+                        <td colspan="4">Aún no hay recetas. Agrega ingredientes a un producto para que el stock se descuente al entregar.</td>
                     </tr>
                 </tbody>
             </table>
