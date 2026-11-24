@@ -1,0 +1,35 @@
+<style>
+  .accesos { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 14px; max-width: 900px; margin-top: 24px; }
+  .accesos a { display: block; background: #171717; border: 1px solid #2b2b2b; border-radius: 8px; padding: 16px; color: #f5f5f5; text-decoration: none; }
+  .accesos a:hover { border-color: #ff6a00; }
+  .accesos strong { color: #ff7b00; display: block; margin-bottom: 4px; }
+  .accesos span { color: #a3a3a3; font-size: 13px; }
+</style>
+<div class="accesos">
+  {% if rol == "Administrador" %}
+    <a href="{% url 'adm_usuarios' %}"><strong>Usuarios</strong><span>Registrar y editar</span></a>
+    <a href="{% url 'adm_menu' %}"><strong>Gestionar menú</strong><span>Buscador y disponibilidad</span></a>
+    <a href="{% url 'adm_inventario' %}"><strong>Inventario</strong><span>Stock en tiempo real</span></a>
+    <a href="{% url 'adm_facturas' %}"><strong>Facturas</strong><span>Historial con filtros</span></a>
+    <a href="{% url 'cocina_panel' %}"><strong>Cocina</strong><span>Comandas en vivo</span></a>
+    <a href="{% url 'reportes' %}"><strong>Reportes de ventas</strong><span>Carta y cocina</span></a>
+    <a href="{% url 'mesas_list' %}"><strong>Mesas y QR</strong><span>CRUD de mesas</span></a>
+    <a href="{% url 'panel_pedidos' %}"><strong>Pedidos por mesa</strong><span>Despachar y liberar</span></a>
+    <a href="{% url 'inicio' %}"><strong>Estadísticas</strong><span>Ventas, mesas, más vendido</span></a>
+    <a href="{% url 'admin:index' %}"><strong>Admin de Django</strong><span>Todas las tablas</span></a>
+  {% elif rol == "Cocinero" %}
+    <a href="{% url 'cocina_panel' %}"><strong>Cocina</strong><span>Comandas en vivo</span></a>
+    <a href="{% url 'reportes' %}"><strong>Reportes</strong><span>Ventas del día</span></a>
+  {% elif rol == "Cajero" %}
+    <a href="{% url 'adm_facturas' %}"><strong>Facturas y Caja</strong><span>Cobros y pagos en línea</span></a>
+    <a href="{% url 'adm_pedidos' %}"><strong>Pedidos Activos</strong><span>Supervisión de comandas</span></a>
+  {% elif rol == "Mesero" %}
+    <a href="{% url 'mesas_list' %}"><strong>Mesas y QR</strong><span>Estado de las mesas</span></a>
+    <a href="{% url 'panel_pedidos' %}"><strong>Pedidos por mesa</strong><span>Despachar y liberar</span></a>
+    <a href="{% url 'carta' %}"><strong>Carta</strong><span>Tomar un pedido</span></a>
+  {% else %}
+    <a href="{% url 'carta' %}"><strong>Ver la carta</strong><span>Platos, adiciones y combos</span></a>
+    <a href="{% url 'carrito' %}"><strong>Mi carrito</strong><span>Revisar y confirmar</span></a>
+  {% endif %}
+  <a href="{% url 'portal' %}"><strong>Portal SISPE</strong><span>Todos los módulos</span></a>
+</div>

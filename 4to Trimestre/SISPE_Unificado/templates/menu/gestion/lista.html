@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block titulo %}{{ cfg.titulo }} · Sabor Urbano{% endblock %}
+{% block seccion %}Gestionar{% endblock %}
+
+{% block contenido %}
+
+<section class="hero">
+  <h1>{{ cfg.icono }} <span>{{ cfg.titulo }}</span></h1>
+  <p>Crea, modifica y elimina {{ cfg.titulo|lower }}. Los cambios se ven al instante en la carta.</p>
+  <div class="hero-mesa">{{ total }} registro{{ total|pluralize }}</div>
+</section>
+
+<div class="chips">
+  <a class="chip {% if entidad == 'categorias' %}activo{% endif %}"
+     href="{% url 'gestion_lista' 'categorias' %}">Categorías</a>
+  <a class="chip {% if entidad == 'productos' %}activo{% endif %}"
+     href="{% url 'gestion_lista' 'productos' %}">Productos</a>
+  <a class="chip {% if entidad == 'adiciones' %}activo{% endif %}"
+     href="{% url 'gestion_lista' 'adiciones' %}">Adiciones</a>
+  <a class="chip {% if entidad == 'combos' %}activo{% endif %}"
+     href="{% url 'gestion_lista' 'combos' %}">Combos</a>
+</div>
+
+<div class="fila entre mt-16">
+  <a class="btn btn-primario" href="{% url 'gestion_crear' entidad %}">
+    + Nuevo {{ cfg.singular }}
+  </a>
+  <a class="btn btn-secundario" href="{% url 'carta' %}">Ver la carta</a>
+</div>
+
+<div class="tabla-envoltura mt-16">
+  <table class="tabla">
+    <thead>
+      <tr>
+        {% if cfg.con_foto %}<th>Imagen</th>{% endif %}
+        {% for columna in columnas %}<th>{{ columna }}</th>{% endfor %}
+        <th class="derecha">Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for fila in filas %}
+        <tr>
+          {% if cfg.con_foto %}
+            <td>
+              {% if fila.obj.tiene_foto %}
+                <img class="mini-foto" src="{{ fila.obj.foto.url }}" alt="{{ fila.obj }}">
+              {% else %}
+                <div class="mini-vacia">{{ fila.obj.inicial }}</div>
+              {% endif %}
+            </td>
+          {% endif %}
+
+          {% for valor in fila.valores %}
+            <td>
+              {% if valor is True %}
+                <span class="si">Sí</span>
+              {% elif valor is False %}
+                <span class="no">No</span>
+              {% else %}
+                {{ valor }}
+              {% endif %}
+            </td>
+          {% endfor %}
+
+          <td>
+            <div class="acciones">
+              {% if entidad == 'combos' %}
+                <a class="btn btn-secundario btn-mini"
+                   href="{% url 'gestion_combo_items' fila.pk %}">Partes</a>
+              {% endif %}
+              <a class="btn btn-secundario btn-mini"
+                 href="{% url 'gestion_editar' entidad fila.pk %}">Modificar</a>
+              <a class="btn btn-peligro btn-mini"
+                 href="{% url 'gestion_borrar' entidad fila.pk %}">Eliminar</a>
+            </div>
+          </td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="8" class="suave centro">
+            Todavía no hay {{ cfg.titulo|lower }}. Crea la primera con el botón de arriba.
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block titulo %}Roles · Sabor Urbano{% endblock %}
+{% block seccion %}Roles{% endblock %}
+
+{% block contenido %}
+<section class="hero">
+  <h1>Quién es <span>quién</span></h1>
+  <p>El sistema tiene dos roles con permisos distintos y un cliente sin cuenta.</p>
+</section>
+
+<div class="rejilla">
+  <article class="tarjeta">
+    <div class="tarjeta-cuerpo">
+      <h3>Cliente</h3>
+      <p class="desc">Sin usuario ni contraseña. Entra escaneando el QR de su mesa,
+        arma el carrito y envía el pedido. Su identidad es mesa + sesión.</p>
+      <ul class="partes-combo">
+        <li>Ver la carta</li><li>Agregar adiciones</li><li>Pedir combos</li><li>Seguimiento</li>
+      </ul>
+    </div>
+  </article>
+
+  <article class="tarjeta">
+    <div class="tarjeta-cuerpo">
+      <h3>Chef</h3>
+      <p class="desc">Cuenta del grupo Chef. Ve las comandas y avanza el estado:
+        pendiente → en preparación → listo → entregado.</p>
+      <ul class="partes-combo">
+        <li>Panel de cocina</li><li>Cambiar estado</li><li>QR de mesas</li><li>Reportes</li>
+      </ul>
+    </div>
+  </article>
+
+  <article class="tarjeta">
+    <div class="tarjeta-cuerpo">
+      <h3>Administrador</h3>
+      <p class="desc">Superusuario. Todo el CRUD del menú, adiciones, combos,
+        imágenes y pedidos, además del admin de Django.</p>
+      <ul class="partes-combo">
+        <li>CRUD completo</li><li>Subir imágenes</li><li>Adiciones</li><li>Combos</li>
+      </ul>
+    </div>
+  </article>
+</div>
+
+<div class="panel mt-24">
+  <h3 class="mt-0">Direcciones de este equipo</h3>
+  <p class="chico suave">Para escanear los QR desde un celular en la misma red,
+    abre la hoja de QR usando una de estas IPs, no 127.0.0.1.</p>
+  <div class="fila">
+    {% for ip in ips %}
+      <a class="chip" href="http://{{ ip }}:8000/cocina/qr/?host={{ ip }}:8000">{{ ip }}:8000</a>
+    {% empty %}
+      <span class="chico suave">No pude detectar IPs de red. Usa la de tu equipo con ipconfig.</span>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

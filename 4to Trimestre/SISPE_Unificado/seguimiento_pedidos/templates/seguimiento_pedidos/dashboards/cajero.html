@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Caja y Facturación | SISPE</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: "Segoe UI", Arial, sans-serif; background: #0d0d0d; color: #f5f5f5; }
+    header { background: #171717; border-bottom: 2px solid #ff6a00; padding: 16px 28px; display: flex; justify-content: space-between; align-items: center; }
+    .brand { color: #ff7b00; font-weight: bold; font-size: 20px; }
+    .badge { background: #ff6a00; color: #0d0d0d; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: bold; }
+    a.logout { color: #ff7b00; text-decoration: none; margin-left: 16px; font-size: 14px; }
+    main { padding: 28px; max-width: 1200px; margin: 0 auto; }
+    h1 { color: #ff7b00; margin: 0 0 4px; }
+    .sub { color: #a3a3a3; margin: 0 0 22px; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; margin-bottom: 30px; }
+    .stat { background: #171717; border: 1px solid #2b2b2b; border-left: 4px solid #ff6a00; border-radius: 8px; padding: 14px 16px; }
+    .stat small { display: block; color: #a3a3a3; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
+    .stat b { font-size: 24px; }
+    .stat.exito { border-left-color: #10b981; }
+    .stat.pendiente { border-left-color: #f59e0b; }
+    section { margin-bottom: 28px; }
+    section h2 { font-size: 14px; text-transform: uppercase; letter-spacing: .08em; color: #a3a3a3; margin: 0 0 12px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+    .grid a { display: block; background: #171717; border: 1px solid #2b2b2b; border-radius: 10px; padding: 20px; color: #f5f5f5; text-decoration: none; }
+    .grid a:hover { border-color: #ff6a00; }
+    .grid strong { display: block; color: #ff7b00; margin-bottom: 6px; font-size: 17px; }
+    .grid span { color: #a3a3a3; font-size: 13px; line-height: 1.4; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">SISPE · Módulo de Caja</div>
+    <div>
+      <a class="logout" href="{% url 'portal' %}">Portal</a>
+      <span class="badge">{{ rol }}</span>
+      <a class="logout" href="{% url 'logout' %}">Cerrar sesión</a>
+    </div>
+  </header>
+  <main>
+    <h1>Panel de Caja y Facturación</h1>
+    <p class="sub">Bienvenida(o), <strong>{{ usuario }}</strong>. Gestiona los cobros, facturas emitidas y pagos recibidos por PSE o efectivo.</p>
+
+    <div class="stats">
+      <div class="stat exito"><small>Recaudado hoy (Pagadas)</small><b>${{ recaudo_hoy|floatformat:0 }}</b></div>
+      <div class="stat"><small>Facturas generadas hoy</small><b>{{ facturas_emitidas }}</b></div>
+      <div class="stat exito"><small>Facturas pagadas hoy</small><b>{{ facturas_pagadas }}</b></div>
+      <div class="stat pendiente"><small>Pendientes de cobro</small><b>{{ facturas_pendientes }}</b></div>
+      <div class="stat"><small>Pedidos activos en cocina</small><b>{{ pedidos_activos }}</b></div>
+    </div>
+
+    <section>
+      <h2>Módulos autorizados para Cajero</h2>
+      <div class="grid">
+        <a href="{% url 'adm_facturas' %}">
+          <strong>Historial y Gestión de Facturas</strong>
+          <span>Revisa todas las facturas, consulta pagos por PSE con número de transacción y emite comprobantes.</span>
+        </a>
+        <a href="{% url 'adm_pedidos' %}">
+          <strong>Pedidos Activos por Mesa</strong>
+          <span>Supervisa comandas activas, estado de preparación y clientes próximos a solicitar la cuenta.</span>
+        </a>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

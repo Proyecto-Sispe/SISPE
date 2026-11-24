@@ -1,0 +1,198 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{% static 'img/logo_2.png' %}" type="image/png">
+    <link rel="stylesheet" href="{% static 'css/inicio.css' %}">
+    <title>SISPE - Sistema de Gestión para Restaurantes</title>
+</head>
+<body>
+
+<nav>
+    <ul class="menu">
+        <li class="logo">
+            <a href="{% url 'home' %}">
+                <img src="{% static 'img/logo_2.png' %}" alt="Logo SISPE">
+            </a>
+        </li>
+        <li><a href="{% url 'home' %}">Inicio</a></li>
+        <li><a href="#modulos">Módulos</a></li>
+        <li><a href="#nosotros">Nosotros</a></li>
+        {% if not user.is_authenticated %}
+            <li><a href="{% url 'registro' %}">Registro</a></li>
+            <li class="right">
+                <a href="{% url 'login' %}" class="btn-nav-login">Iniciar Sesión</a>
+            </li>
+        {% else %}
+            <li class="right">
+                <span style="font-size: 13px; color: #ff9a4d; margin-right: 8px;">
+                    {{ user.get_full_name|default:user.username }} ({{ rol_nombre_display }})
+                </span>
+                <a href="{% url 'portal' %}" class="btn-nav-login">Mi Panel</a>
+                <form method="post" action="{% url 'logout' %}" style="display:inline; margin-left: 6px;">
+                    {% csrf_token %}
+                    <button type="submit" style="background:none; border:none; color:#ff6b6b; cursor:pointer; font-weight:600; font-size:14px;">
+                        Salir
+                    </button>
+                </form>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+
+<section class="hero">
+    <div class="hero-contenido">
+        <h1>Bienvenido a SISPE</h1>
+        <p>
+            El Sistema de Gestión para Restaurantes que centraliza tus mesas, menú digital,
+            pedidos en tiempo real, facturación y reportes en un solo lugar. Optimiza la
+            operación de tu negocio y mejora la experiencia de tus clientes.
+        </p>
+        <div class="botones">
+            {% if not user.is_authenticated %}
+                <a href="{% url 'login' %}" class="btn btn-principal">Iniciar Sesión</a>
+                <a href="{% url 'registro' %}" class="btn btn-secundario">Crear Cuenta</a>
+            {% else %}
+                <a href="{% url 'portal' %}" class="btn btn-principal">Acceder a Mi Panel</a>
+            {% endif %}
+            <a href="{% url 'carta' %}" class="btn btn-carta">Explorar Carta Digital</a>
+        </div>
+    </div>
+    <div class="hero-icono">
+        <img src="{% static 'img/logo.png' %}" alt="Icono SISPE">
+    </div>
+</section>
+
+<section class="modulos" id="modulos">
+    <h2>¿Qué puedes hacer con SISPE?</h2>
+    <div class="contenedor-modulos">
+
+        <div class="card">
+            <div>
+                <div class="card-icono">🪑</div>
+                <h3>Control de Mesas</h3>
+                <p>Gestiona la disponibilidad, capacidad y ubicación de cada mesa, con acceso rápido por código QR.</p>
+            </div>
+            {% if user.is_authenticated %}
+                <a href="{% url 'mesas_list' %}" class="btn-card">Gestionar Mesas</a>
+            {% else %}
+                <a href="{% url 'login' %}?next={% url 'mesas_list' %}" class="btn-card">Iniciar sesión para gestionar</a>
+            {% endif %}
+        </div>
+
+        <div class="card">
+            <div>
+                <div class="card-icono">📋</div>
+                <h3>Menú Digital</h3>
+                <p>Organiza productos, categorías y precios. Tus clientes consultan el menú desde su celular.</p>
+            </div>
+            <a href="{% url 'carta' %}" class="btn-card">Ver Carta Digital</a>
+        </div>
+
+        <div class="card">
+            <div>
+                <div class="card-icono">🍳</div>
+                <h3>Pedidos en Tiempo Real</h3>
+                <p>Recibe y controla los pedidos al instante con un panel de cocina tipo semáforo de estados.</p>
+            </div>
+            {% if user.is_authenticated %}
+                <a href="{% url 'cocina_panel' %}" class="btn-card">Panel de Cocina</a>
+            {% else %}
+                <a href="{% url 'login' %}?next={% url 'cocina_panel' %}" class="btn-card">Iniciar sesión para el panel</a>
+            {% endif %}
+        </div>
+
+        <div class="card">
+            <div>
+                <div class="card-icono">💳</div>
+                <h3>Facturación</h3>
+                <p>Genera facturas, gestiona pagos y mantén el historial de ventas siempre disponible.</p>
+            </div>
+            {% if user.is_authenticated %}
+                <a href="{% url 'adm_facturas' %}" class="btn-card">Módulo Facturación</a>
+            {% else %}
+                <a href="{% url 'login' %}?next={% url 'adm_facturas' %}" class="btn-card">Iniciar sesión para facturar</a>
+            {% endif %}
+        </div>
+
+        <div class="card">
+            <div>
+                <div class="card-icono">👥</div>
+                <h3>Gestión de Personas</h3>
+                <p>Administra clientes, meseros, cocineros y administradores con roles y permisos.</p>
+            </div>
+            {% if user.is_authenticated %}
+                <a href="{% url 'adm_usuarios' %}" class="btn-card">Ver Usuarios</a>
+            {% else %}
+                <a href="{% url 'login' %}?next={% url 'adm_usuarios' %}" class="btn-card">Iniciar sesión para administrar</a>
+            {% endif %}
+        </div>
+
+        <div class="card">
+            <div>
+                <div class="card-icono">📊</div>
+                <h3>Reportes en PDF</h3>
+                <p>Genera reportes de ventas, productos y usuarios para tomar mejores decisiones.</p>
+            </div>
+            {% if user.is_authenticated %}
+                <a href="{% url 'reportes' %}" class="btn-card">Ver Reportes</a>
+            {% else %}
+                <a href="{% url 'login' %}?next={% url 'reportes' %}" class="btn-card">Iniciar sesión para ver reportes</a>
+            {% endif %}
+        </div>
+
+    </div>
+</section>
+
+<section class="modulos" id="nosotros">
+    <h2>Sobre SISPE</h2>
+    <div class="contenedor-modulos" style="grid-template-columns: 1fr;">
+        <div class="card">
+            <p>
+                SISPE es un proyecto académico desarrollado para digitalizar y simplificar la
+                administración de restaurantes. Une en una sola plataforma todas las áreas clave
+                del servicio: desde que el cliente escanea el QR de su mesa hasta la entrega de su
+                factura. Inicia sesión para acceder a tu panel según tu rol, o crea una cuenta
+                para comenzar.
+            </p>
+            <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px;">
+                {% if not user.is_authenticated %}
+                    <a href="{% url 'login' %}" class="btn-card">Iniciar Sesión</a>
+                    <a href="{% url 'registro' %}" class="btn-card" style="background-color: transparent; border: 1px solid #eab566; color: #eab566;">Crear Cuenta</a>
+                {% else %}
+                    <a href="{% url 'portal' %}" class="btn-card">Ir al Portal</a>
+                {% endif %}
+                <a href="{% url 'roles' %}" class="btn-card" style="background-color: transparent; border: 1px solid #eab566; color: #eab566;">Conocer Roles</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer class="footer">
+    <div class="footer-contenido">
+        <div class="footer-izq">
+            <h3>SISPE</h3>
+            <p>Sistema de Gestión para Restaurantes</p>
+        </div>
+        <div class="footer-links">
+            <a href="{% url 'home' %}">Inicio</a>
+            <a href="#modulos">Módulos</a>
+            <a href="#nosotros">Nosotros</a>
+            <a href="{% url 'carta' %}">Carta</a>
+            {% if not user.is_authenticated %}
+                <a href="{% url 'login' %}">Iniciar Sesión</a>
+                <a href="{% url 'registro' %}">Registro</a>
+            {% else %}
+                <a href="{% url 'portal' %}">Portal</a>
+            {% endif %}
+        </div>
+        <div class="footer-der">
+            <p>© {% now "Y" %} SISPE. Todos los derechos reservados.</p>
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>

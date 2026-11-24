@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block titulo %}¡Gracias por tu visita! · Sabor Urbano{% endblock %}
+{% block seccion %}Despedida{% endblock %}
+
+{% block contenido %}
+<div class="panel" style="max-width: 640px; margin: 40px auto; text-align: center; padding: 48px 24px; border: 1px solid #33291f; border-radius: 16px; background: #1c1714;">
+  <div style="font-size: 64px; margin-bottom: 16px;">👋</div>
+  
+  <h1 style="color: #ff9a4d; font-size: 32px; font-weight: 800; margin-bottom: 12px; line-height: 1.2;">
+    Gracias por visitarnos, ¡vuelve pronto!
+  </h1>
+  
+  <p class="suave" style="font-size: 16px; line-height: 1.6; max-width: 480px; margin: 0 auto 28px;">
+    Tu pedido ha sido cancelado exitosamente y la mesa asociada ha quedado <strong style="color: #3ecf8e;">libre y disponible</strong>.
+    Fue un placer tenerte con nosotros. ¡Esperamos deleitarte muy pronto!
+  </p>
+
+  <div style="display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;">
+    <a class="btn btn-primario" href="{% url 'carta' %}" style="padding: 12px 28px; font-weight: 700;">
+      Ver nuestra carta
+    </a>
+    <a class="btn btn-secundario" href="{% url 'portal' %}" style="padding: 12px 28px;">
+      Ir al Portal
+    </a>
+  </div>
+</div>
+{% endblock %}

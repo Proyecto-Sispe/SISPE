@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block titulo %}Reportes · Sabor Urbano{% endblock %}
+{% block seccion %}Reportes{% endblock %}
+
+{% block contenido %}
+
+<section class="hero">
+  <h1>Reportes de <span>ventas</span></h1>
+  <p>Filtra por fecha, categoría y estado para ver cómo va el restaurante.</p>
+</section>
+
+<form class="panel" method="get">
+  <div class="fila">
+    <div class="grupo-campo" style="flex:1 1 150px;margin-bottom:0">
+      <label for="desde">Desde</label>
+      <input class="campo" type="date" id="desde" name="desde" value="{{ desde }}">
+    </div>
+    <div class="grupo-campo" style="flex:1 1 150px;margin-bottom:0">
+      <label for="hasta">Hasta</label>
+      <input class="campo" type="date" id="hasta" name="hasta" value="{{ hasta }}">
+    </div>
+    <div class="grupo-campo" style="flex:1 1 170px;margin-bottom:0">
+      <label for="categoria">Categoría</label>
+      <select class="campo" id="categoria" name="categoria">
+        <option value="">Todas</option>
+        {% for cat in categorias %}
+          <option value="{{ cat.id_categoria }}"
+            {% if cat.id_categoria|stringformat:'s' == categoria %}selected{% endif %}>
+            {{ cat.nom_categoria }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="grupo-campo" style="flex:1 1 150px;margin-bottom:0">
+      <label for="estado">Estado</label>
+      <select class="campo" id="estado" name="estado">
+        <option value="">Todos</option>
+        {% for clave, etiqueta in estados %}
+          <option value="{{ clave }}" {% if estado == clave %}selected{% endif %}>{{ etiqueta }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button class="btn btn-primario" type="submit">Filtrar</button>
+    <a class="btn btn-secundario" href="{% url 'reportes' %}">Limpiar</a>
+  </div>
+</form>
+
+<div class="rejilla mt-24">
+  <div class="panel">
+    <div class="chico suave">Ventas totales</div>
+    <div class="precio" style="font-size:26px">${{ ventas|floatformat:0 }}</div>
+  </div>
+  <div class="panel">
+    <div class="chico suave">Pedidos</div>
+    <div class="precio" style="font-size:26px">{{ cantidad_pedidos }}</div>
+  </div>
+  <div class="panel">
+    <div class="chico suave">Ticket promedio</div>
+    <div class="precio" style="font-size:26px">${{ ticket|floatformat:0 }}</div>
+  </div>
+</div>
+
+<div class="panel mt-24">
+  <div class="seccion-titulo mt-0"><h2>Ventas por categoría</h2></div>
+  {% for fila in por_categoria %}
+    <div style="margin-bottom:14px">
+      <div class="fila entre chico">
+        <span>{{ fila.producto__categoria__nom_categoria }}</span>
+        <span class="suave">{{ fila.unidades }} und · ${{ fila.total|floatformat:0 }}</span>
+      </div>
+      <div class="barra-avance"><i style="width: {{ fila.porcentaje }}%"></i></div>
+    </div>
+  {% empty %}
+    <p class="chico suave">Sin ventas en ese rango.</p>
+  {% endfor %}
+</div>
+
+<div class="panel mt-16">
+  <div class="seccion-titulo mt-0"><h2>Productos más vendidos</h2></div>
+  <div class="tabla-envoltura">
+    <table class="tabla">
+      <thead>
+        <tr><th>Producto</th><th class="derecha">Unidades</th><th class="derecha">Total</th></tr>
+      </thead>
+      <tbody>
+        {% for fila in top %}
+          <tr>
+            <td>{{ fila.producto__nombre }}</td>
+            <td class="derecha">{{ fila.unidades }}</td>
+            <td class="derecha">${{ fila.total|floatformat:0 }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="3" class="suave">Sin datos.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="panel mt-16">
+  <div class="seccion-titulo mt-0"><h2>Combos vendidos</h2></div>
+  <div class="tabla-envoltura">
+    <table class="tabla">
+      <thead>
+        <tr><th>Combo</th><th class="derecha">Unidades</th><th class="derecha">Total</th></tr>
+      </thead>
+      <tbody>
+        {% for fila in combos_vendidos %}
+          <tr>
+            <td>{{ fila.combo__nombre }}</td>
+            <td class="derecha">{{ fila.unidades }}</td>
+            <td class="derecha">${{ fila.total|floatformat:0 }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="3" class="suave">Todavía no se ha vendido ningún combo.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

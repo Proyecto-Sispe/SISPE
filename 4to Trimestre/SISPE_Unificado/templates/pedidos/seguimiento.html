@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block titulo %}Seguimiento del pedido #{{ pedido.id_pedido }} · Sabor Urbano{% endblock %}
+{% block seccion %}Seguimiento{% endblock %}
+
+{% block contenido %}
+
+<section class="hero">
+  <h1>Pedido <span>#{{ pedido.id_pedido }}</span></h1>
+  <p>Mesa {{ pedido.id_mesa }} · esta pantalla se actualiza sola cada 5 segundos.</p>
+  <div class="hero-mesa">
+    Estado actual:
+    <span class="pastilla {{ pedido.estado }}" id="pastillaEstado">{{ pedido.get_estado_display }}</span>
+  </div>
+</section>
+
+<div class="panel">
+  <div class="linea-tiempo" id="lineaTiempo">
+    {% for clave, etiqueta in pasos %}
+      <div class="paso {% if pedido.estado == clave %}actual{% endif %}" data-paso="{{ clave }}">
+        <div class="bola">{% if pedido.estado == clave %}●{% else %}○{% endif %}</div>
+        <span>{{ etiqueta }}</span>
+      </div>
+    {% endfor %}
+  </div>
+
+  <div class="barra-avance mt-24">
+    <i id="barraAvance" style="width: {{ pedido.avance }}%"></i>
+  </div>
+  <p class="chico suave centro mb-0" id="textoEspera">
+    Llevas {{ pedido.minutos_espera }} minuto{{ pedido.minutos_espera|pluralize }} esperando.
+  </p>
+</div>
+
+<div class="panel mt-16">
+  <div class="seccion-titulo mt-0">
+    <h2>Lo que pediste</h2>
+    <span class="cuenta">{{ detalles|length }} línea{{ detalles|length|pluralize:"s" }}</span>
+  </div>
+
+  {% for detalle in detalles %}
+    <div class="linea-carrito">
+      <div class="linea-foto">
+        {% if detalle.producto and detalle.producto.tiene_foto %}
+          <img src="{{ detalle.producto.foto.url }}" alt="{{ detalle.descripcion }}">
+        {% elif detalle.combo and detalle.combo.tiene_foto %}
+          <img src="{{ detalle.combo.foto.url }}" alt="{{ detalle.descripcion }}">
+        {% else %}
+          {{ detalle.descripcion|slice:":1"|upper }}
+        {% endif %}
+      </div>
+
+      <div class="linea-info">
+        <h4>{{ detalle.cantidad }}× {{ detalle.descripcion }}</h4>
+        <div class="meta">
+          {% if detalle.es_combo %}Combo{% else %}Plato{% endif %}
+          · unitario ${{ detalle.precio_unitario|floatformat:0 }}
+        </div>
+        {% if detalle.adiciones.all %}
+          <div>
+            {% for extra in detalle.adiciones.all %}
+              <span class="extra-tag">+ {{ extra.adicion.nombre }} ${{ extra.precio|floatformat:0 }}</span>
+            {% endfor %}
+          </div>
+        {% endif %}
+        {% if detalle.notas %}<div class="meta">Nota: {{ detalle.notas }}</div>{% endif %}
+      </div>
+
+      <div class="derecha">
+        <div class="precio">${{ detalle.valor_venta|floatformat:0 }}</div>
+      </div>
+    </div>
+  {% endfor %}
+
+  <div class="resumen-total">
+    <span>Total</span>
+    <b>${{ pedido.total|floatformat:0 }}</b>
+  </div>
+</div>
+
+<div class="panel mt-16" style="text-align:center;padding:24px">
+  <h3 style="margin-top:0;font-size:18px;color:#ff9a4d">Acciones del Pedido</h3>
+  <p class="suave chico" style="margin-bottom:20px">
+    Gestiona tu pedido, solicita tu factura para retirarte o realiza el pago en línea.
+  </p>
+
+  <div class="fila centro" style="gap:12px;flex-wrap:wrap">
+    {# Botón Cancelar pedido (solo si está en estado pendiente) #}
+    {% if pedido.estado == 'pendiente' %}
+      <form id="formCancelarPedido" method="post" action="{% url 'cancelar_pedido' pedido.id_pedido %}" style="display:inline">
+        {% csrf_token %}
+        <button type="submit" class="btn" style="background:#dc2626;color:#ffffff;border:none;cursor:pointer;font-weight:600"
+                onclick="return confirm('¿Seguro que deseas cancelar tu pedido? Tu mesa quedará libre y volverás a la página de bienvenida.');">
+          ✕ Cancelar pedido
+        </button>
+      </form>
+    {% endif %}
+
+    {# Botón Finalizar pedido y facturación #}
+    {% if pedido.estado != 'cancelado' %}
+      <form method="post" action="{% url 'finalizar_pedido' pedido.id_pedido %}" style="display:inline">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primario" style="cursor:pointer;font-weight:700"
+                onclick="return confirm('¿Deseas finalizar el pedido y retirarte? Tu mesa quedará libre automáticamente y verás tu factura detallada.');">
+          🏁 Finalizar pedido
+        </button>
+      </form>
+
+      {# Enlace directo a factura / pago en línea #}
+      <a class="btn" style="background:#10b981;color:#ffffff;font-weight:600" href="{% url 'factura_cliente' pedido.id_pedido %}">
+        💳 Ver factura / Pagar con PSE
+      </a>
+    {% endif %}
+
+    {# Pedir algo más #}
+    <a class="btn btn-secundario" href="{% url 'carta' %}?mesa={{ pedido.id_mesa }}">
+      + Pedir algo más
+    </a>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+  const url = "{% url 'seguimiento_json' pedido.id_pedido %}";
+  const pastilla = document.getElementById('pastillaEstado');
+  const barra = document.getElementById('barraAvance');
+  const espera = document.getElementById('textoEspera');
+  const pasos = document.querySelectorAll('.paso');
+  const formCancelar = document.getElementById('formCancelarPedido');
+  const orden = ['pendiente', 'en_preparacion', 'listo', 'entregado'];
+
+  function pintar(datos) {
+    pastilla.textContent = datos.estado_display;
+    pastilla.className = 'pastilla ' + datos.estado;
+    barra.style.width = datos.avance + '%';
+    espera.textContent = 'Llevas ' + datos.minutos + ' minuto' + (datos.minutos === 1 ? '' : 's') + ' esperando.';
+
+    const indice = orden.indexOf(datos.estado);
+    pasos.forEach(function (paso, i) {
+      paso.classList.remove('hecho', 'actual');
+      if (i < indice) paso.classList.add('hecho');
+      if (i === indice) paso.classList.add('actual');
+      paso.querySelector('.bola').textContent = i <= indice ? '●' : '○';
+    });
+
+    if (formCancelar && !datos.puede_cancelar) {
+      formCancelar.style.display = 'none';
+    }
+  }
+
+  let vivo = true;
+  async function consultar() {
+    if (!vivo) return;
+    try {
+      const respuesta = await fetch(url, { headers: { 'Accept': 'application/json' } });
+      if (respuesta.ok) {
+        const datos = await respuesta.json();
+        pintar(datos);
+        if (datos.estado === 'entregado' || datos.estado === 'cancelado') {
+          vivo = false;
+          return;
+        }
+      }
+    } catch (e) { /* sin conexion */ }
+    setTimeout(consultar, 5000);
+  }
+
+  setTimeout(consultar, 5000);
+})();
+</script>
+{% endblock %}

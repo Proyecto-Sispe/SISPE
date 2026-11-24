@@ -1,0 +1,58 @@
+{% extends "administracion/_base.html" %}
+{% block titulo %}Pedidos activos · SISPE{% endblock %}
+{% block adm %}
+<section class="hero">
+  <h1>Pedidos <span>activos</span></h1>
+  <p>Pedidos en curso con sus productos y comentarios. Se actualiza cada 10 segundos.</p>
+  <div class="hero-mesa">{{ pedidos|length }} en curso</div>
+</section>
+<div class="tarjetas">
+  {% for pedido in pedidos %}
+    <div class="comanda">
+      <div class="comanda-top">
+        <b>#{{ pedido.id_pedido }} · Mesa {{ pedido.id_mesa }}</b>
+        <span class="minutos {% if pedido.minutos_espera > 15 %}tarde{% endif %}">{{ pedido.minutos_espera }} min</span>
+      </div>
+      <div class="fila entre chico">
+        <span>{% if pedido.factura_info.cliente_nombre %}👤 {{ pedido.factura_info.cliente_nombre }}{% if pedido.factura_info.cliente_documento %} · {{ pedido.factura_info.cliente_documento }}{% endif %}{% else %}<span class="suave">Cliente sin registrar</span>{% endif %}</span>
+        <span class="etiqueta {{ pedido.estado }}">{{ pedido.get_estado_display }}</span>
+      </div>
+      <div class="barra-avance"><i style="width: {{ pedido.avance }}%"></i></div>
+      <ul>
+        {% for detalle in pedido.detalles.all %}
+          <li><b>{{ detalle.cantidad }}× {{ detalle.descripcion }}</b>
+            {% for extra in detalle.adiciones.all %}<span class="extra-tag">+ {{ extra.adicion.nombre }}</span>{% endfor %}
+            {% if detalle.notas %}<div class="chico">💬 {{ detalle.notas }}</div>{% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+      {% if pedido.observaciones %}<p class="chico mb-0">📝 Comentario del cliente: <b>{{ pedido.observaciones }}</b></p>{% endif %}
+      <div class="fila entre chico mt-16"><span class="suave">{{ pedido.fecha_pedido|date:"H:i" }}</span><b>${{ pedido.total|floatformat:0 }}</b></div>
+      <div class="fila mt-16">
+        {% if pedido.siguiente_estado %}
+          <form method="post" action="{% url 'cocina_estado' pedido.id_pedido %}">{% csrf_token %}
+            <input type="hidden" name="estado" value="{{ pedido.siguiente_estado }}">
+            <input type="hidden" name="next" value="{{ request.path }}">
+            <button class="btn btn-primario btn-mini">{{ pedido.siguiente_etiqueta }}</button>
+          </form>
+        {% endif %}
+        <form method="post" action="{% url 'cocina_estado' pedido.id_pedido %}">{% csrf_token %}
+          <input type="hidden" name="estado" value="cancelado">
+          <input type="hidden" name="next" value="{{ request.path }}">
+          <button class="btn btn-peligro btn-mini" onclick="return confirm('¿Cancelar el pedido #{{ pedido.id_pedido }}? Se devolverán sus insumos.')">Cancelar</button>
+        </form>
+        {% if pedido.id_mesa %}
+          <form method="post" action="{% url 'liberar_mesa' pedido.id_mesa %}">{% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.path }}">
+            <button class="btn btn-secundario btn-mini">Liberar mesa</button>
+          </form>
+        {% endif %}
+        {% if pedido.factura_info %}<a class="btn btn-secundario btn-mini" href="{% url 'adm_factura' pedido.factura_info.pk %}">Factura</a>{% endif %}
+      </div>
+    </div>
+  {% empty %}
+    <p class="suave">No hay pedidos en curso.</p>
+  {% endfor %}
+</div>
+{% endblock %}
+{% block scripts %}<script>setTimeout(function () { window.location.reload(); }, 10000);</script>{% endblock %}

@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block titulo %}Partes del combo · Sabor Urbano{% endblock %}
+{% block seccion %}Gestionar{% endblock %}
+
+{% block contenido %}
+
+<section class="hero">
+  <h1>Partes de <span>{{ combo.nombre }}</span></h1>
+  <p>Agrega, modifica o quita los productos que componen el combo. Cada parte se puede editar por separado.</p>
+  <div class="hero-mesa">
+    Precio del combo <b>${{ combo.precio|floatformat:0 }}</b> ·
+    suma suelta <b>${{ combo.precio_suelto|floatformat:0 }}</b>
+  </div>
+</section>
+
+<div class="panel" style="max-width:640px">
+  <h3 class="mt-0">{% if editando %}Modificar parte{% else %}Agregar parte{% endif %}</h3>
+
+  <form method="post">
+    {% csrf_token %}
+    {% if editando %}<input type="hidden" name="item_id" value="{{ editando.pk }}">{% endif %}
+
+    {% for campo in form %}
+      <div class="grupo-campo">
+        <label for="{{ campo.id_for_label }}">{{ campo.label }}</label>
+        {{ campo }}
+        {% for error in campo.errors %}<div class="error">{{ error }}</div>{% endfor %}
+      </div>
+    {% endfor %}
+
+    <div class="fila entre">
+      {% if editando %}
+        <a class="btn btn-secundario" href="{% url 'gestion_combo_items' combo.pk %}">Cancelar edición</a>
+      {% else %}
+        <a class="btn btn-secundario" href="{% url 'gestion_lista' 'combos' %}">Volver a combos</a>
+      {% endif %}
+      <button class="btn btn-primario" type="submit">
+        {% if editando %}Guardar cambios{% else %}Agregar al combo{% endif %}
+      </button>
+    </div>
+  </form>
+</div>
+
+<div class="tabla-envoltura mt-24">
+  <table class="tabla">
+    <thead>
+      <tr>
+        <th>Producto</th>
+        <th class="derecha">Cantidad</th>
+        <th class="derecha">Subtotal</th>
+        <th class="derecha">Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in items %}
+        <tr>
+          <td>{{ item.producto.nombre }}</td>
+          <td class="derecha">{{ item.cantidad }}</td>
+          <td class="derecha">${{ item.subtotal|floatformat:0 }}</td>
+          <td>
+            <div class="acciones">
+              <a class="btn btn-secundario btn-mini"
+                 href="{% url 'gestion_combo_items' combo.pk %}?editar={{ item.pk }}">Modificar</a>
+              <form method="post" style="display:inline">
+                {% csrf_token %}
+                <input type="hidden" name="accion" value="quitar">
+                <input type="hidden" name="item" value="{{ item.pk }}">
+                <button class="btn btn-peligro btn-mini" type="submit">Quitar</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="4" class="suave centro">Este combo todavía no tiene partes.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<p class="centro mt-24">
+  <a class="btn btn-secundario" href="{% url 'gestion_editar' 'combos' combo.pk %}">Modificar datos del combo</a>
+  <a class="btn btn-secundario" href="{% url 'gestion_lista' 'combos' %}">Volver a combos</a>
+</p>
+
+{% endblock %}

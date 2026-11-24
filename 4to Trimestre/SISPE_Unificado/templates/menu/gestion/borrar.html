@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block titulo %}Eliminar {{ cfg.singular }} · Sabor Urbano{% endblock %}
+{% block seccion %}Gestionar{% endblock %}
+
+{% block contenido %}
+<div style="max-width:520px;margin:40px auto">
+  <div class="panel">
+    <h2 class="mt-0">Eliminar {{ cfg.singular }}</h2>
+    <p class="suave">
+      Vas a eliminar <b>{{ objeto }}</b>. Esta acción no se puede deshacer.
+    </p>
+    <div class="aviso warning">
+      Si el registro ya aparece en pedidos, el sistema lo protegerá y te pedirá
+      marcarlo como inactivo en lugar de borrarlo.
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="fila entre mt-24">
+        <a class="btn btn-secundario" href="{% url 'gestion_lista' entidad %}">Cancelar</a>
+        <button class="btn btn-peligro" type="submit">Sí, eliminar</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard {{ rol }} | SISPE</title>
+  <style>
+    body { margin: 0; font-family: Arial, sans-serif; background: #0d0d0d; color: #f5f5f5; }
+    header {
+      background: #171717;
+      border-bottom: 2px solid #ff6a00;
+      padding: 16px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .brand { color: #ff7b00; font-weight: bold; font-size: 20px; }
+    .badge { background: #ff6a00; color: #0d0d0d; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: bold; }
+    a.logout { color: #ff7b00; text-decoration: none; margin-left: 16px; font-size: 14px; }
+    main { padding: 32px 28px; }
+    .panel {
+      background: #171717;
+      border: 1px solid #2b2b2b;
+      border-left: 4px solid #ff6a00;
+      border-radius: 8px;
+      padding: 24px;
+      max-width: 720px;
+    }
+    h1 { color: #ff7b00; margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">SISPE</div>
+    <div>
+      <a class="logout" href="{% url 'portal' %}">Portal</a>
+      <span class="badge">{{ rol }}</span>
+      <a class="logout" href="{% url 'logout' %}">Cerrar sesión</a>
+    </div>
+  </header>
+  <main>
+    <div class="panel">
+      <h1>Panel {{ rol }}</h1>
+      <p>Bienvenido, <strong>{{ usuario }}</strong>. Dashboard de ejemplo para atención de mesas y pedidos.</p>
+    </div>
+    {% include "seguimiento_pedidos/dashboards/_enlaces.html" %}
+  </main>
+</body>
+</html>

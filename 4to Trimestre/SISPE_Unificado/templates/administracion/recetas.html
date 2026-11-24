@@ -1,0 +1,31 @@
+{% extends "administracion/_base.html" %}
+{% block titulo %}Insumos por producto · SISPE{% endblock %}
+{% block adm %}
+<section class="hero">
+  <h1>Insumos por <span>producto</span></h1>
+  <p>Define qué materias primas gasta cada plato. Se descuentan solas al confirmar un pedido.</p>
+</section>
+<form class="filtros" method="get">
+  <div><label>Buscar</label><input type="search" name="q" value="{{ q }}" placeholder="Producto o insumo"></div>
+  <div><label>Categoría</label><select name="cat"><option value="">Todas</option>{% for c in categorias %}<option value="{{ c.id_categoria }}" {% if cat == c.id_categoria|stringformat:"s" %}selected{% endif %}>{{ c.nom_categoria }}</option>{% endfor %}</select></div>
+  <div class="acciones-filtro"><button class="btn btn-primario">Buscar</button><a class="btn btn-secundario" href="{% url 'adm_recetas' %}">Limpiar</a></div>
+</form>
+<div class="tabla-envoltura">
+  <table class="tabla">
+    <thead><tr><th>Producto</th><th>Categoría</th><th>Insumos por unidad</th><th class="derecha"></th></tr></thead>
+    <tbody>
+    {% for p in pagina %}
+      <tr>
+        <td><b>{{ p.nombre }}</b></td>
+        <td>{{ p.categoria.nom_categoria }}</td>
+        <td>{% with receta=p.receta.all %}{% if receta %}<ul class="receta-lista">{% for r in receta %}<li>{{ r.cantidad|floatformat:"-3" }} {{ r.insumo.unidad|lower }} · {{ r.insumo.nombre }}</li>{% endfor %}</ul>{% else %}<span class="suave chico">Sin insumos</span>{% endif %}{% endwith %}</td>
+        <td><div class="acciones"><a class="btn btn-secundario btn-mini" href="{% url 'adm_receta' p.pk %}">Editar insumos</a></div></td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="4" class="suave centro">No hay productos con esos filtros.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include "administracion/_paginacion.html" %}
+{% endblock %}

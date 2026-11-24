@@ -1,0 +1,7 @@
+{% if pagina.paginator.num_pages > 1 %}
+<div class="paginacion">
+  {% if pagina.has_previous %}<a class="btn btn-secundario btn-mini" href="?{{ filtros }}{% if filtros %}&{% endif %}page={{ pagina.previous_page_number }}">← Anterior</a>{% endif %}
+  <span class="chico suave">Página {{ pagina.number }} de {{ pagina.paginator.num_pages }}</span>
+  {% if pagina.has_next %}<a class="btn btn-secundario btn-mini" href="?{{ filtros }}{% if filtros %}&{% endif %}page={{ pagina.next_page_number }}">Siguiente →</a>{% endif %}
+</div>
+{% endif %}

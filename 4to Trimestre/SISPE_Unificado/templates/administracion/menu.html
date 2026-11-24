@@ -1,0 +1,56 @@
+{% extends "administracion/_base.html" %}
+{% block titulo %}Menú · SISPE{% endblock %}
+{% block adm %}
+<section class="hero">
+  <h1>Gestión de <span>menú</span></h1>
+  <p>Busca productos por varios criterios, edítalos y cambia su disponibilidad en la carta.</p>
+  <div class="hero-mesa">{{ total }} producto{{ total|pluralize }}</div>
+</section>
+<form class="filtros" method="get">
+  <div><label>Buscar</label><input type="search" name="q" value="{{ q }}" placeholder="Nombre, descripción, código"></div>
+  <div><label>Categoría</label><select name="cat"><option value="">Todas</option>{% for c in categorias %}<option value="{{ c.id_categoria }}" {% if cat == c.id_categoria|stringformat:"s" %}selected{% endif %}>{{ c.nom_categoria }}</option>{% endfor %}</select></div>
+  <div><label>Disponibilidad</label><select name="disp"><option value="">Todos</option><option value="si" {% if disp == "si" %}selected{% endif %}>Disponibles</option><option value="no" {% if disp == "no" %}selected{% endif %}>No disponibles</option></select></div>
+  <div><label>Precio desde</label><input type="number" name="pmin" value="{{ pmin }}" min="0" step="100"></div>
+  <div><label>Precio hasta</label><input type="number" name="pmax" value="{{ pmax }}" min="0" step="100"></div>
+  <div><label>Insumos</label><select name="receta"><option value="">Todos</option><option value="con" {% if receta == "con" %}selected{% endif %}>Con insumos</option><option value="sin" {% if receta == "sin" %}selected{% endif %}>Sin insumos</option></select></div>
+  <div><label>Ordenar por</label><select name="orden">
+    <option value="nombre" {% if orden == "nombre" %}selected{% endif %}>Nombre</option>
+    <option value="categoria" {% if orden == "categoria" %}selected{% endif %}>Categoría</option>
+    <option value="precio" {% if orden == "precio" %}selected{% endif %}>Precio menor</option>
+    <option value="-precio" {% if orden == "-precio" %}selected{% endif %}>Precio mayor</option></select></div>
+  <div class="acciones-filtro"><button class="btn btn-primario">Buscar</button><a class="btn btn-secundario" href="{% url 'adm_menu' %}">Limpiar</a></div>
+</form>
+<div class="fila entre">
+  <a class="btn btn-primario" href="{% url 'gestion_crear' 'productos' %}">+ Nuevo producto</a>
+  <a class="btn btn-secundario" href="{% url 'gestion_lista' 'categorias' %}">Categorías, adiciones y combos</a>
+</div>
+<div class="tabla-envoltura mt-16">
+  <table class="tabla">
+    <thead><tr><th>Imagen</th><th>Producto</th><th>Categoría</th><th>Precio</th><th>Insumos</th><th>Estado</th><th class="derecha">Acciones</th></tr></thead>
+    <tbody>
+    {% for p in pagina %}
+      <tr>
+        <td>{% if p.tiene_foto %}<img class="mini-foto" src="{{ p.foto.url }}" alt="{{ p }}">{% else %}<div class="mini-vacia">{{ p.inicial }}</div>{% endif %}</td>
+        <td><b>{{ p.nombre }}</b><div class="chico suave">{{ p.descripcion|truncatechars:70 }}</div></td>
+        <td>{{ p.categoria.nom_categoria }}</td>
+        <td>${{ p.precio|floatformat:0 }}</td>
+        <td><a href="{% url 'adm_receta' p.pk %}">{{ p.n_insumos }} insumo{{ p.n_insumos|pluralize }}</a></td>
+        <td>{% if p.disponible %}<span class="etiqueta ok">Disponible</span>{% else %}<span class="etiqueta anulada">No disponible</span>{% endif %}</td>
+        <td>
+          <div class="acciones">
+            <form method="post" action="{% url 'adm_menu_disponible' p.pk %}">{% csrf_token %}
+              <input type="hidden" name="next" value="{{ request.get_full_path }}">
+              <button class="btn btn-secundario btn-mini">{% if p.disponible %}Marcar no disponible{% else %}Marcar disponible{% endif %}</button>
+            </form>
+            <a class="btn btn-secundario btn-mini" href="{% url 'gestion_editar' 'productos' p.pk %}">Editar</a>
+          </div>
+        </td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="7" class="suave centro">No hay productos con esos filtros.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% include "administracion/_paginacion.html" %}
+{% endblock %}

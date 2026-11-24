@@ -1,0 +1,25 @@
+{% extends "mesas_pedidos/base.html" %}
+{% block title %}Resumen pedido #{{ pedido.id }} · SISPE{% endblock %}
+{% block content %}
+<div class="card shadow-sm mx-auto" style="max-width:720px">
+    <div class="card-header d-flex justify-content-between">
+        <strong>Pedido #{{ pedido.id }} · Mesa {{ pedido.mesa.id }}</strong>
+        <span class="badge bg-warning text-dark">{{ pedido.get_estado_display }}</span>
+    </div>
+    <ul class="list-group list-group-flush">
+        {% for d in pedido.detalles.all %}
+        <li class="list-group-item">
+            <div class="d-flex justify-content-between"><span>{{ d.cantidad }}x {{ d.menu.productos }}</span><span>${{ d.valor_venta }}</span></div>
+            {% for a in d.adiciones_detalle.all %}<div class="small text-muted">+ {{ a.cantidad }}x {{ a.adicion.nombre }} (${{ a.adicion.precio }})</div>{% endfor %}
+            {% if d.observaciones %}<div class="small fst-italic">{{ d.observaciones }}</div>{% endif %}
+        </li>
+        {% empty %}
+        <li class="list-group-item text-muted">Todavía no hay productos.</li>
+        {% endfor %}
+    </ul>
+    <div class="card-footer d-flex justify-content-between align-items-center">
+        <strong>Total: ${{ total }}</strong>
+        {% if not pedido.confirmado %}<a href="{% url 'ver_menu_pedido' pedido.id %}" class="btn btn-primary btn-sm">Seguir pidiendo</a>{% endif %}
+    </div>
+</div>
+{% endblock %}

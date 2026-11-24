@@ -1,0 +1,32 @@
+{% extends "administracion/_base.html" %}
+{% block titulo %}Insumos de {{ producto.nombre }} · SISPE{% endblock %}
+{% block adm %}
+<section class="hero">
+  <h1>Insumos de <span>{{ producto.nombre }}</span></h1>
+  <p>Cantidad que se descuenta por cada unidad vendida (también cuando va dentro de un combo).</p>
+</section>
+<div class="tabla-envoltura">
+  <table class="tabla">
+    <thead><tr><th>Insumo</th><th>Cantidad por unidad</th><th>Stock actual</th><th class="derecha"></th></tr></thead>
+    <tbody>
+    {% for r in receta %}
+      <tr>
+        <td><b>{{ r.insumo.nombre }}</b></td>
+        <td>{{ r.cantidad|floatformat:"-3" }} {{ r.insumo.unidad }}</td>
+        <td><span class="etiqueta {{ r.insumo.estado_stock }}">{{ r.insumo.stock_actual|floatformat:"-3" }}</span></td>
+        <td><form class="acciones" method="post" action="{% url 'adm_receta_quitar' r.pk %}">{% csrf_token %}<button class="btn btn-peligro btn-mini">Quitar</button></form></td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="4" class="suave centro">Este producto todavía no tiene insumos asociados.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+<div class="panel mt-16" style="max-width:720px">
+  <h3 class="mt-0">Agregar o actualizar insumo</h3>
+  <form method="post" novalidate>{% csrf_token %}
+    <div class="form-adm">{% include "administracion/_campos.html" %}</div>
+    <div class="fila mt-16"><button class="btn btn-primario">Guardar</button><a class="btn btn-secundario" href="{% url 'adm_recetas' %}">Volver</a></div>
+  </form>
+</div>
+{% endblock %}

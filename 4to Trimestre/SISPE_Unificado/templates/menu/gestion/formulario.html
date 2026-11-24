@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block titulo %}{% if modo == 'crear' %}Nuevo{% else %}Modificar{% endif %} {{ cfg.singular }} · Sabor Urbano{% endblock %}
+{% block seccion %}Gestionar{% endblock %}
+
+{% block contenido %}
+
+<section class="hero">
+  <h1>{% if modo == 'crear' %}Nuevo{% else %}Modificar{% endif %} <span>{{ cfg.singular }}</span></h1>
+  <p>
+    {% if modo == 'crear' %}
+      Completa los datos. La imagen es opcional: si no la pones, la carta muestra la inicial del plato.
+    {% else %}
+      Cambia lo que necesites y guarda. La imagen actual se conserva si no subes otra.
+    {% endif %}
+  </p>
+</section>
+
+<div class="panel" style="max-width:640px">
+  <form method="post" enctype="multipart/form-data" novalidate>
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+      <div class="aviso error">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    {% if modo == 'editar' and cfg.con_foto %}
+      <div class="grupo-campo">
+        <label>Imagen actual</label>
+        <div class="foto-actual">
+          {% if objeto.tiene_foto %}
+            <img src="{{ objeto.foto.url }}" alt="{{ objeto }}">
+            <div class="chico suave">Sube otra imagen abajo para reemplazarla.</div>
+          {% else %}
+            <div class="sin-foto">{{ objeto.inicial }}</div>
+            <div class="chico suave">Este registro todavía no tiene imagen.</div>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+
+    {% for campo in form %}
+      {% if campo.field.widget.input_type == 'checkbox' %}
+        <div class="grupo-check">
+          {{ campo }}
+          <label for="{{ campo.id_for_label }}">{{ campo.label }}</label>
+        </div>
+        {% if campo.help_text %}<div class="ayuda">{{ campo.help_text }}</div>{% endif %}
+        {% for error in campo.errors %}<div class="error">{{ error }}</div>{% endfor %}
+      {% else %}
+        <div class="grupo-campo">
+          <label for="{{ campo.id_for_label }}">{{ campo.label }}</label>
+          {{ campo }}
+          {% if campo.help_text %}<div class="ayuda">{{ campo.help_text }}</div>{% endif %}
+          {% for error in campo.errors %}<div class="error">{{ error }}</div>{% endfor %}
+        </div>
+      {% endif %}
+    {% endfor %}
+
+    <div class="fila entre mt-24">
+      <a class="btn btn-secundario" href="{% url 'gestion_lista' entidad %}">Cancelar</a>
+      <button class="btn btn-primario" type="submit">
+        {% if modo == 'crear' %}Crear {{ cfg.singular }}{% else %}Guardar cambios{% endif %}
+      </button>
+    </div>
+  </form>
+</div>
+
+{% if modo == 'editar' %}
+  <p class="centro mt-16">
+    <a class="btn btn-peligro" href="{% url 'gestion_borrar' entidad objeto.pk %}">
+      Eliminar este {{ cfg.singular }}
+    </a>
+  </p>
+{% endif %}
+
+{% endblock %}

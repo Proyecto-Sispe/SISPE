@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block titulo %}Sin permiso · SISPE{% endblock %}
+{% block seccion %}Acceso restringido{% endblock %}
+{% block contenido %}
+<div class="vacio">
+  <div class="icono">🔒</div>
+  <h2>No tienes permiso para esta sección</h2>
+  <p class="suave">Tu cuenta <b>{{ user.get_username }}</b> no tiene el rol {{ grupos|join:" / " }}.</p>
+  <div class="fila centro mt-24" style="justify-content:center">
+    <a class="btn btn-primario" href="{% url 'portal' %}">Ir al portal</a>
+    <a class="btn btn-secundario" href="{% url 'logout' %}">Entrar con otra cuenta</a>
+  </div>
+</div>
+{% endblock %}

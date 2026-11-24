@@ -1,0 +1,36 @@
+{% extends "administracion/_base.html" %}
+{% block titulo %}Usuarios · SISPE{% endblock %}
+{% block adm %}
+<section class="hero">
+  <h1>Gestión de <span>usuarios</span></h1>
+  <p>Registra personas, consulta el listado y cambia sus datos o su rol.</p>
+  <div class="hero-mesa">{{ filas|length }} usuario{{ filas|length|pluralize }}</div>
+</section>
+<form class="filtros" method="get">
+  <div><label>Buscar</label><input type="search" name="q" value="{{ q }}" placeholder="Nombre, correo, documento o teléfono"></div>
+  <div><label>Rol</label><select name="rol"><option value="">Todos</option>{% for r in roles %}<option value="{{ r.idrol }}" {% if rol == r.idrol|stringformat:"s" %}selected{% endif %}>{{ r.nom_rol }}</option>{% endfor %}</select></div>
+  <div><label>Estado</label><select name="estado"><option value="">Todos</option><option value="activo" {% if estado == "activo" %}selected{% endif %}>Activos</option><option value="inactivo" {% if estado == "inactivo" %}selected{% endif %}>Inactivos</option></select></div>
+  <div class="acciones-filtro"><button class="btn btn-primario">Filtrar</button><a class="btn btn-secundario" href="{% url 'adm_usuarios' %}">Limpiar</a></div>
+</form>
+<div class="fila entre"><a class="btn btn-primario" href="{% url 'adm_usuario_crear' %}">+ Registrar usuario</a></div>
+<div class="tabla-envoltura mt-16">
+  <table class="tabla">
+    <thead><tr><th>Documento</th><th>Nombre</th><th>Correo</th><th>Teléfono</th><th>Rol</th><th>Estado</th><th class="derecha">Acciones</th></tr></thead>
+    <tbody>
+    {% for f in filas %}
+      <tr>
+        <td>{{ f.persona.pkfk_tipo_doc.tipo_doc|truncatechars:14 }}<br><b>{{ f.persona.id_usuario }}</b></td>
+        <td>{{ f.persona.nom1_usu }} {{ f.persona.nom2_usu|default:"" }} {{ f.persona.ape1_usu }} {{ f.persona.ape2_usu|default:"" }}</td>
+        <td>{{ f.persona.correo_usu|default:"-" }}</td>
+        <td>{{ f.persona.telefono }}</td>
+        <td>{{ f.rol.nom_rol|default:"Sin rol" }}</td>
+        <td>{% if f.persona.estado == 1 %}<span class="etiqueta ok">Activo</span>{% else %}<span class="etiqueta anulada">Inactivo</span>{% endif %}</td>
+        <td><div class="acciones"><a class="btn btn-secundario btn-mini" href="{% url 'adm_usuario_editar' f.persona.pkfk_tipo_doc_id f.persona.id_usuario %}">Editar</a></div></td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="7" class="suave centro">No hay usuarios con esos filtros.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

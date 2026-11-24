@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block titulo %}Sin permiso · Sabor Urbano{% endblock %}
+{% block seccion %}Acceso restringido{% endblock %}
+
+{% block contenido %}
+<div class="vacio">
+  <div class="icono">🔒</div>
+  <h2>Esta zona es del chef</h2>
+  <p class="suave">
+    Tu cuenta <b>{{ usuario.username }}</b> no pertenece al grupo <b>Chef</b>,
+    así que no puede ver el panel de cocina.
+  </p>
+  <div class="fila centro mt-24" style="justify-content:center">
+    <a class="btn btn-primario" href="{% url 'carta' %}">Volver a la carta</a>
+    <a class="btn btn-secundario" href="{% url 'roles' %}">Ver los roles</a>
+  </div>
+</div>
+{% endblock %}

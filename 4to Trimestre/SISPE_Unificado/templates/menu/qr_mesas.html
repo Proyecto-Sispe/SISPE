@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block titulo %}QR de mesas · Sabor Urbano{% endblock %}
+{% block seccion %}QR mesas{% endblock %}
+
+{% block contenido %}
+<section class="hero no-imprimir">
+  <h1>Hoja de <span>códigos QR</span></h1>
+  <p>Genera todas las mesas de un rango en una sola página, lista para imprimir.</p>
+</section>
+
+<form class="panel no-imprimir" method="get">
+  <div class="fila">
+    <div class="grupo-campo" style="flex:1 1 120px;margin-bottom:0">
+      <label for="desde">Desde mesa</label>
+      <input class="campo" type="number" min="1" max="60" id="desde" name="desde" value="{{ desde }}">
+    </div>
+    <div class="grupo-campo" style="flex:1 1 120px;margin-bottom:0">
+      <label for="hasta">Hasta mesa</label>
+      <input class="campo" type="number" min="1" max="60" id="hasta" name="hasta" value="{{ hasta }}">
+    </div>
+    <div class="grupo-campo" style="flex:2 1 240px;margin-bottom:0">
+      <label for="host">Dirección del servidor (IP:puerto)</label>
+      <input class="campo" type="text" id="host" name="host" value="{{ host }}"
+             list="ipsEquipo" placeholder="192.168.1.10:8000">
+      <datalist id="ipsEquipo">
+        {% for ip in ips %}<option value="{{ ip }}:8000">{% endfor %}
+      </datalist>
+    </div>
+    <button class="btn btn-primario" type="submit">Generar</button>
+    <button class="btn btn-secundario" type="button" onclick="window.print()">Imprimir</button>
+  </div>
+
+  <p class="chico suave mt-16 mb-0">
+    Dirección efectiva: <b>{{ host }}</b> ·
+    motor de QR: <b>{{ motor|default:"no instalado" }}</b>
+  </p>
+  <div class="fila mt-16">
+    {% for ip in ips %}
+      <a class="chip" href="?desde={{ desde }}&hasta={{ hasta }}&host={{ ip }}:8000">{{ ip }}:8000</a>
+    {% endfor %}
+  </div>
+</form>
+
+<div class="rejilla mt-24">
+  {% for item in mesas %}
+    <div class="panel centro" style="padding:16px">
+      <div class="chico suave">Mesa</div>
+      <div class="precio" style="font-size:22px">{{ item.numero }}</div>
+      {% if item.imagen %}
+        <img src="{{ item.imagen }}" alt="QR mesa {{ item.numero }}"
+             style="width:100%;max-width:190px;margin:10px auto;border-radius:10px;background:#fff;padding:8px">
+      {% elif item.respaldo %}
+        <img src="{{ item.respaldo }}" alt="QR mesa {{ item.numero }}"
+             style="width:100%;max-width:190px;margin:10px auto;border-radius:10px;background:#fff;padding:8px">
+      {% else %}
+        <div class="aviso warning chico">Sin generador de QR</div>
+      {% endif %}
+      <p class="chico suave" style="word-break:break-all;margin:0">{{ item.destino }}</p>
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}

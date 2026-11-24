@@ -1,0 +1,37 @@
+{% extends "mesas_pedidos/base.html" %}
+{% block title %}Mesas y QR · SISPE{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="h4 mb-0">Mesas</h2>
+    <a href="{% url 'mesa_create' %}" class="btn btn-primary btn-sm">+ Nueva mesa</a>
+</div>
+<div class="row g-3">
+    {% for mesa in mesas %}
+    <div class="col-lg-3 col-md-4 col-sm-6">
+        <div class="card h-100 shadow-sm text-center">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <strong>Mesa #{{ mesa.id }}</strong>
+                {% if mesa.estado == 0 %}<span class="badge bg-success">Libre</span>{% else %}<span class="badge bg-danger">Ocupada</span>{% endif %}
+            </div>
+            <div class="card-body">
+                {% if mesa.qr_url %}<a href="{{ mesa.qr_url }}" download="mesa_{{ mesa.id }}.png" title="Descargar QR"><img src="{{ mesa.qr_url }}" alt="QR Mesa {{ mesa.id }}" class="img-fluid mb-2" style="max-height:170px"></a>{% endif %}
+                <p class="mb-1"><strong>{{ mesa.ubicacion }}</strong></p>
+                <p class="text-muted small mb-2">Capacidad: {{ mesa.capacidad }} personas</p>
+                <a href="{{ mesa.url_pedido }}" class="small" target="_blank">Abrir enlace del QR</a>
+            </div>
+            <div class="card-footer d-flex gap-1 justify-content-center flex-wrap">
+                <a href="{% url 'mesa_update' mesa.id %}" class="btn btn-outline-secondary btn-sm">Editar</a>
+                <a href="{% url 'mesa_delete' mesa.id %}" class="btn btn-outline-danger btn-sm">Eliminar</a>
+                {% if mesa.estado == 1 %}
+                <form method="post" action="{% url 'liberar_mesa' mesa.id %}">{% csrf_token %}
+                    <button class="btn btn-outline-success btn-sm">Liberar</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12"><div class="alert alert-warning">No hay mesas registradas.</div></div>
+    {% endfor %}
+</div>
+{% endblock %}

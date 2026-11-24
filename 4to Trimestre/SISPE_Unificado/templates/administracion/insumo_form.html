@@ -1,0 +1,11 @@
+{% extends "administracion/_base.html" %}
+{% block titulo %}{% if insumo %}Editar{% else %}Nuevo{% endif %} insumo · SISPE{% endblock %}
+{% block adm %}
+<section class="hero"><h1>{% if insumo %}Editar <span>{{ insumo.nombre }}</span>{% else %}Nuevo <span>insumo</span>{% endif %}</h1></section>
+<div class="panel" style="max-width:720px">
+  <form method="post" novalidate>{% csrf_token %}
+    <div class="form-adm">{% include "administracion/_campos.html" %}</div>
+    <div class="fila mt-16"><button class="btn btn-primario">Guardar</button><a class="btn btn-secundario" href="{% url 'adm_inventario' %}">Cancelar</a></div>
+  </form>
+</div>
+{% endblock %}

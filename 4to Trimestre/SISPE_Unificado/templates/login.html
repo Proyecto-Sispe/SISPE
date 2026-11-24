@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block titulo %}Entrar · Sabor Urbano{% endblock %}
+{% block seccion %}Acceso{% endblock %}
+
+{% block contenido %}
+<div style="max-width:420px;margin:40px auto">
+  <div class="panel">
+    <h2 class="mt-0">Entrar al sistema</h2>
+    <p class="suave chico">Usa tu cuenta de chef o de administrador.</p>
+
+    {% if form.errors %}
+      <div class="aviso error">Usuario o contraseña incorrectos.</div>
+    {% endif %}
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="grupo-campo">
+        <label for="id_username">Nombre de usuario</label>
+        <input class="campo" type="text" name="username" id="id_username"
+               autocomplete="username" required autofocus>
+      </div>
+      <div class="grupo-campo">
+        <label for="id_password">Contraseña</label>
+        <input class="campo" type="password" name="password" id="id_password"
+               autocomplete="current-password" required>
+      </div>
+      <input type="hidden" name="next" value="{{ next }}">
+      <button class="btn btn-primario btn-bloque" type="submit">Iniciar sesión</button>
+    </form>
+
+    <p class="chico suave centro mt-16 mb-0">
+      <a href="{% url 'carta' %}">Volver a la carta</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends "administracion/_base.html" %}
+{% block titulo %}{% if modo == "crear" %}Registrar{% else %}Editar{% endif %} usuario · SISPE{% endblock %}
+{% block adm %}
+<section class="hero">
+  <h1>{% if modo == "crear" %}Registrar <span>usuario</span>{% else %}Editar <span>{{ persona.nom1_usu }} {{ persona.ape1_usu }}</span>{% endif %}</h1>
+  <p>{% if modo == "crear" %}Datos personales, rol y contraseña de acceso.{% else %}El documento no se puede cambiar. Puedes modificar los datos, el rol y el estado.{% endif %}</p>
+</section>
+<div class="panel" style="max-width:860px">
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="aviso error">{{ form.non_field_errors }}</div>{% endif %}
+    <div class="form-adm">{% include "administracion/_campos.html" %}</div>
+    <div class="fila mt-16">
+      <button class="btn btn-primario" type="submit">Guardar</button>
+      <a class="btn btn-secundario" href="{% url 'adm_usuarios' %}">Cancelar</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

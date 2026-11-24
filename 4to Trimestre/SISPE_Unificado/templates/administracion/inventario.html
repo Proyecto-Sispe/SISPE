@@ -1,0 +1,68 @@
+{% extends "administracion/_base.html" %}
+{% block titulo %}Inventario · SISPE{% endblock %}
+{% block adm %}
+<section class="hero">
+  <h1>Gestión de <span>inventario</span></h1>
+  <p>Stock en tiempo real: cada pedido confirmado descuenta los insumos de sus productos.</p>
+</section>
+<div class="stats">
+  <div class="stat"><small>Insumos</small><b>{{ resumen.total }}</b></div>
+  <div class="stat"><small>Stock bajo</small><b>{{ resumen.bajo }}</b></div>
+  <div class="stat"><small>Agotados</small><b>{{ resumen.agotado }}</b></div>
+</div>
+<form class="filtros" method="get">
+  <div><label>Buscar</label><input type="search" name="q" value="{{ q }}" placeholder="Insumo o producto que lo usa"></div>
+  <div><label>Estado</label><select name="estado"><option value="">Todos</option>
+    <option value="ok" {% if estado == "ok" %}selected{% endif %}>Suficiente</option>
+    <option value="bajo" {% if estado == "bajo" %}selected{% endif %}>Stock bajo</option>
+    <option value="agotado" {% if estado == "agotado" %}selected{% endif %}>Agotado</option></select></div>
+  <div><label>Unidad</label><select name="unidad"><option value="">Todas</option>{% for u in unidades %}<option value="{{ u }}" {% if unidad == u %}selected{% endif %}>{{ u }}</option>{% endfor %}</select></div>
+  <div class="acciones-filtro"><button class="btn btn-primario">Buscar</button><a class="btn btn-secundario" href="{% url 'adm_inventario' %}">Limpiar</a></div>
+</form>
+<div class="fila entre">
+  <a class="btn btn-primario" href="{% url 'adm_insumo_crear' %}">+ Nuevo insumo</a>
+  <a class="btn btn-secundario" href="{% url 'adm_recetas' %}">Asociar insumos a productos</a>
+</div>
+<div class="tabla-envoltura mt-16">
+  <table class="tabla">
+    <thead><tr><th>Insumo</th><th>Stock</th><th>Mínimo</th><th>Estado</th><th>Productos</th><th class="derecha">Agregar / descontar</th></tr></thead>
+    <tbody>
+    {% for i in insumos %}
+      <tr>
+        <td><b>{{ i.nombre }}</b>{% if not i.activo %} <span class="chico suave">(inactivo)</span>{% endif %}<div><a class="chico" href="{% url 'adm_insumo_editar' i.pk %}">Editar</a></div></td>
+        <td><b>{{ i.stock_actual|floatformat:"-3" }}</b> {{ i.unidad }}</td>
+        <td>{{ i.stock_minimo|floatformat:"-3" }}</td>
+        <td><span class="etiqueta {{ i.estado_stock }}">{% if i.estado_stock == "ok" %}Suficiente{% elif i.estado_stock == "bajo" %}Bajo{% else %}Agotado{% endif %}</span></td>
+        <td>{{ i.n_productos }}</td>
+        <td>
+          <form class="mini-form" method="post" action="{% url 'adm_inventario_mover' i.pk %}">{% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <input type="number" name="cantidad" min="0" step="0.001" placeholder="Cant." required>
+            <input type="text" name="motivo" class="motivo" placeholder="Motivo (opcional)">
+            <button class="btn btn-primario btn-mini" name="accion" value="agregar">+ Agregar</button>
+            <button class="btn btn-peligro btn-mini" name="accion" value="descontar">− Descontar</button>
+          </form>
+        </td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="6" class="suave centro">No hay insumos con esos filtros.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+<h2 class="seccion-titulo mt-24">Últimos movimientos</h2>
+<div class="tabla-envoltura">
+  <table class="tabla">
+    <thead><tr><th>Fecha</th><th>Insumo</th><th>Tipo</th><th>Cantidad</th><th>Detalle</th></tr></thead>
+    <tbody>
+    {% for m in movimientos %}
+      <tr><td>{{ m.fecha|date:"d/m/Y H:i" }}</td><td>{{ m.insumo.nombre }}</td><td>{{ m.get_tipo_display }}</td>
+        <td class="{% if m.cantidad < 0 %}no{% else %}si{% endif %}">{{ m.cantidad|floatformat:"-3" }}</td>
+        <td class="chico suave">{{ m.motivo }}{% if m.usuario %} · {{ m.usuario }}{% endif %}</td></tr>
+    {% empty %}
+      <tr><td colspan="5" class="suave centro">Todavía no hay movimientos.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

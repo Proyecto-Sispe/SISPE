@@ -1,0 +1,412 @@
+/* ==========================================================================
+   SISPE - Hoja de estilos de Inicio (Landing Page)
+   Adaptada de inicio.css original con soporte responsivo y botones de acción
+   ========================================================================== */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    background-color: #171717;
+    color: #f5f5f5;
+    font-family: "Segoe UI", Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* --------------------------------- NAV ---------------------------------- */
+nav {
+    width: 100%;
+    background-color: #1f1f1f;
+    border-bottom: 2px solid #eab566;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.menu {
+    display: flex;
+    align-items: center;
+    list-style: none;
+    margin: 0 auto;
+    max-width: 1200px;
+    padding: 10px 24px;
+    gap: 10px;
+}
+
+.logo {
+    margin-right: 20px;
+    display: flex;
+    align-items: center;
+}
+
+.logo img {
+    height: 44px;
+    display: block;
+    object-fit: contain;
+}
+
+.menu li a {
+    font-weight: 600;
+    font-size: 15px;
+    padding: 8px 14px;
+    color: #e5e5e5;
+    text-decoration: none;
+    transition: color 0.2s, background-color 0.2s;
+    border-radius: 6px;
+}
+
+.menu li a:hover {
+    color: #ff9a4d;
+    background-color: rgba(234, 181, 102, 0.1);
+}
+
+.right {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-nav-login {
+    background-color: #eab566;
+    color: #14100e !important;
+    font-weight: 700 !important;
+    padding: 8px 18px !important;
+    border-radius: 6px;
+    transition: background-color 0.2s !important;
+}
+
+.btn-nav-login:hover {
+    background-color: #ff7a1a !important;
+    color: #ffffff !important;
+}
+
+/* -------------------------------- HERO ---------------------------------- */
+.hero {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 70px 40px;
+    background: linear-gradient(135deg, #1c1714 0%, #291e17 100%);
+    border-bottom: 1px solid #33291f;
+    color: white;
+}
+
+.hero-contenido {
+    max-width: 600px;
+    margin: 0 auto 0 8%;
+}
+
+.hero h1 {
+    font-size: 46px;
+    color: #eab566;
+    margin-bottom: 18px;
+    font-weight: 800;
+    line-height: 1.15;
+}
+
+.hero p {
+    font-size: 16px;
+    line-height: 1.6;
+    color: #d1d5db;
+    margin-bottom: 32px;
+}
+
+.botones {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.btn {
+    display: inline-block;
+    padding: 12px 26px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 15px;
+    transition: transform 0.15s, background-color 0.2s, border-color 0.2s;
+    cursor: pointer;
+    text-align: center;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
+.btn-principal {
+    background-color: #eab566;
+    color: #14100e;
+    border: 1px solid #eab566;
+}
+
+.btn-principal:hover {
+    background-color: #ff7a1a;
+    border-color: #ff7a1a;
+    color: #ffffff;
+}
+
+.btn-secundario {
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    color: #f5f5f5;
+    background-color: transparent;
+}
+
+.btn-secundario:hover {
+    border-color: #eab566;
+    color: #eab566;
+    background-color: rgba(234, 181, 102, 0.08);
+}
+
+.btn-carta {
+    background-color: #3ecf8e;
+    color: #0d2c1f;
+    border: 1px solid #3ecf8e;
+}
+
+.btn-carta:hover {
+    background-color: #34b37a;
+    color: #ffffff;
+}
+
+.hero-icono {
+    margin: 0 8% 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.hero-icono img {
+    width: 220px;
+    height: auto;
+    filter: drop-shadow(0 10px 25px rgba(0,0,0,0.4));
+}
+
+/* ------------------------------- MODULOS -------------------------------- */
+.modulos {
+    padding: 60px 40px;
+    background-color: #171717;
+    text-align: center;
+}
+
+.modulos h2 {
+    color: #eab566;
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 40px;
+    position: relative;
+    display: inline-block;
+}
+
+.modulos h2::after {
+    content: "";
+    display: block;
+    width: 60px;
+    height: 3px;
+    background: #ff7a1a;
+    margin: 8px auto 0 auto;
+    border-radius: 2px;
+}
+
+.contenedor-modulos {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 25px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.card {
+    background-color: #211c18;
+    border: 1px solid #3d2f25;
+    border-radius: 12px;
+    padding: 30px 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+    text-align: left;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    border-color: #eab566;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+}
+
+.card .card-icono {
+    font-size: 32px;
+    margin-bottom: 12px;
+}
+
+.card h3 {
+    color: #eab566;
+    font-size: 20px;
+    margin-bottom: 12px;
+    font-weight: 700;
+}
+
+.card p {
+    font-size: 14px;
+    color: #a99a8c;
+    line-height: 1.6;
+    margin-bottom: 20px;
+    flex-grow: 1;
+}
+
+.btn-card {
+    display: inline-block;
+    background-color: #eab566;
+    color: #14100e;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 10px 18px;
+    border-radius: 6px;
+    text-decoration: none;
+    text-align: center;
+    transition: background-color 0.2s, color 0.2s;
+    align-self: flex-start;
+}
+
+.btn-card:hover {
+    background-color: #ff7a1a;
+    color: #ffffff;
+}
+
+/* ------------------------------- FOOTER --------------------------------- */
+.footer {
+    width: 100%;
+    background-color: #12100e;
+    color: #a3a3a3;
+    padding: 30px 40px;
+    margin-top: auto;
+    border-top: 2px solid #eab566;
+}
+
+.footer-contenido {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.footer-izq h3 {
+    color: #eab566;
+    font-size: 18px;
+    margin: 0 0 4px 0;
+}
+
+.footer-izq p {
+    font-size: 13px;
+    color: #888888;
+}
+
+.footer-der p {
+    font-size: 13px;
+    color: #888888;
+}
+
+.footer-links {
+    display: flex;
+    gap: 16px;
+}
+
+.footer-links a {
+    color: #a99a8c;
+    text-decoration: none;
+    font-size: 13px;
+    transition: color 0.2s;
+}
+
+.footer-links a:hover {
+    color: #eab566;
+}
+
+/* ----------------------------- RESPONSIVE ------------------------------- */
+@media (max-width: 992px) {
+    .contenedor-modulos {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .hero {
+        padding: 50px 30px;
+    }
+    .hero-contenido {
+        margin: 0;
+    }
+    .hero-icono {
+        margin: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .menu {
+        flex-wrap: wrap;
+        padding: 10px 16px;
+        justify-content: center;
+    }
+
+    .logo {
+        margin-right: 0;
+        width: 100%;
+        text-align: center;
+        justify-content: center;
+        margin-bottom: 8px;
+    }
+
+    .menu li {
+        margin: 4px 6px;
+    }
+
+    .right {
+        margin-left: 0;
+        margin-top: 6px;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .hero {
+        flex-direction: column;
+        text-align: center;
+        padding: 40px 20px;
+        gap: 30px;
+    }
+
+    .hero h1 {
+        font-size: 32px;
+    }
+
+    .hero p {
+        margin: 0 auto 24px auto;
+    }
+
+    .botones {
+        justify-content: center;
+    }
+
+    .modulos {
+        padding: 40px 20px;
+    }
+
+    .contenedor-modulos {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .footer-contenido {
+        flex-direction: column;
+        text-align: center;
+    }
+}

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Administración del sistema | SISPE</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: "Segoe UI", Arial, sans-serif; background: #0d0d0d; color: #f5f5f5; }
+    header { background: #171717; border-bottom: 2px solid #ff6a00; padding: 16px 28px; display: flex; justify-content: space-between; align-items: center; }
+    .brand { color: #ff7b00; font-weight: bold; font-size: 20px; }
+    .badge { background: #ff6a00; color: #0d0d0d; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: bold; }
+    a.logout { color: #ff7b00; text-decoration: none; margin-left: 16px; font-size: 14px; }
+    main { padding: 28px; max-width: 1200px; margin: 0 auto; }
+    h1 { color: #ff7b00; margin: 0 0 4px; }
+    .sub { color: #a3a3a3; margin: 0 0 22px; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px; margin-bottom: 30px; }
+    .stat { background: #171717; border: 1px solid #2b2b2b; border-left: 4px solid #ff6a00; border-radius: 8px; padding: 14px 16px; }
+    .stat small { display: block; color: #a3a3a3; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; }
+    .stat b { font-size: 24px; }
+    .stat.alerta { border-left-color: #ef4444; }
+    section { margin-bottom: 28px; }
+    section h2 { font-size: 14px; text-transform: uppercase; letter-spacing: .08em; color: #a3a3a3; margin: 0 0 12px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; }
+    .grid a { display: block; background: #171717; border: 1px solid #2b2b2b; border-radius: 10px; padding: 18px; color: #f5f5f5; text-decoration: none; }
+    .grid a:hover { border-color: #ff6a00; }
+    .grid strong { display: block; color: #ff7b00; margin-bottom: 6px; font-size: 16px; }
+    .grid span { color: #a3a3a3; font-size: 13px; line-height: 1.4; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">SISPE · Administración</div>
+    <div>
+      <a class="logout" href="{% url 'portal' %}">Portal</a>
+      <span class="badge">{{ rol }}</span>
+      <a class="logout" href="{% url 'logout' %}">Cerrar sesión</a>
+    </div>
+  </header>
+  <main>
+    <h1>Administración del sistema</h1>
+    <p class="sub">Bienvenido, <strong>{{ usuario }}</strong>.</p>
+
+    <div class="stats">
+      <div class="stat"><small>Ventas de hoy</small><b>${{ ventas_hoy|floatformat:0 }}</b></div>
+      <div class="stat"><small>Facturas hoy</small><b>{{ facturas_hoy }}</b></div>
+      <div class="stat"><small>Pedidos activos</small><b>{{ pedidos_activos }}</b></div>
+      <div class="stat"><small>Mesas ocupadas</small><b>{{ mesas_ocupadas }} / {{ mesas_total }}</b></div>
+      <div class="stat {% if insumos_bajos %}alerta{% endif %}"><small>Insumos por reponer</small><b>{{ insumos_bajos }}</b></div>
+      <div class="stat"><small>Usuarios</small><b>{{ usuarios }}</b></div>
+    </div>
+
+    <section>
+      <h2>Administración del sistema</h2>
+      <div class="grid">
+        <a href="{% url 'adm_usuarios' %}"><strong>Gestión de usuarios</strong><span>Registrar personas, consultar el listado, editar sus datos y cambiar su rol.</span></a>
+        <a href="{% url 'adm_menu' %}"><strong>Gestión de menú</strong><span>Buscador multicriterio, edición de productos y disponible / no disponible ({{ no_disponibles }} ocultos).</span></a>
+        <a href="{% url 'adm_inventario' %}"><strong>Gestión de inventarios</strong><span>Stock en tiempo real, agregar o descontar cantidades y alertas de stock bajo.</span></a>
+        <a href="{% url 'adm_recetas' %}"><strong>Insumos por producto</strong><span>Qué materias primas gasta cada plato; se descuentan al confirmar el pedido.</span></a>
+      </div>
+    </section>
+
+    <section>
+      <h2>Facturación y reportes</h2>
+      <div class="grid">
+        <a href="{% url 'adm_facturas' %}"><strong>Facturas</strong><span>Historial por pedido con filtros por mesa, día, semana, mes, año, cliente o valor.</span></a>
+        <a href="{% url 'reportes' %}"><strong>Reportes de ventas</strong><span>Ventas por categoría, platos más vendidos y combos.</span></a>
+        <a href="{% url 'inicio' %}"><strong>Estadísticas</strong><span>Resumen del esquema SISPE.</span></a>
+      </div>
+    </section>
+
+    <section>
+      <h2>Atención y pedidos</h2>
+      <div class="grid">
+        <a href="{% url 'mesas_list' %}"><strong>Gestión de mesas</strong><span>Código QR de cada mesa, ubicación, capacidad y liberar mesa.</span></a>
+        <a href="{% url 'adm_pedidos' %}"><strong>Pedidos activos</strong><span>Tarjetas con los productos pedidos y los comentarios de cada cliente.</span></a>
+        <a href="{% url 'cocina_panel' %}"><strong>Cocina</strong><span>Tablero de comandas por estado.</span></a>
+        <a href="{% url 'admin:index' %}"><strong>Admin de Django</strong><span>Acceso directo a todas las tablas.</span></a>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

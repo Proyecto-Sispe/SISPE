@@ -1,0 +1,255 @@
+{% extends "base.html" %}
+
+{% block titulo %}Factura del Pedido #{{ pedido.id_pedido }} · Sabor Urbano{% endblock %}
+{% block seccion %}Facturación{% endblock %}
+
+{% block contenido %}
+<section class="hero" style="text-align: center; margin-bottom: 24px;">
+  <h1>Factura <span>Detallada</span></h1>
+  <p>Revisa el desglose de tu consumo, cantidades, impuestos y realiza tu pago en línea.</p>
+  <div style="display: inline-block; background: rgba(62, 207, 142, 0.12); color: #3ecf8e; border: 1px solid rgba(62, 207, 142, 0.3); padding: 6px 16px; border-radius: 999px; font-size: 13px; font-weight: 600; margin-top: 8px;">
+    ✓ Mesa #{{ pedido.id_mesa }} liberada y disponible
+  </div>
+</section>
+
+<div class="panel" style="max-width: 820px; margin: 0 auto; padding: 28px; background: #1c1714; border: 1px solid #33291f; border-radius: 16px;">
+  
+  {# Cabecera de la factura #}
+  <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid #33291f; padding-bottom: 20px; margin-bottom: 20px; flex-wrap: wrap; gap: 16px;">
+    <div>
+      <div style="font-size: 20px; font-weight: 800; color: #ff9a4d;">Sabor Urbano</div>
+      <div class="suave chico">Restaurante & Bar · Factura de Venta</div>
+      <div style="font-size: 14px; margin-top: 6px;">Factura N.º: <b style="font-family: monospace; color: #f4ece4;">{{ factura.numero }}</b></div>
+      <div class="suave chico">Pedido asociado: #{{ pedido.id_pedido }}</div>
+    </div>
+    
+    <div style="text-align: right;">
+      <div style="font-size: 13px;">Fecha: <b>{{ factura.fecha|date:"d/m/Y H:i" }}</b></div>
+      <div style="font-size: 13px;">Mesa: <b>Mesa {{ pedido.id_mesa }}</b></div>
+      <div style="font-size: 13px;">Cliente: <b>{{ factura.cliente_nombre|default:"Cliente general" }}</b></div>
+      <div style="margin-top: 8px;">
+        {% if factura.estado == 'pagada' %}
+          <span class="etiqueta emitido" style="background: rgba(62, 207, 142, 0.2); color: #3ecf8e; border: 1px solid #3ecf8e; padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 700;">
+            ✓ Pagada
+          </span>
+        {% else %}
+          <span class="etiqueta" style="background: rgba(255, 154, 77, 0.2); color: #ff9a4d; border: 1px solid #ff9a4d; padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 700;">
+            Pendiente de pago
+          </span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  {# Tabla detallada de productos consumidos #}
+  <div class="seccion-titulo" style="margin: 0 0 12px 0;">
+    <h3 style="margin: 0; font-size: 16px; color: #f4ece4;">Desglose de productos consumidos</h3>
+  </div>
+
+  <table class="tabla factura-tabla" style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
+    <thead>
+      <tr style="border-bottom: 1px solid #33291f; text-align: left; color: #a99a8c; font-size: 13px;">
+        <th style="padding: 10px 8px;">Producto / Ítem</th>
+        <th style="padding: 10px 8px; text-align: center;">Cantidad</th>
+        <th style="padding: 10px 8px; text-align: right;">Precio Unit.</th>
+        <th style="padding: 10px 8px; text-align: right;">Subtotal</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for detalle in pedido.detalles.all %}
+        <tr style="border-bottom: 1px solid rgba(51, 41, 31, 0.6); font-size: 14px;">
+          <td style="padding: 12px 8px;">
+            <div style="font-weight: 600; color: #f4ece4;">{{ detalle.descripcion }}</div>
+            {% if detalle.adiciones.all %}
+              <div style="margin-top: 4px;">
+                {% for ad in detalle.adiciones.all %}
+                  <span class="extra-tag" style="font-size: 11px; background: #241d19; padding: 2px 6px; border-radius: 4px; color: #ff9a4d;">
+                    + {{ ad.adicion.nombre }} (${{ ad.precio|floatformat:0 }})
+                  </span>
+                {% endfor %}
+              </div>
+            {% endif %}
+            {% if detalle.notas %}
+              <div class="chico suave" style="font-style: italic; margin-top: 2px;">Nota: {{ detalle.notas }}</div>
+            {% endif %}
+          </td>
+          <td style="padding: 12px 8px; text-align: center; font-weight: 600;">
+            {{ detalle.cantidad }}
+          </td>
+          <td style="padding: 12px 8px; text-align: right; color: #a99a8c;">
+            ${{ detalle.precio_unitario|floatformat:0 }}
+          </td>
+          <td style="padding: 12px 8px; text-align: right; font-weight: 700; color: #f4ece4;">
+            ${{ detalle.valor_venta|floatformat:0 }}
+          </td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="4" class="suave centro" style="padding: 24px;">No hay ítems registrados en este pedido.</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {# Desglose de liquidación e impuestos #}
+  <div style="background: #241d19; border: 1px solid #33291f; border-radius: 12px; padding: 20px; margin-bottom: 28px;">
+    <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 15px;">
+      <span class="suave">Subtotal de consumo:</span>
+      <b style="color: #f4ece4;">${{ subtotal|floatformat:0 }}</b>
+    </div>
+
+    <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 15px;">
+      <span class="suave">Impuesto al consumo (8%):</span>
+      <b style="color: #f4ece4;">${{ impuesto|floatformat:0 }}</b>
+    </div>
+
+    {% if factura.estado != 'pagada' %}
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 10px 12px; background: rgba(255, 154, 77, 0.08); border: 1px solid rgba(255, 154, 77, 0.2); border-radius: 8px;">
+        <label style="cursor: pointer; display: flex; align-items: center; gap: 8px; margin: 0; font-size: 14px;">
+          <input type="checkbox" id="checkPropina" checked style="width: 17px; height: 17px; accent-color: #ff9a4d; cursor: pointer;">
+          <span>Incluir propina sugerida voluntaria (10%)</span>
+        </label>
+        <b id="valorPropina" style="color: #ff9a4d;">+${{ propina_sugerida|floatformat:0 }}</b>
+      </div>
+    {% elif factura.propina > 0 %}
+      <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 15px;">
+        <span class="suave">Propina voluntaria pagada (10%):</span>
+        <b style="color: #ff9a4d;">${{ factura.propina|floatformat:0 }}</b>
+      </div>
+    {% endif %}
+
+    <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #33291f; padding-top: 14px; margin-top: 8px;">
+      <div>
+        <span style="font-size: 18px; font-weight: 800; color: #f4ece4;">Total a pagar:</span>
+        <div class="suave chico">Pesos colombianos (COP)</div>
+      </div>
+      <div style="font-size: 28px; font-weight: 900; color: #ff9a4d;" id="totalDisplay">
+        ${{ total_a_pagar|floatformat:0 }}
+      </div>
+    </div>
+  </div>
+
+  {# Sección de Pago PSE o Comprobante #}
+  {% if factura.estado == 'pagada' %}
+    <div style="background: rgba(62, 207, 142, 0.08); border: 1px solid rgba(62, 207, 142, 0.3); border-radius: 12px; padding: 24px; text-align: center;">
+      <div style="font-size: 40px; margin-bottom: 8px;">✓</div>
+      <h3 style="color: #3ecf8e; margin: 0 0 6px 0;">¡Esta factura ya ha sido pagada con éxito!</h3>
+      <p class="suave chico" style="margin-bottom: 16px;">
+        Método: <strong>{{ factura.metodo_pago }}</strong> · CUS: <strong style="font-family: monospace;">{{ factura.transaccion_id }}</strong>
+      </p>
+      <a class="btn" href="{% url 'comprobante_pago' pedido.id_pedido %}" style="background: #10b981; color: #ffffff; font-weight: 700; padding: 12px 24px;">
+        🛡️ Ver comprobante de salida digital
+      </a>
+    </div>
+  {% else %}
+    {# Formulario interactivo de Pago en línea PSE #}
+    <div style="border: 1px solid #33291f; border-radius: 12px; padding: 24px; background: #171210;">
+      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+        <div style="background: #ffffff; padding: 4px 10px; border-radius: 6px; font-weight: 900; color: #0d2c65; font-size: 16px; letter-spacing: 1px;">
+          PSE
+        </div>
+        <div>
+          <h3 style="margin: 0; font-size: 18px; color: #f4ece4;">Pago en línea a través de PSE</h3>
+          <p class="suave chico" style="margin: 2px 0 0 0;">Débito seguro desde cualquier banco en Colombia (cuentas de ahorros o corriente)</p>
+        </div>
+      </div>
+
+      <form method="post" action="{% url 'pagar_pse' pedido.id_pedido %}">
+        {% csrf_token %}
+        <input type="hidden" name="incluir_propina" id="inputPropinaOculto" value="1">
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 16px;">
+          <div>
+            <label style="display: block; font-size: 13px; color: #a99a8c; margin-bottom: 6px;">Selecciona tu Banco *</label>
+            <select name="banco" required style="width: 100%; padding: 10px 12px; background: #241d19; color: #f4ece4; border: 1px solid #33291f; border-radius: 8px; font-size: 14px;">
+              <option value="">-- Elige tu entidad financiera --</option>
+              {% for cod, nom in bancos_pse %}
+                <option value="{{ cod }}">{{ nom }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div>
+            <label style="display: block; font-size: 13px; color: #a99a8c; margin-bottom: 6px;">Tipo de cliente</label>
+            <select name="tipo_cliente" style="width: 100%; padding: 10px 12px; background: #241d19; color: #f4ece4; border: 1px solid #33291f; border-radius: 8px; font-size: 14px;">
+              <option value="natural">Persona Natural</option>
+              <option value="juridica">Persona Jurídica</option>
+            </select>
+          </div>
+
+          <div>
+            <label style="display: block; font-size: 13px; color: #a99a8c; margin-bottom: 6px;">Nombre del titular *</label>
+            <input type="text" name="nombre" value="{{ factura.cliente_nombre }}" required placeholder="Nombre completo"
+                   style="width: 100%; padding: 10px 12px; background: #241d19; color: #f4ece4; border: 1px solid #33291f; border-radius: 8px; font-size: 14px;">
+          </div>
+
+          <div>
+            <label style="display: block; font-size: 13px; color: #a99a8c; margin-bottom: 6px;">Documento de identidad *</label>
+            <input type="text" name="documento" value="{{ factura.cliente_documento }}" required placeholder="N.º de cédula o NIT"
+                   style="width: 100%; padding: 10px 12px; background: #241d19; color: #f4ece4; border: 1px solid #33291f; border-radius: 8px; font-size: 14px;">
+          </div>
+
+          <div style="grid-column: 1 / -1;">
+            <label style="display: block; font-size: 13px; color: #a99a8c; margin-bottom: 6px;">Correo electrónico registrado en PSE *</label>
+            <input type="email" name="email" required placeholder="correo@ejemplo.com"
+                   style="width: 100%; padding: 10px 12px; background: #241d19; color: #f4ece4; border: 1px solid #33291f; border-radius: 8px; font-size: 14px;">
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #33291f; padding-top: 16px; flex-wrap: wrap; gap: 12px;">
+          <div>
+            <span class="suave chico">Monto total que será debitado:</span>
+            <div style="font-size: 22px; font-weight: 800; color: #3ecf8e;" id="totalDebitarDisplay">
+              ${{ total_con_propina|floatformat:0 }}
+            </div>
+          </div>
+
+          <button type="submit" class="btn" style="background: #ff7a1a; color: #14100e; font-weight: 800; font-size: 16px; padding: 12px 32px; border: none; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+            🔒 Pagar con PSE
+          </button>
+        </div>
+      </form>
+    </div>
+  {% endif %}
+
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid #33291f;">
+    <a class="btn btn-secundario" href="{% url 'seguimiento' pedido.id_pedido %}">
+      ← Volver al pedido
+    </a>
+    <button class="btn btn-secundario" onclick="window.print()">
+      🖨️ Imprimir factura
+    </button>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function() {
+  const checkPropina = document.getElementById('checkPropina');
+  const inputOculto = document.getElementById('inputPropinaOculto');
+  const totalDisplay = document.getElementById('totalDisplay');
+  const totalDebitar = document.getElementById('totalDebitarDisplay');
+
+  const conPropina = {{ total_con_propina }};
+  const sinPropina = {{ total_con_impuesto }};
+
+  function formatoMoneda(valor) {
+    return '$' + Math.round(valor).toLocaleString('es-CO');
+  }
+
+  if (checkPropina) {
+    checkPropina.addEventListener('change', function() {
+      const activo = checkPropina.checked;
+      if (inputOculto) inputOculto.value = activo ? '1' : '0';
+      const valor = activo ? conPropina : sinPropina;
+      if (totalDisplay) totalDisplay.textContent = formatoMoneda(valor);
+      if (totalDebitar) totalDebitar.textContent = formatoMoneda(valor);
+    });
+    // Iniciar con propina seleccionada
+    if (totalDisplay) totalDisplay.textContent = formatoMoneda(conPropina);
+    if (totalDebitar) totalDebitar.textContent = formatoMoneda(conPropina);
+  }
+})();
+</script>
+{% endblock %}

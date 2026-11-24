@@ -1,0 +1,52 @@
+{% extends "administracion/_base.html" %}
+{% block titulo %}Factura {{ factura.numero }} · SISPE{% endblock %}
+{% block adm %}
+<div class="panel" style="max-width:760px;margin:0 auto">
+  <div class="fila entre">
+    <div><h2 class="mt-0">Factura {{ factura.numero }}</h2><div class="suave chico">Sabor Urbano · SISPE</div></div>
+    <span class="etiqueta {{ factura.estado }}">{{ factura.get_estado_display }}</span>
+  </div>
+  <p class="chico">
+    Fecha: <b>{{ factura.fecha|date:"d/m/Y H:i" }}</b> · Mesa <b>{{ factura.mesa }}</b> · Pedido <b>#{{ factura.pedido_id }}</b><br>
+    Cliente: <b>{{ factura.cliente_nombre|default:"Consumidor final" }}</b>{% if factura.cliente_documento %} · Documento {{ factura.cliente_documento }}{% endif %}
+  </p>
+  <table class="tabla factura-tabla">
+    <thead><tr><th>Producto</th><th class="derecha">Cant.</th><th class="derecha">Unitario</th><th class="derecha">Subtotal</th></tr></thead>
+    <tbody>
+    {% for d in pedido.detalles.all %}
+      <tr>
+        <td>{{ d.descripcion }}{% for a in d.adiciones.all %}<div class="chico suave">+ {{ a.adicion.nombre }} (${{ a.precio|floatformat:0 }})</div>{% endfor %}{% if d.notas %}<div class="chico suave"><em>{{ d.notas }}</em></div>{% endif %}</td>
+        <td class="derecha">{{ d.cantidad }}</td>
+        <td class="derecha">${{ d.precio_unitario|floatformat:0 }}</td>
+        <td class="derecha">${{ d.valor_venta|floatformat:0 }}</td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="4" class="suave centro">El pedido no tiene detalles.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <div style="background:#1c1714;border:1px solid #33291f;border-radius:10px;padding:16px;margin-top:16px">
+    <div class="fila entre" style="margin-bottom:6px"><span class="suave">Subtotal consumo:</span><b>${{ factura.subtotal|floatformat:0 }}</b></div>
+    <div class="fila entre" style="margin-bottom:6px"><span class="suave">Impoconsumo (8%):</span><b>${{ factura.impuesto|floatformat:0 }}</b></div>
+    {% if factura.propina > 0 %}
+    <div class="fila entre" style="margin-bottom:6px"><span class="suave">Propina voluntaria (10%):</span><b>${{ factura.propina|floatformat:0 }}</b></div>
+    {% endif %}
+    <div class="fila entre" style="border-top:1px solid #33291f;padding-top:10px;margin-top:8px">
+      <span style="font-size:17px;font-weight:700">Total a pagar / pagado:</span>
+      <b style="font-size:22px;color:#ff9a4d">${{ factura.total|floatformat:0 }}</b>
+    </div>
+    {% if factura.metodo_pago %}
+    <div style="margin-top:12px;padding-top:10px;border-top:1px dashed #33291f;font-size:13px">
+      <div>Método de pago: <b>{{ factura.metodo_pago }}</b></div>
+      {% if factura.transaccion_id %}
+      <div>CUS / Transacción: <b style="font-family:monospace;color:#3ecf8e">{{ factura.transaccion_id }}</b></div>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+  <div class="fila mt-16 no-imprimir">
+    <button class="btn btn-primario" onclick="window.print()">Imprimir</button>
+    <a class="btn btn-secundario" href="{% url 'adm_facturas' %}">Volver</a>
+  </div>
+</div>
+{% endblock %}

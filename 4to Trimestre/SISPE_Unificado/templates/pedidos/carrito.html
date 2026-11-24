@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block titulo %}Carrito · Sabor Urbano{% endblock %}
+{% block seccion %}Carrito{% endblock %}
+
+{% block contenido %}
+
+<section class="hero">
+  <h1>Tu <span>pedido</span></h1>
+  <p>Revisa las cantidades y las adiciones antes de enviarlo a la cocina.</p>
+  {% if mesa %}
+    <div class="hero-mesa">Mesa <b>{{ mesa }}</b></div>
+  {% else %}
+    <div class="hero-mesa">Sin mesa asignada · escanea el QR de tu mesa</div>
+  {% endif %}
+</section>
+
+{% if lineas %}
+  <div class="panel">
+    {% for linea in lineas %}
+      <div class="linea-carrito">
+        <div class="linea-foto">
+          {% if linea.foto %}
+            <img src="{{ linea.foto.url }}" alt="{{ linea.nombre }}">
+          {% else %}
+            {{ linea.nombre|slice:":1"|upper }}
+          {% endif %}
+        </div>
+
+        <div class="linea-info">
+          <h4>{{ linea.nombre }}</h4>
+          <div class="meta">
+            ${{ linea.base|floatformat:0 }} base
+            {% if linea.extra %} + ${{ linea.extra|floatformat:0 }} en adiciones{% endif %}
+            · unitario ${{ linea.unitario|floatformat:0 }}
+          </div>
+          {% if linea.adiciones %}
+            <div>
+              {% for adicion in linea.adiciones %}
+                <span class="extra-tag">+ {{ adicion.nombre }} ${{ adicion.precio|floatformat:0 }}</span>
+              {% endfor %}
+            </div>
+          {% endif %}
+          {% if linea.notas %}
+            <div class="meta">Nota: {{ linea.notas }}</div>
+          {% endif %}
+        </div>
+
+        <div class="linea-acciones">
+          <form method="post" action="{% url 'carrito_actualizar' linea.clave %}">
+            {% csrf_token %}
+            <div class="control-cantidad">
+              <button type="submit" name="accion" value="restar" aria-label="Quitar uno">−</button>
+              <span>{{ linea.cantidad }}</span>
+              <button type="submit" name="accion" value="sumar" aria-label="Sumar uno">+</button>
+            </div>
+          </form>
+
+          <div class="derecha">
+            <div class="precio">${{ linea.subtotal|floatformat:0 }}</div>
+            <form method="post" action="{% url 'carrito_quitar' linea.clave %}">
+              {% csrf_token %}
+              <button class="btn btn-peligro btn-mini" type="submit">Quitar</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+
+    <div class="resumen-total">
+      <span>Total del pedido</span>
+      <b>${{ total|floatformat:0 }}</b>
+    </div>
+  </div>
+
+  <div class="panel mt-16">
+    <form method="post" action="{% url 'confirmar' %}">
+      {% csrf_token %}
+      <input type="hidden" name="mesa" value="{{ mesa }}">
+
+      <div class="grupo-campo">
+        <label for="observaciones">Observaciones para la cocina (opcional)</label>
+        <textarea class="campo" id="observaciones" name="observaciones" rows="2"
+                  placeholder="Ej. servir todo junto, alergias…"></textarea>
+      </div>
+
+      <div class="fila entre">
+        <form method="post" action="{% url 'carrito_vaciar' %}" style="display:inline">
+          {% csrf_token %}
+          <button class="btn btn-secundario" type="submit">Vaciar carrito</button>
+        </form>
+        <button class="btn btn-primario" type="submit">Confirmar y enviar a cocina</button>
+      </div>
+    </form>
+  </div>
+
+  <p class="centro mt-16">
+    <a class="btn btn-secundario" href="{% url 'carta' %}{% if mesa %}?mesa={{ mesa }}{% endif %}">
+      Seguir pidiendo
+    </a>
+  </p>
+
+{% else %}
+  <div class="vacio">
+    <div class="icono">🛒</div>
+    <p>Tu carrito está vacío.</p>
+    <a class="btn btn-primario mt-16" href="{% url 'carta' %}{% if mesa %}?mesa={{ mesa }}{% endif %}">
+      Ver la carta
+    </a>
+  </div>
+{% endif %}
+
+{% endblock %}

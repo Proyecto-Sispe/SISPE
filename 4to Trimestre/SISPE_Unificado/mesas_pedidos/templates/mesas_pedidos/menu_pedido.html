@@ -1,0 +1,57 @@
+{% extends "mesas_pedidos/base.html" %}
+{% block title %}Pedido #{{ pedido.id }} · SISPE{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <h2 class="h4 mb-0">Pedido #{{ pedido.id }} · Mesa {{ pedido.mesa.id }}{% if pedido.sesion_qr %} · {{ pedido.sesion_qr.nombre_cliente }}{% endif %}</h2>
+    <div>
+        <span class="badge bg-dark fs-6">Total: ${{ total_actual }}</span>
+        <a href="{% url 'resumen_pedido' pedido.id %}" class="btn btn-outline-secondary btn-sm">Ver resumen</a>
+    </div>
+</div>
+{% if pedido.confirmado %}
+<div class="alert alert-info">Este pedido ya fue enviado a cocina.</div>
+{% endif %}
+{% for categoria in categorias %}
+<h3 class="h5 mt-4">{{ categoria.nom_categoria }}</h3>
+<div class="row g-3">
+    {% for item in categoria.productos.all %}
+    <div class="col-md-4 col-sm-6">
+        <div class="card h-100 shadow-sm">
+            {% if item.foto %}<img src="{{ item.foto.url }}" class="card-img-top" alt="{{ item.productos }}" style="height:160px;object-fit:cover">{% endif %}
+            <div class="card-body d-flex flex-column">
+                <div class="d-flex justify-content-between"><h4 class="h6">{{ item.productos }}</h4><span class="fw-bold text-success">${{ item.precio }}</span></div>
+                <p class="small text-muted">{{ item.descripcion }}</p>
+                {% if not pedido.confirmado %}
+                <form method="post" class="mt-auto">{% csrf_token %}
+                    <input type="hidden" name="id_menu" value="{{ item.id }}">
+                    <div class="input-group input-group-sm mb-2">
+                        <span class="input-group-text">Cantidad</span>
+                        <input type="number" name="cantidad" value="1" min="1" class="form-control">
+                    </div>
+                    {% if adiciones %}
+                    <div class="small mb-2">
+                        {% for ad in adiciones %}
+                        <label class="me-2"><input type="checkbox" name="adiciones" value="{{ ad.id }}"> {{ ad.nombre }} (+${{ ad.precio }})</label>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    <input type="text" name="observaciones_item" class="form-control form-control-sm mb-2" placeholder="Observaciones">
+                    <button class="btn btn-primary btn-sm w-100">Agregar</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <p class="text-muted">Sin productos en esta categoría.</p>
+    {% endfor %}
+</div>
+{% endfor %}
+{% if not pedido.confirmado %}
+<form method="post" action="{% url 'confirmar_pedido' pedido.id %}" class="card card-body mt-4 shadow-sm">{% csrf_token %}
+    <label class="form-label">Observaciones del pedido</label>
+    <textarea name="observaciones_pedido" class="form-control mb-2" rows="2"></textarea>
+    <button class="btn btn-success">Confirmar y enviar a cocina</button>
+</form>
+{% endif %}
+{% endblock %}

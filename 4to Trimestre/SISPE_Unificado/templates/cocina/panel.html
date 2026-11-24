@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block titulo %}Cocina · Sabor Urbano{% endblock %}
+{% block seccion %}Cocina{% endblock %}
+
+{% block contenido %}
+
+<section class="hero">
+  <h1>Panel de <span>cocina</span></h1>
+  <p>Comandas activas. El tablero se refresca solo cada 8 segundos.</p>
+  <div class="fila mt-16">
+    <div class="hero-mesa">Activas <b>{{ total_activos }}</b></div>
+    <div class="hero-mesa">Pedidos hoy <b>{{ pedidos_hoy }}</b></div>
+    <div class="hero-mesa">Ventas hoy <b>${{ ventas_hoy|floatformat:0 }}</b></div>
+    <div class="hero-mesa">Chef <b>{{ user.username }}</b></div>
+  </div>
+</section>
+
+<div class="tablero">
+  {% for columna in columnas %}
+    <div class="columna">
+      <div class="columna-cabecera">
+        <h3>{{ columna.titulo }}</h3>
+        <span class="cuenta">{{ columna.pedidos|length }}</span>
+      </div>
+
+      {% for pedido in columna.pedidos %}
+        <div class="comanda">
+          <div class="comanda-top">
+            <b>#{{ pedido.id_pedido }} · Mesa {{ pedido.id_mesa }}</b>
+            <span class="minutos {% if pedido.minutos_espera > 15 %}tarde{% endif %}">
+              {{ pedido.minutos_espera }} min
+            </span>
+          </div>
+
+          <div class="barra-avance"><i style="width: {{ pedido.avance }}%"></i></div>
+
+          <ul>
+            {% for detalle in pedido.detalles.all %}
+              <li>
+                <b>{{ detalle.cantidad }}× {{ detalle.descripcion }}</b>
+                {% for extra in detalle.adiciones.all %}
+                  <span class="extra-tag">+ {{ extra.adicion.nombre }}</span>
+                {% endfor %}
+                {% if detalle.notas %}<em> · {{ detalle.notas }}</em>{% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+
+          {% if pedido.observaciones %}
+            <p class="chico suave mb-0">Nota general: {{ pedido.observaciones }}</p>
+          {% endif %}
+
+          <div class="fila mt-16">
+            {% if pedido.siguiente_estado %}
+              <form method="post" action="{% url 'cocina_estado' pedido.id_pedido %}">
+                {% csrf_token %}
+                <input type="hidden" name="estado" value="{{ pedido.siguiente_estado }}">
+                <button class="btn btn-primario btn-mini" type="submit">
+                  {{ pedido.siguiente_etiqueta }}
+                </button>
+              </form>
+            {% endif %}
+            <form method="post" action="{% url 'cocina_estado' pedido.id_pedido %}">
+              {% csrf_token %}
+              <input type="hidden" name="estado" value="cancelado">
+              <button class="btn btn-peligro btn-mini" type="submit">Cancelar</button>
+            </form>
+          </div>
+        </div>
+      {% empty %}
+        <p class="chico suave centro">Sin comandas aquí.</p>
+      {% endfor %}
+    </div>
+  {% endfor %}
+</div>
+
+<p class="centro mt-24">
+  <a class="btn btn-secundario" href="{% url 'cocina_qr' %}">Generar QR de mesas</a>
+  <a class="btn btn-secundario" href="{% url 'reportes' %}">Ver reportes</a>
+</p>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+setTimeout(function () { window.location.reload(); }, 8000);
+</script>
+{% endblock %}

@@ -1,0 +1,302 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block titulo %}Carta · Sabor Urbano{% endblock %}
+{% block seccion %}Carta{% endblock %}
+
+{% block contenido %}
+
+<section class="hero">
+  <h1>La carta de <span>Sabor Urbano</span></h1>
+  <p>Elige tus platos, súmales adiciones y envía el pedido. La cocina lo recibe al instante.</p>
+  {% if mesa %}
+    <div class="hero-mesa">Mesa <b>{{ mesa }}</b>{% if request.session.cliente_mesa.nombre %} · Hola, <b>{{ request.session.cliente_mesa.nombre }}</b>{% endif %} · pedido ligado a esta mesa</div>
+  {% else %}
+    <div class="hero-mesa">Escanea el QR de tu mesa para que el pedido llegue con su número</div>
+  {% endif %}
+</section>
+
+<form class="buscador" method="get" action="{% url 'carta' %}">
+  {% if mesa %}<input type="hidden" name="mesa" value="{{ mesa }}">{% endif %}
+  {% if cat_filtro %}<input type="hidden" name="cat" value="{{ cat_filtro }}">{% endif %}
+  <input type="search" name="q" value="{{ busqueda }}"
+         placeholder="Buscar un plato, un combo o un ingrediente…">
+  <button class="btn btn-primario" type="submit">Buscar</button>
+  {% if busqueda or cat_filtro %}
+    <a class="btn btn-secundario" href="{% url 'carta' %}{% if mesa %}?mesa={{ mesa }}{% endif %}">Limpiar</a>
+  {% endif %}
+</form>
+
+<div class="chips">
+  <a class="chip {% if not cat_filtro %}activo{% endif %}"
+     href="{% url 'carta' %}?{% if mesa %}mesa={{ mesa }}&{% endif %}{% if busqueda %}q={{ busqueda }}{% endif %}">Todo</a>
+  {% for categoria in categorias %}
+    <a class="chip {% if cat_filtro == categoria.id_categoria|stringformat:'s' %}activo{% endif %}"
+       href="{% url 'carta' %}?cat={{ categoria.id_categoria }}{% if mesa %}&mesa={{ mesa }}{% endif %}{% if busqueda %}&q={{ busqueda }}{% endif %}">
+      {{ categoria.nom_categoria }}
+    </a>
+  {% endfor %}
+</div>
+
+{% if combos %}
+<section>
+  <div class="seccion-titulo">
+    <h2>Combos</h2>
+    <span class="cuenta">{{ combos|length }} disponible{{ combos|length|pluralize:"s" }}</span>
+  </div>
+
+  <div class="rejilla">
+    {% for combo in combos %}
+      <article class="tarjeta">
+        <div class="tarjeta-foto">
+          {% if combo.tiene_foto %}
+            <img src="{{ combo.foto.url }}" alt="{{ combo.nombre }}" loading="lazy">
+          {% else %}
+            <div class="foto-vacia">{{ combo.inicial }}</div>
+          {% endif %}
+          <span class="etiqueta-combo">Combo</span>
+        </div>
+
+        <div class="tarjeta-cuerpo">
+          <h3>{{ combo.nombre }}</h3>
+          {% if combo.descripcion %}<p class="desc">{{ combo.descripcion }}</p>{% endif %}
+
+          {% if combo.resumen %}
+            <ul class="partes-combo">
+              {% for parte in combo.resumen %}<li>{{ parte }}</li>{% endfor %}
+            </ul>
+          {% endif %}
+
+          <div class="precio-fila">
+            <div>
+              <span class="precio">${{ combo.precio|floatformat:0 }}</span>
+              {% if combo.ahorro %}
+                <span class="precio-tachado">${{ combo.precio_suelto|floatformat:0 }}</span>
+              {% endif %}
+            </div>
+            <button class="btn-agregar" type="button"
+                    data-tipo="combo"
+                    data-id="{{ combo.id_combo }}"
+                    data-nombre="{{ combo.nombre }}"
+                    data-precio="{{ combo.precio|floatformat:0 }}"
+                    data-adiciones='{{ adiciones_combo_json }}'
+                    aria-label="Agregar {{ combo.nombre }}">+</button>
+          </div>
+        </div>
+      </article>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% for grupo in grupos %}
+<section>
+  <div class="seccion-titulo">
+    <h2>{{ grupo.categoria.nom_categoria }}</h2>
+    <span class="cuenta">{{ grupo.productos|length }} plato{{ grupo.productos|length|pluralize:"s" }}</span>
+  </div>
+
+  <div class="rejilla">
+    {% for producto in grupo.productos %}
+      <article class="tarjeta">
+        <div class="tarjeta-foto">
+          {% if producto.tiene_foto %}
+            <img src="{{ producto.foto.url }}" alt="{{ producto.nombre }}" loading="lazy">
+          {% else %}
+            <div class="foto-vacia">{{ producto.inicial }}</div>
+          {% endif %}
+        </div>
+
+        <div class="tarjeta-cuerpo">
+          <h3>{{ producto.nombre }}</h3>
+          {% if producto.descripcion %}<p class="desc">{{ producto.descripcion }}</p>{% endif %}
+
+          <div class="precio-fila">
+            <span class="precio">${{ producto.precio|floatformat:0 }}</span>
+            <button class="btn-agregar" type="button"
+                    data-tipo="producto"
+                    data-id="{{ producto.id_menu }}"
+                    data-nombre="{{ producto.nombre }}"
+                    data-precio="{{ producto.precio|floatformat:0 }}"
+                    data-adiciones='{{ adiciones_json|default:"{}" }}'
+                    aria-label="Agregar {{ producto.nombre }}">+</button>
+          </div>
+        </div>
+      </article>
+    {% endfor %}
+  </div>
+</section>
+{% empty %}
+  {% if not combos %}
+    <div class="vacio">
+      <div class="icono">🍽️</div>
+      <p>No encontramos platos con esa búsqueda.</p>
+      <a class="btn btn-secundario mt-16" href="{% url 'carta' %}">Ver toda la carta</a>
+    </div>
+  {% endif %}
+{% endfor %}
+
+<!-- ===================== modal de adiciones ===================== -->
+<div class="modal-fondo" id="modalAdiciones">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitulo">
+    <div class="modal-cabecera">
+      <div>
+        <h3 id="modalTitulo">Personalizar</h3>
+        <p id="modalDetalle">Suma adiciones a tu plato</p>
+      </div>
+      <button class="cerrar-modal" type="button" id="cerrarModal" aria-label="Cerrar">×</button>
+    </div>
+
+    <form method="post" action="{% url 'carrito_agregar' %}" id="formAdiciones">
+      {% csrf_token %}
+      <input type="hidden" name="tipo" id="campoTipo" value="producto">
+      <input type="hidden" name="id" id="campoId" value="">
+      <input type="hidden" name="mesa" value="{{ mesa }}">
+      <input type="hidden" name="volver" value="carta">
+
+      <div id="listaAdiciones"></div>
+
+      <div class="grupo-campo">
+        <label for="campoNotas">Nota para la cocina (opcional)</label>
+        <input class="campo" type="text" name="notas" id="campoNotas"
+               maxlength="200" placeholder="Ej. sin cebolla, término medio…">
+      </div>
+
+      <div class="grupo-campo">
+        <label for="campoCantidad">Cantidad</label>
+        <div class="control-cantidad">
+          <button type="button" id="menosCantidad">−</button>
+          <span id="verCantidad">1</span>
+          <button type="button" id="masCantidad">+</button>
+        </div>
+        <input type="hidden" name="cantidad" id="campoCantidad" value="1">
+      </div>
+
+      <div class="modal-total">
+        <span>Total de esta línea</span>
+        <b id="modalTotal">$0</b>
+      </div>
+
+      <button class="btn btn-primario btn-bloque" type="submit">Agregar al carrito</button>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block barra_flotante %}
+{% if carrito_items %}
+<div class="barra-flotante">
+  <div class="contenedor">
+    <div>
+      <div class="etiqueta">{{ carrito_items }} ítem{{ carrito_items|pluralize }} en el carrito</div>
+      <div class="monto">Ver y confirmar pedido</div>
+    </div>
+    <a class="btn btn-primario" href="{% url 'carrito' %}">Ir al carrito</a>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+  const modal = document.getElementById('modalAdiciones');
+  const lista = document.getElementById('listaAdiciones');
+  const campoTipo = document.getElementById('campoTipo');
+  const campoId = document.getElementById('campoId');
+  const campoCantidad = document.getElementById('campoCantidad');
+  const verCantidad = document.getElementById('verCantidad');
+  const modalTotal = document.getElementById('modalTotal');
+  const modalTitulo = document.getElementById('modalTitulo');
+  const modalDetalle = document.getElementById('modalDetalle');
+  const campoNotas = document.getElementById('campoNotas');
+
+  let precioBase = 0;
+
+  function dinero(n) {
+    return '$' + Math.round(n).toLocaleString('es-CO');
+  }
+
+  function recalcular() {
+    let extra = 0;
+    lista.querySelectorAll('input[type=checkbox]:checked').forEach(function (c) {
+      extra += parseFloat(c.dataset.precio || 0);
+    });
+    const cantidad = parseInt(campoCantidad.value, 10) || 1;
+    modalTotal.textContent = dinero((precioBase + extra) * cantidad);
+  }
+
+  function abrir(boton) {
+    const tipo = boton.dataset.tipo;
+    const id = boton.dataset.id;
+    const nombre = boton.dataset.nombre;
+    precioBase = parseFloat(boton.dataset.precio || 0) || 0;
+
+    let mapa = {};
+    try { mapa = JSON.parse(boton.dataset.adiciones || '{}'); } catch (e) { mapa = {}; }
+
+    let opciones = [];
+    if (tipo === 'combo') {
+      opciones = Array.isArray(mapa) ? mapa : [];
+    } else {
+      opciones = mapa[id] || [];
+    }
+
+    campoTipo.value = tipo;
+    campoId.value = id;
+    campoCantidad.value = 1;
+    verCantidad.textContent = '1';
+    campoNotas.value = '';
+    modalTitulo.textContent = nombre;
+    modalDetalle.textContent = opciones.length
+      ? 'Elige las adiciones que quieras; su precio se suma al del plato.'
+      : 'Sin adiciones disponibles para este plato.';
+
+    lista.innerHTML = '';
+    opciones.forEach(function (op) {
+      const label = document.createElement('label');
+      label.className = 'opcion-adicion';
+      label.innerHTML =
+        '<input type="checkbox" name="adiciones" value="' + op.id + '" data-precio="' + op.precio + '">' +
+        '<span class="nombre">' + op.nombre + '</span>' +
+        '<span class="suma">+' + dinero(op.precio) + '</span>';
+      lista.appendChild(label);
+    });
+
+    lista.querySelectorAll('input[type=checkbox]').forEach(function (c) {
+      c.addEventListener('change', recalcular);
+    });
+
+    recalcular();
+    modal.classList.add('abierto');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function cerrar() {
+    modal.classList.remove('abierto');
+    document.body.style.overflow = '';
+  }
+
+  document.querySelectorAll('.btn-agregar').forEach(function (boton) {
+    boton.addEventListener('click', function () { abrir(boton); });
+  });
+
+  document.getElementById('cerrarModal').addEventListener('click', cerrar);
+  modal.addEventListener('click', function (e) { if (e.target === modal) cerrar(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') cerrar(); });
+
+  document.getElementById('masCantidad').addEventListener('click', function () {
+    campoCantidad.value = Math.min(parseInt(campoCantidad.value, 10) + 1, 99);
+    verCantidad.textContent = campoCantidad.value;
+    recalcular();
+  });
+
+  document.getElementById('menosCantidad').addEventListener('click', function () {
+    campoCantidad.value = Math.max(parseInt(campoCantidad.value, 10) - 1, 1);
+    verCantidad.textContent = campoCantidad.value;
+    recalcular();
+  });
+})();
+</script>
+{% endblock %}
