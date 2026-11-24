@@ -38,7 +38,7 @@ ENTIDADES = {
             ("orden", "Orden"),
             ("activa", "Visible"),
         ],
-        "icono": "🍽️",
+        "icono": "plato",
     },
     "productos": {
         "titulo": "Productos",
@@ -52,7 +52,7 @@ ENTIDADES = {
             ("precio", "Precio"),
             ("disponible", "Disponible"),
         ],
-        "icono": "🍔",
+        "icono": "hamburguesa",
         "con_foto": True,
     },
     "adiciones": {
@@ -67,7 +67,7 @@ ENTIDADES = {
             ("categoria", "Categoría"),
             ("activa", "Activa"),
         ],
-        "icono": "➕",
+        "icono": "mas",
     },
     "combos": {
         "titulo": "Combos",
@@ -81,7 +81,7 @@ ENTIDADES = {
             ("precio_suelto", "Suma suelta"),
             ("activo", "Activo"),
         ],
-        "icono": "🎁",
+        "icono": "regalo",
         "con_foto": True,
     },
 }

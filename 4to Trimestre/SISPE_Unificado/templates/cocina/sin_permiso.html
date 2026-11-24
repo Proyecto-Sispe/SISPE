@@ -5,7 +5,7 @@
 
 {% block contenido %}
 <div class="vacio">
-  <div class="icono">🔒</div>
+  <div class="icono">{% include "componentes/icono.html" with icono="candado" %}</div>
   <h2>Esta zona es del chef</h2>
   <p class="suave">
     Tu cuenta <b>{{ usuario.username }}</b> no pertenece al grupo <b>Chef</b>,

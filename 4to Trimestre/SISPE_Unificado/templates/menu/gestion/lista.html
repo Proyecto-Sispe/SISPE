@@ -6,7 +6,10 @@
 {% block contenido %}
 
 <section class="hero">
-  <h1>{{ cfg.icono }} <span>{{ cfg.titulo }}</span></h1>
+  <h1 class="gestion-titulo">
+    {% include "componentes/icono.html" with icono=cfg.icono clase="icono-svg--titulo" only %}
+    <span>{{ cfg.titulo }}</span>
+  </h1>
   <p>Crea, modifica y elimina {{ cfg.titulo|lower }}. Los cambios se ven al instante en la carta.</p>
   <div class="hero-mesa">{{ total }} registro{{ total|pluralize }}</div>
 </section>

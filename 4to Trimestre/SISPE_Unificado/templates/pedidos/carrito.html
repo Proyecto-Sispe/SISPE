@@ -102,7 +102,7 @@
 
 {% else %}
   <div class="vacio">
-    <div class="icono">🛒</div>
+    <div class="icono">{% include "componentes/icono.html" with icono="carrito" %}</div>
     <p>Tu carrito está vacío.</p>
     <a class="btn btn-primario mt-16" href="{% url 'carta' %}{% if mesa %}?mesa={{ mesa }}{% endif %}">
       Ver la carta

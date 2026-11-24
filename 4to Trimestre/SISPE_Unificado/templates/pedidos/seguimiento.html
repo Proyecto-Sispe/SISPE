@@ -102,13 +102,13 @@
         {% csrf_token %}
         <button type="submit" class="btn btn-primario" style="cursor:pointer;font-weight:700"
                 onclick="return confirm('¿Deseas finalizar el pedido y retirarte? Tu mesa quedará libre automáticamente y verás tu factura detallada.');">
-          🏁 Finalizar pedido
+          {% include "componentes/icono.html" with icono="bandera" %} Finalizar pedido
         </button>
       </form>
 
       {# Enlace directo a factura / pago en línea #}
       <a class="btn" style="background:#10b981;color:#ffffff;font-weight:600" href="{% url 'factura_cliente' pedido.id_pedido %}">
-        💳 Ver factura / Pagar con PSE
+        {% include "componentes/icono.html" with icono="tarjeta" %} Ver factura / Pagar con PSE
       </a>
     {% endif %}
 

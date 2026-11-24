@@ -5,7 +5,9 @@
 
 {% block contenido %}
 <div class="panel" style="max-width: 640px; margin: 40px auto; text-align: center; padding: 48px 24px; border: 1px solid #2b2b2b; border-radius: 16px; background: #171717;">
-  <div style="font-size: 64px; margin-bottom: 16px;">👋</div>
+  <div style="margin-bottom: 16px; color: #ff7b00;">
+    {% include "componentes/icono.html" with icono="saludo" clase="icono-svg--grande" %}
+  </div>
   
   <h1 style="color: #ff7b00; font-size: 32px; font-weight: 800; margin-bottom: 12px; line-height: 1.2;">
     Gracias por visitarnos, ¡vuelve pronto!

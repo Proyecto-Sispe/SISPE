@@ -3,7 +3,7 @@
 {% block seccion %}Acceso restringido{% endblock %}
 {% block contenido %}
 <div class="vacio">
-  <div class="icono">🔒</div>
+  <div class="icono">{% include "componentes/icono.html" with icono="candado" %}</div>
   <h2>No tienes permiso para esta sección</h2>
   <p class="suave">Tu cuenta <b>{{ user.get_username }}</b> no tiene el rol {{ grupos|join:" / " }}.</p>
   <div class="fila centro mt-24" style="justify-content:center">

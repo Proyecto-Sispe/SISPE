@@ -882,6 +882,10 @@ table.tabla tr:hover td { background: rgba(255, 123, 0, 0.04); }
 }
 
 .vacio .icono { font-size: 46px; margin-bottom: 12px; opacity: 0.6; }
+.icono-svg { display: inline-block; width: 1em; height: 1em; vertical-align: -0.15em; flex: 0 0 auto; }
+.icono-svg--titulo { width: 32px; height: 32px; color: var(--ambar); }
+.icono-svg--grande { width: 64px; height: 64px; }
+.icono-svg--comprobante { width: 1.4em; height: 1.4em; vertical-align: -0.25em; }
 
 /* ------------------------------ modal adiciones ------------------------- */
 .modal-fondo {

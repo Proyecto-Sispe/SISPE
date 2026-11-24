@@ -3,7 +3,7 @@
 {% block seccion %}Mesa {{ mesa.id }}{% endblock %}
 {% block contenido %}
 <div class="vacio">
-  <div class="icono">🍽️</div>
+  <div class="icono">{% include "componentes/icono.html" with icono="plato" %}</div>
   <h2>La mesa {{ mesa.id }} ya está ocupada</h2>
   <p class="suave">Pide a un mesero que la libere o escanea el QR de otra mesa.</p>
 </div>

@@ -14,7 +14,7 @@
         <span class="minutos {% if pedido.minutos_espera > 15 %}tarde{% endif %}">{{ pedido.minutos_espera }} min</span>
       </div>
       <div class="fila entre chico">
-        <span>{% if pedido.factura_info.cliente_nombre %}👤 {{ pedido.factura_info.cliente_nombre }}{% if pedido.factura_info.cliente_documento %} · {{ pedido.factura_info.cliente_documento }}{% endif %}{% else %}<span class="suave">Cliente sin registrar</span>{% endif %}</span>
+        <span>{% if pedido.factura_info.cliente_nombre %}{% include "componentes/icono.html" with icono="personas" %} {{ pedido.factura_info.cliente_nombre }}{% if pedido.factura_info.cliente_documento %} · {{ pedido.factura_info.cliente_documento }}{% endif %}{% else %}<span class="suave">Cliente sin registrar</span>{% endif %}</span>
         <span class="etiqueta {{ pedido.estado }}">{{ pedido.get_estado_display }}</span>
       </div>
       <div class="barra-avance"><i style="width: {{ pedido.avance }}%"></i></div>
@@ -22,11 +22,11 @@
         {% for detalle in pedido.detalles.all %}
           <li><b>{{ detalle.cantidad }}× {{ detalle.descripcion }}</b>
             {% for extra in detalle.adiciones.all %}<span class="extra-tag">+ {{ extra.adicion.nombre }}</span>{% endfor %}
-            {% if detalle.notas %}<div class="chico">💬 {{ detalle.notas }}</div>{% endif %}
+            {% if detalle.notas %}<div class="chico">{% include "componentes/icono.html" with icono="chat" %} {{ detalle.notas }}</div>{% endif %}
           </li>
         {% endfor %}
       </ul>
-      {% if pedido.observaciones %}<p class="chico mb-0">📝 Comentario del cliente: <b>{{ pedido.observaciones }}</b></p>{% endif %}
+      {% if pedido.observaciones %}<p class="chico mb-0">{% include "componentes/icono.html" with icono="menu" %} Comentario del cliente: <b>{{ pedido.observaciones }}</b></p>{% endif %}
       <div class="fila entre chico mt-16"><span class="suave">{{ pedido.fecha_pedido|date:"H:i" }}</span><b>${{ pedido.total|floatformat:0 }}</b></div>
       <div class="fila mt-16">
         {% if pedido.siguiente_estado %}

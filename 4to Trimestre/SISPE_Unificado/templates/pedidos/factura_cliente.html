@@ -34,7 +34,7 @@
       <div style="margin-top: 8px;">
         {% if factura.estado == 'pagada' %}
           <span class="etiqueta emitido" style="background: rgba(62, 207, 142, 0.2); color: #3ecf8e; border: 1px solid #3ecf8e; padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 700;">
-            ✓ Pagada
+            {% include "componentes/icono.html" with icono="check" %} Pagada
           </span>
         {% else %}
           <span class="etiqueta" style="background: rgba(255, 123, 0, 0.2); color: #ff7b00; border: 1px solid #ff7b00; padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 700;">
@@ -142,7 +142,7 @@
         Método: <strong>{{ factura.metodo_pago }}</strong> · CUS: <strong style="font-family: monospace;">{{ factura.transaccion_id }}</strong>
       </p>
       <a class="btn" href="{% url 'comprobante_pago' pedido.id_pedido %}" style="background: #10b981; color: #ffffff; font-weight: 700; padding: 12px 24px;">
-        🛡️ Ver comprobante de salida digital
+        {% include "componentes/icono.html" with icono="escudo" %} Ver comprobante de salida digital
       </a>
     </div>
   {% else %}
@@ -233,7 +233,7 @@
           </div>
 
           <button type="submit" class="btn" style="background: #ff6a00; color: #141414; font-weight: 800; font-size: 16px; padding: 12px 32px; border: none; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
-            🔒 Pagar con PSE
+            {% include "componentes/icono.html" with icono="candado" %} Pagar con PSE
           </button>
         </div>
       </form>
@@ -257,7 +257,7 @@
       ← Volver al pedido
     </a>
     <button class="btn btn-secundario" onclick="window.print()">
-      🖨️ Imprimir factura
+      {% include "componentes/icono.html" with icono="imprimir" %} Imprimir factura
     </button>
   </div>
 </div>

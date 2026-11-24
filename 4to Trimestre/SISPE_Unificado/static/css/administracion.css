@@ -28,5 +28,6 @@
 .tarjetas { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 14px; }
 .paginacion { display: flex; gap: 8px; justify-content: center; align-items: center; margin-top: 16px; }
 .receta-lista { margin: 0; padding-left: 16px; font-size: 12.5px; color: var(--texto-suave); }
+.gestion-titulo { display: flex; align-items: center; gap: 12px; }
 .factura-tabla td.derecha, .factura-tabla th.derecha { text-align: right; }
 @media print { .barra, .no-imprimir { display: none !important; } body { background: #fff; color: #000; } }
