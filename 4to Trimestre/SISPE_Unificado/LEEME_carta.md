@@ -1,4 +1,4 @@
-# Sabor Urbano · adiciones, combos e imágenes
+# SISPE · adiciones, combos e imágenes
 
 ## Instalación
 

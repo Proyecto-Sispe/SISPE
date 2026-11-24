@@ -1,9 +1,9 @@
 {% extends "base.html" %}
-{% block titulo %}Bienvenido · Mesa {{ mesa.id }} · Sabor Urbano{% endblock %}
+{% block titulo %}Bienvenido · Mesa {{ mesa.id }} · SISPE{% endblock %}
 {% block seccion %}Mesa {{ mesa.id }}{% endblock %}
 {% block contenido %}
 <section class="hero centro">
-  <h1>¡Bienvenido a <span>Sabor Urbano</span>!</h1>
+  <h1>¡Bienvenido a <span>SISPE</span>!</h1>
   <p>Estás en la mesa <b>{{ mesa.id }}</b>{% if mesa.ubicacion %} · {{ mesa.ubicacion }}{% endif %}. Cuéntanos quién eres y empieza a pedir desde tu celular.</p>
 </section>
 <div class="panel" style="max-width:440px;margin:0 auto">

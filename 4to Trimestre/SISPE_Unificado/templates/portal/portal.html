@@ -1,8 +1,10 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="{% static 'img/logo_2.png' %}" type="image/png">
   <title>Portal SISPE</title>
   <style>
     * { box-sizing: border-box; }
@@ -25,7 +27,8 @@
 </head>
 <body>
   <header>
-    <h1><a href="{% url 'home' %}" style="color:inherit;text-decoration:none">SISPE · Portal</a></h1>
+  <h1><a href="{% url 'home' %}" style="color:inherit;text-decoration:none;display:flex;align-items:center;gap:10px">
+    <img src="{% static 'img/logo_2.png' %}" alt="" width="50" height="50">SISPE · Portal</a></h1>
     <div class="usuario">
       {% if user.is_authenticated %}
         {{ request.session.usuario_nombre|default:user.username }}{% if request.session.usuario_rol %} ({{ request.session.usuario_rol }}){% endif %}
@@ -59,7 +62,6 @@
       <div class="grid">
         <a href="{% url 'cocina_panel' %}"><strong>Panel de cocina</strong><span>Comandas de la carta en vivo</span></a>
         <a href="{% url 'panel_pedidos' %}"><strong>Pedidos por mesa</strong><span>Despachar y liberar mesa</span></a>
-        <a href="{% url 'cocina_qr' %}"><strong>QR de la carta</strong><span>Códigos para imprimir</span></a>
         <a href="{% url 'reportes' %}"><strong>Reportes</strong><span>Ventas y productos elaborados</span></a>
       </div>
     </section>
@@ -83,7 +85,7 @@
       <p class="origen">Atención y mesas</p>
       <div class="grid">
         <a href="{% url 'dashboard_mesero' %}"><strong>Panel de Mesero</strong><span>Módulo de atención</span></a>
-        <a href="{% url 'mesas_list' %}"><strong>Mesas y QR</strong><span>Estado en vivo y liberación</span></a>
+        <a href="{% url 'mesas_list' %}"><strong>Mesas</strong><span>Estado en vivo y liberación</span></a>
         <a href="{% url 'panel_pedidos' %}"><strong>Pedidos de mesa</strong><span>Comandas para entregar</span></a>
         <a href="{% url 'carta' %}"><strong>Tomar pedido</strong><span>Carta digital para mesas</span></a>
       </div>
@@ -98,9 +100,9 @@
         <a href="{% url 'dashboard_admin' %}"><strong>Panel de administración</strong><span>Usuarios, menú, inventario, facturas</span></a>
         <a href="{% url 'adm_usuarios' %}"><strong>Gestión de usuarios</strong><span>Roles, permisos y personal</span></a>
         <a href="{% url 'adm_inventario' %}"><strong>Inventario</strong><span>Stock en tiempo real y recetas</span></a>
+        <a href="{% url 'mesas_list' %}"><strong>Mesas y códigos QR</strong><span>Estado, edición y generación de códigos para las mesas reales.</span></a>
         <a href="{% url 'gestion_lista' 'productos' %}"><strong>Gestionar carta</strong><span>Categorías, adiciones, combos</span></a>
-        <a href="{% url 'inicio' %}"><strong>Estadísticas</strong><span>Ventas, mesas, más vendido</span></a>
-        <a href="{% url 'admin:index' %}"><strong>Admin de Django</strong><span>Todas las tablas</span></a>
+        <a href="{% url 'admin:index' %}"><strong>Centro de Gestión</strong><span>Administración segura de datos y usuarios</span></a>
       </div>
     </section>
     {% endif %}

@@ -1,9 +1,11 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Iniciar Sesión | SISPE</title>
+  <link rel="icon" href="{% static 'img/logo_2.png' %}" type="image/png">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
     body {
@@ -27,7 +29,7 @@
     }
     h1 { color: #ff7b00; font-size: 24px; margin-bottom: 6px; }
     p.sub { color: #a3a3a3; font-size: 14px; margin-bottom: 22px; }
-    label { display: block; font-size: 13px; color: #e5e5e5; margin-bottom: 6px; }
+    label { display: block; font-size: 13px; color: #f5f5f5; margin-bottom: 6px; }
     input {
       width: 100%;
       padding: 11px 12px;
@@ -63,11 +65,16 @@
     .extra { margin-top: 16px; text-align: center; }
     .extra a { color: #ff7b00; text-decoration: none; font-size: 13px; }
     .extra a:hover { text-decoration: underline; }
+    .marca-login { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+    .marca-login img { width: 58px; height: 58px; object-fit: contain; }
   </style>
 </head>
 <body>
   <div class="card">
-    <h1>SISPE</h1>
+    <div class="marca-login">
+      <img src="{% static 'img/logo_2.png' %}" alt="">
+      <h1>SISPE</h1>
+    </div>
     <p class="sub">Acceso al sistema por rol</p>
 
     {% if messages %}
@@ -89,7 +96,8 @@
     </form>
 
     <div class="extra">
-      <a href="{% url 'recuperar_password' %}">¿Olvidaste tu contraseña?</a>
+      <a href="{% url 'recuperar_password' %}">Recuperar cuenta SISPE</a>
+      &nbsp;·&nbsp; <a href="{% url 'password_reset' %}">Recuperar cuenta administrativa</a>
       &nbsp;·&nbsp; <a href="{% url 'registro' %}">Crear cuenta</a>
       &nbsp;·&nbsp; <a href="{% url 'home' %}">Volver al inicio</a>
     </div>

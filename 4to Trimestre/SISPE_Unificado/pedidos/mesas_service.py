@@ -15,7 +15,7 @@ def liberar_mesa_y_sesion(id_mesa):
     except (ValueError, TypeError):
         return
 
-    # 1. Base 'mesas' (Victor / mesas_pedidos)
+    # 1. Base de datos de mesas.
     try:
         from mesas_pedidos.models import Mesa, SesionMesa
         Mesa.objects.filter(pk=mesa_num).update(estado=Mesa.EstadoMesa.LIBRE)
@@ -25,7 +25,7 @@ def liberar_mesa_y_sesion(id_mesa):
     except Exception:
         pass
 
-    # 2. Base 'sistema' (Juan / base_datos y Sispe / seguimiento_pedidos)
+    # 2. Base de datos SISPE.
     try:
         from base_datos.models import Mesa as MesaBD, SesionMesa as SesionBD
         MesaBD.objects.filter(id_mesa=mesa_num).update(estado=0)

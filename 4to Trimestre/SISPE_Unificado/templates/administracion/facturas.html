@@ -42,7 +42,7 @@
         <td>
           <span class="etiqueta {{ f.estado }}">{{ f.get_estado_display }}</span>
           {% if f.metodo_pago %}<div class="chico suave">{{ f.metodo_pago }}</div>{% endif %}
-          {% if f.transaccion_id %}<div class="chico suave" style="color:#ff9a4d;font-family:monospace">{{ f.transaccion_id }}</div>{% endif %}
+          {% if f.transaccion_id %}<div class="chico suave" style="color:#ff7b00;font-family:monospace">{{ f.transaccion_id }}</div>{% endif %}
         </td>
         <td><div class="acciones"><a class="btn btn-secundario btn-mini" href="{% url 'adm_factura' f.pk %}">Ver</a></div></td>
       </tr>

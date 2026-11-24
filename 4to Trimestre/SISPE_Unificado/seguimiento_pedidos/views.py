@@ -19,7 +19,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
 
-from administracion.permisos import admin_required, rol_required
+from administracion.permisos import DJANGO_DASHBOARD_GROUP, admin_required, rol_required
 
 from .models import PasswordResets, Persona, PersonaHasRol, Rol, TipoDoc
 
@@ -124,6 +124,9 @@ def login_view(request):
         if usuario is not None:
             auth_login(request, usuario)
             request.session['usuario_nombre'] = usuario.get_full_name() or usuario.username
+            if usuario.groups.filter(name=DJANGO_DASHBOARD_GROUP).exists():
+                request.session['usuario_rol'] = 'admin_django'
+                return redirect('admin:index')
             request.session['usuario_rol'] = (
                 'administrador' if (usuario.is_superuser or usuario.groups.filter(name='Administrador').exists())
                 else 'cocinero' if usuario.groups.filter(name__in=['Chef', 'Cocinero']).exists()

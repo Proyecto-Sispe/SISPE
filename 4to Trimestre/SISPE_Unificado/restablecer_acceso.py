@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-restablecer_acceso.py  -  Sabor Urbano
+restablecer_acceso.py  -  SISPE
 
 Crea (o restablece) las cuentas de acceso al sistema y los grupos de rol.
 Es idempotente: puedes correrlo las veces que quieras, no duplica nada y
@@ -76,7 +76,7 @@ CUENTAS = [
         "nombre": "Administrador",
         "superuser": True,
         "grupo": "Administrador",
-        "descripcion": "Admin de Django (/admin/) + panel de cocina",
+        "descripcion": "Centro de Gestión SISPE (/admin/) y panel de cocina",
     },
     {
         "username": "chef",

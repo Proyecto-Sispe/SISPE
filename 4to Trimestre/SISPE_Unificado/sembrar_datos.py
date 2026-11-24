@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-sembrar_datos.py - Sabor Urbano
+sembrar_datos.py - SISPE
 ================================
 
 Llena la base con datos de ejemplo adicionales (categorías, productos,
@@ -741,7 +741,7 @@ def resumen_final(resultados):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Siembra datos de ejemplo para Sabor Urbano usando ORM de Django."
+        description="Siembra datos de ejemplo para SISPE usando ORM de Django."
     )
     parser.add_argument(
         "--solo-ver",

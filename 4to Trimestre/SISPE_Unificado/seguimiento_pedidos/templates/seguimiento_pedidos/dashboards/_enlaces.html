@@ -13,10 +13,9 @@
     <a href="{% url 'adm_facturas' %}"><strong>Facturas</strong><span>Historial con filtros</span></a>
     <a href="{% url 'cocina_panel' %}"><strong>Cocina</strong><span>Comandas en vivo</span></a>
     <a href="{% url 'reportes' %}"><strong>Reportes de ventas</strong><span>Carta y cocina</span></a>
-    <a href="{% url 'mesas_list' %}"><strong>Mesas y QR</strong><span>CRUD de mesas</span></a>
+    <a href="{% url 'mesas_list' %}"><strong>Mesas y códigos QR</strong><span>CRUD de mesas y generación de códigos</span></a>
     <a href="{% url 'panel_pedidos' %}"><strong>Pedidos por mesa</strong><span>Despachar y liberar</span></a>
-    <a href="{% url 'inicio' %}"><strong>Estadísticas</strong><span>Ventas, mesas, más vendido</span></a>
-    <a href="{% url 'admin:index' %}"><strong>Admin de Django</strong><span>Todas las tablas</span></a>
+    <a href="{% url 'admin:index' %}"><strong>Centro de Gestión SISPE</strong><span>Administración segura de datos y usuarios</span></a>
   {% elif rol == "Cocinero" %}
     <a href="{% url 'cocina_panel' %}"><strong>Cocina</strong><span>Comandas en vivo</span></a>
     <a href="{% url 'reportes' %}"><strong>Reportes</strong><span>Ventas del día</span></a>
@@ -24,7 +23,7 @@
     <a href="{% url 'adm_facturas' %}"><strong>Facturas y Caja</strong><span>Cobros y pagos en línea</span></a>
     <a href="{% url 'adm_pedidos' %}"><strong>Pedidos Activos</strong><span>Supervisión de comandas</span></a>
   {% elif rol == "Mesero" %}
-    <a href="{% url 'mesas_list' %}"><strong>Mesas y QR</strong><span>Estado de las mesas</span></a>
+    <a href="{% url 'mesas_list' %}"><strong>Mesas</strong><span>Estado de las mesas</span></a>
     <a href="{% url 'panel_pedidos' %}"><strong>Pedidos por mesa</strong><span>Despachar y liberar</span></a>
     <a href="{% url 'carta' %}"><strong>Carta</strong><span>Tomar un pedido</span></a>
   {% else %}

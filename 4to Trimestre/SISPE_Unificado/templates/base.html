@@ -3,7 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block titulo %}Sabor Urbano{% endblock %}</title>
+  <link rel="icon" href="{% static 'img/logo_2.png' %}" type="image/png">
+  <title>{% block titulo %}SISPE{% endblock %}</title>
   <link rel="stylesheet" href="{% static 'css/estilo.css' %}">
   {% block extra_head %}{% endblock %}
 </head>
@@ -12,8 +13,8 @@
 <header class="barra">
   <div class="contenedor barra-interna">
     <a class="marca" href="{% url 'home' %}">
-      <span class="punto"></span>
-      Sabor Urbano
+      <img class="marca-logo" src="{% static 'img/logo_2.png' %}" alt="">
+      <span>SISPE</span>
       <small>{% block seccion %}Carta{% endblock %}</small>
     </a>
 
@@ -31,13 +32,13 @@
         <a class="enlace-barra {% if 'factura' in request.path %}activo{% endif %}"
            href="{% url 'adm_facturas' %}">Facturas</a>
         <a class="enlace-barra {% if 'mesas' in request.path %}activo{% endif %}"
-           href="{% url 'mesas_list' %}">Mesas & QR</a>
+           href="{% url 'mesas_list' %}">Mesas</a>
         <a class="enlace-barra {% if request.resolver_match.url_name == 'adm_pedidos' %}activo{% endif %}"
            href="{% url 'adm_pedidos' %}">Pedidos Activos</a>
         <a class="enlace-barra {% if 'cocina' in request.path %}activo{% endif %}"
            href="{% url 'cocina_panel' %}">Cocina</a>
-        <a class="enlace-barra {% if 'estadisticas' in request.path %}activo{% endif %}"
-           href="{% url 'inicio' %}">Estadísticas</a>
+        <a class="enlace-barra {% if request.resolver_match.url_name == 'reportes' %}activo{% endif %}"
+           href="{% url 'reportes' %}">Reportes</a>
         <a class="enlace-barra" href="{% url 'portal' %}">Portal</a>
 
       {# --- 2. ROL: COCINERO --- #}
@@ -46,10 +47,12 @@
            href="{% url 'dashboard_cocinero' %}">Inicio</a>
         <a class="enlace-barra {% if request.resolver_match.url_name == 'cocina_panel' %}activo{% endif %}"
            href="{% url 'cocina_panel' %}">Comandas Cocina</a>
-        <a class="enlace-barra {% if request.resolver_match.url_name == 'cocina_qr' %}activo{% endif %}"
-           href="{% url 'cocina_qr' %}">QR Mesas</a>
         <a class="enlace-barra {% if request.resolver_match.url_name == 'reportes' %}activo{% endif %}"
            href="{% url 'reportes' %}">Reportes</a>
+
+      {# --- ROL: ACCESO LIMITADO AL CENTRO DE GESTIÓN --- #}
+      {% elif es_django_admin %}
+        <a class="enlace-barra" href="{% url 'admin:index' %}">Centro de Gestión</a>
 
       {# --- 3. ROL: CAJERO --- #}
       {% elif es_cajero %}
@@ -65,7 +68,7 @@
         <a class="enlace-barra {% if request.resolver_match.url_name == 'dashboard_mesero' %}activo{% endif %}"
            href="{% url 'dashboard_mesero' %}">Inicio</a>
         <a class="enlace-barra {% if 'mesas' in request.path %}activo{% endif %}"
-           href="{% url 'mesas_list' %}">Mesas y QR</a>
+           href="{% url 'mesas_list' %}">Mesas</a>
         <a class="enlace-barra {% if 'servicio/pedidos' in request.path %}activo{% endif %}"
            href="{% url 'panel_pedidos' %}">Despacho Pedidos</a>
         <a class="enlace-barra {% if request.resolver_match.url_name == 'carta' %}activo{% endif %}"
@@ -102,7 +105,7 @@
 
       {# Identificador de rol y botón Salir #}
       {% if user.is_authenticated %}
-        <span class="pastilla-rol" style="font-size:11px;padding:3px 9px;border-radius:12px;background:#241d19;color:#ff9a4d;border:1px solid #3d2b1f;margin-left:4px">
+        <span class="pastilla-rol" style="font-size:11px;padding:3px 9px;border-radius:12px;background:#202020;color:#ff7b00;border:1px solid #2b2b2b;margin-left:4px">
           {{ rol_nombre_display }}
         </span>
         <form method="post" action="{% url 'logout' %}" style="display:inline;margin-left:4px">
@@ -119,7 +122,7 @@
 
 <main class="contenedor">
   {% if messages %}
-    <div class="avisos">
+    <div class="avisos" aria-live="polite">
       {% for message in messages %}
         <div class="aviso {{ message.tags }}">{{ message }}</div>
       {% endfor %}
@@ -132,5 +135,6 @@
 {% block barra_flotante %}{% endblock %}
 
 {% block scripts %}{% endblock %}
+<script src="{% static 'js/notificaciones.js' %}" defer></script>
 </body>
 </html>

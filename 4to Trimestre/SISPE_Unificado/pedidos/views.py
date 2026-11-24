@@ -228,6 +228,12 @@ BANCOS_PSE = [
     ("falabella", "Banco Falabella"),
 ]
 
+METODOS_PAGO_PENDIENTES = {
+    "pse": "PSE - Pendiente",
+    "efectivo": "Efectivo - Pendiente en caja",
+    "tarjeta": "Tarjeta - Pendiente en caja",
+}
+
 
 @require_POST
 def cancelar_pedido(request, pk):
@@ -294,6 +300,33 @@ def factura_cliente(request, pk):
     if not factura:
         factura = facturar(pedido, request.session.get("cliente_mesa") or {})
 
+    if request.method == "POST":
+        metodo = request.POST.get("metodo_pago", "").strip()
+        if factura.estado == "pagada":
+            messages.error(request, "Esta factura ya está pagada.")
+        elif metodo not in METODOS_PAGO_PENDIENTES:
+            messages.error(request, "Selecciona un método de pago válido.")
+        else:
+            factura.metodo_pago = METODOS_PAGO_PENDIENTES[metodo]
+            factura.transaccion_id = ""
+            factura.save(update_fields=["metodo_pago", "transaccion_id"])
+            messages.success(
+                request,
+                "Método PSE seleccionado."
+                if metodo == "pse"
+                else f"Selección guardada. Acércate a caja para pagar en {metodo}.",
+            )
+        return redirect("factura_cliente", pk=pedido.pk)
+
+    metodo_seleccionado = next(
+        (
+            codigo
+            for codigo, etiqueta in METODOS_PAGO_PENDIENTES.items()
+            if factura.metodo_pago == etiqueta
+        ),
+        "",
+    )
+
     subtotal = Decimal(str(pedido.total or 0))
     impuesto = (subtotal * Decimal("0.08")).quantize(Decimal("0.01"))
     propina_sugerida = (subtotal * Decimal("0.10")).quantize(Decimal("0.01"))
@@ -322,6 +355,7 @@ def factura_cliente(request, pk):
             "total_a_pagar": total_a_pagar,
             "propina_aplicada": propina_aplicada,
             "bancos_pse": BANCOS_PSE,
+            "metodo_seleccionado": metodo_seleccionado,
         },
     )
 
@@ -332,6 +366,12 @@ def pagar_pse(request, pk):
     factura = getattr(pedido, "factura", None)
     if not factura:
         factura = facturar(pedido, request.session.get("cliente_mesa") or {})
+    if factura.estado == "pagada":
+        messages.info(request, "Esta factura ya está pagada.")
+        return redirect("factura_cliente", pk=pedido.pk)
+    if factura.metodo_pago != METODOS_PAGO_PENDIENTES["pse"]:
+        messages.error(request, "Selecciona PSE antes de continuar con el pago.")
+        return redirect("factura_cliente", pk=pedido.pk)
 
     banco_codigo = request.POST.get("banco", "").strip()
     nombre_titular = request.POST.get("nombre", "").strip()

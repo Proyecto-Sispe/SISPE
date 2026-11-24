@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block titulo %}Comprobante de Pago Digital · Sabor Urbano{% endblock %}
+{% block titulo %}Comprobante de Pago Digital · SISPE{% endblock %}
 {% block seccion %}Comprobante{% endblock %}
 
 {% block contenido %}
@@ -10,20 +10,20 @@
   <div style="font-size: 17px; font-weight: 800; color: #3ecf8e; margin-bottom: 4px;">
     COMPROBANTE DE SALIDA VÁLIDO
   </div>
-  <div style="font-size: 14px; color: #f4ece4; line-height: 1.4;">
+  <div style="font-size: 14px; color: #f5f5f5; line-height: 1.4;">
     <strong>Presenta este comprobante al cajero</strong> como respaldo antes de salir del establecimiento.
   </div>
 </div>
 
 {# Tarjeta del Comprobante Digital #}
-<div class="panel" style="max-width: 680px; margin: 0 auto 40px auto; background: #1c1714; border: 1px solid #33291f; border-radius: 16px; padding: 32px; box-shadow: 0 18px 40px rgba(0,0,0,0.5);">
+<div class="panel" style="max-width: 680px; margin: 0 auto 40px auto; background: #171717; border: 1px solid #2b2b2b; border-radius: 16px; padding: 32px; box-shadow: 0 18px 40px rgba(0,0,0,0.5);">
   
   {# Cabecera con sello de éxito #}
-  <div style="text-align: center; border-bottom: 1px dashed #33291f; padding-bottom: 24px; margin-bottom: 24px;">
+  <div style="text-align: center; border-bottom: 1px dashed #2b2b2b; padding-bottom: 24px; margin-bottom: 24px;">
     <div style="display: inline-flex; justify-content: center; align-items: center; width: 68px; height: 68px; border-radius: 50%; background: rgba(62, 207, 142, 0.15); border: 2px solid #3ecf8e; color: #3ecf8e; font-size: 34px; margin-bottom: 12px;">
       ✓
     </div>
-    <h2 style="margin: 0 0 6px 0; font-size: 24px; color: #f4ece4; font-weight: 800;">
+    <h2 style="margin: 0 0 6px 0; font-size: 24px; color: #f5f5f5; font-weight: 800;">
       ¡Pago Aprobado con Éxito!
     </h2>
     <div style="display: inline-block; background: #10b981; color: #0d2c1f; font-size: 12px; font-weight: 900; letter-spacing: 1px; padding: 4px 14px; border-radius: 999px; text-transform: uppercase;">
@@ -35,17 +35,17 @@
   </div>
 
   {# Grid de detalles de la transacción #}
-  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px 20px; font-size: 14px; margin-bottom: 24px; background: #241d19; padding: 20px; border-radius: 12px; border: 1px solid #33291f;">
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px 20px; font-size: 14px; margin-bottom: 24px; background: #202020; padding: 20px; border-radius: 12px; border: 1px solid #2b2b2b;">
     <div>
       <div class="suave chico">N.º de Transacción (CUS):</div>
-      <div style="font-family: monospace; font-size: 15px; font-weight: 700; color: #ff9a4d; word-break: break-all;">
+      <div style="font-family: monospace; font-size: 15px; font-weight: 700; color: #ff7b00; word-break: break-all;">
         {{ factura.transaccion_id|default:pago_info.cus }}
       </div>
     </div>
 
     <div>
       <div class="suave chico">Fecha y Hora:</div>
-      <div style="font-weight: 600; color: #f4ece4;">
+      <div style="font-weight: 600; color: #f5f5f5;">
         {{ factura.fecha|date:"d/m/Y h:i A" }}
       </div>
     </div>
@@ -59,28 +59,28 @@
 
     <div>
       <div class="suave chico">Factura N.º:</div>
-      <div style="font-weight: 600; color: #f4ece4;">
+      <div style="font-weight: 600; color: #f5f5f5;">
         {{ factura.numero }}
       </div>
     </div>
 
     <div>
       <div class="suave chico">Cliente / Titular:</div>
-      <div style="font-weight: 600; color: #f4ece4;">
+      <div style="font-weight: 600; color: #f5f5f5;">
         {{ factura.cliente_nombre|default:pago_info.titular|default:"Cliente general" }}
       </div>
     </div>
 
     <div>
       <div class="suave chico">Documento:</div>
-      <div style="font-weight: 600; color: #f4ece4;">
+      <div style="font-weight: 600; color: #f5f5f5;">
         {{ factura.cliente_documento|default:pago_info.documento|default:"-" }}
       </div>
     </div>
 
     <div style="grid-column: 1 / -1;">
       <div class="suave chico">Medio de Pago:</div>
-      <div style="font-weight: 600; color: #f4ece4;">
+      <div style="font-weight: 600; color: #f5f5f5;">
         {{ factura.metodo_pago|default:"PSE - Débito en línea" }}
       </div>
     </div>
@@ -91,18 +91,18 @@
     <div class="suave chico" style="text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;">
       Resumen de productos consumidos
     </div>
-    <div style="border: 1px solid #33291f; border-radius: 10px; overflow: hidden;">
+    <div style="border: 1px solid #2b2b2b; border-radius: 10px; overflow: hidden;">
       {% for detalle in pedido.detalles.all %}
-        <div style="display: flex; justify-content: space-between; padding: 10px 14px; border-bottom: 1px solid #292019; font-size: 13px;">
+        <div style="display: flex; justify-content: space-between; padding: 10px 14px; border-bottom: 1px solid #2b2b2b; font-size: 13px;">
           <span>{{ detalle.cantidad }}× {{ detalle.descripcion }}</span>
-          <b style="color: #f4ece4;">${{ detalle.valor_venta|floatformat:0 }}</b>
+          <b style="color: #f5f5f5;">${{ detalle.valor_venta|floatformat:0 }}</b>
         </div>
       {% endfor %}
     </div>
   </div>
 
   {# Liquidación final #}
-  <div style="background: #171210; border: 1px solid #33291f; border-radius: 12px; padding: 18px; margin-bottom: 24px;">
+  <div style="background: #171717; border: 1px solid #2b2b2b; border-radius: 12px; padding: 18px; margin-bottom: 24px;">
     <div style="display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 14px;">
       <span class="suave">Subtotal consumo:</span>
       <span>${{ factura.subtotal|floatformat:0 }}</span>
@@ -117,8 +117,8 @@
       <span>${{ factura.propina|floatformat:0 }}</span>
     </div>
     {% endif %}
-    <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #33291f; padding-top: 10px; margin-top: 8px;">
-      <span style="font-size: 16px; font-weight: 700; color: #f4ece4;">Total Pagado:</span>
+    <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #2b2b2b; padding-top: 10px; margin-top: 8px;">
+      <span style="font-size: 16px; font-weight: 700; color: #f5f5f5;">Total Pagado:</span>
       <b style="font-size: 24px; color: #3ecf8e;">${{ factura.total|floatformat:0 }}</b>
     </div>
   </div>

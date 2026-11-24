@@ -1,30 +1,31 @@
 {% extends "admin/base.html" %}
 {% load static %}
 
-{% block title %}{{ title }} · Sabor Urbano{% endblock %}
+{% block title %}{{ title }} · SISPE{% endblock %}
 
 {% block extrastyle %}
   {{ block.super }}
   <link rel="stylesheet" href="{% static 'css/admin.css' %}">
 {% endblock %}
 
+{% block extrahead %}
+  {{ block.super }}
+  <link rel="icon" href="{% static 'img/logo_2.png' %}" type="image/png">
+  <script src="{% static 'js/notificaciones.js' %}" defer></script>
+{% endblock %}
+
 {% block branding %}
 <div class="su-marca">
-  <span class="su-punto"></span>
-  <span class="su-nombre">Sabor Urbano</span>
-  <span class="su-sub">Administración</span>
+  <img class="su-logo" src="{% static 'img/logo_2.png' %}" alt="">
+  <span class="su-brand-text">
+    <span class="su-nombre">Centro de Gestión SISPE</span>
+    <span class="su-sub">Administración segura</span>
+  </span>
 </div>
 {% endblock %}
 
 {% block nav-global %}
-<div class="su-atajos">
-  <a href="{% url 'cocina_panel' %}">Cocina</a>
-  <a href="{% url 'cocina_qr' %}">QR mesas</a>
-  <a href="{% url 'gestion_lista' 'productos' %}">Gestionar menú</a>
-  <a href="{% url 'carta' %}">Ver carta</a>
-  <a href="{% url 'reportes' %}">Reportes</a>
-  <a href="{% url 'mesas_list' %}">Mesas y servicio</a>
-  <a href="{% url 'inicio' %}">Estadísticas</a>
-  <a href="{% url 'portal' %}">Portal SISPE</a>
-</div>
+  <nav class="su-atajos" aria-label="Navegación de administración">
+    <a href="{% url 'portal' %}">Volver al portal</a>
+  </nav>
 {% endblock %}

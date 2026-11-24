@@ -4,10 +4,12 @@ from django.contrib.auth.views import redirect_to_login
 from django.shortcuts import render
 
 
+DJANGO_DASHBOARD_GROUP = "Django Dashboard Only"
+
+
 def obtener_rol_actual(request):
     """
-    Retorna el rol normalizado del usuario:
-    'administrador', 'cocinero', 'cajero', 'mesero', 'cliente' o 'anonimo'.
+    Retorna el rol normalizado, incluido el acceso limitado al Centro de Gestión.
     """
     if not request.user.is_authenticated:
         if request.session.get("cliente_mesa") or request.session.get("mesa"):
@@ -32,6 +34,8 @@ def obtener_rol_actual(request):
     # 2. Superusuario de Django
     if request.user.is_superuser or request.user.groups.filter(name__in=["Administrador", "Admin"]).exists():
         return "administrador"
+    if request.user.groups.filter(name=DJANGO_DASHBOARD_GROUP).exists():
+        return "admin_django"
 
     # 3. Grupos de Django
     if request.user.groups.filter(name__in=["Chef", "Cocinero"]).exists():

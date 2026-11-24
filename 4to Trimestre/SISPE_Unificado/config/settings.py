@@ -1,11 +1,11 @@
 """
 Configuracion unificada de SISPE.
 
-Une las cuatro partes del proyecto en un solo servidor Django:
-  - Parte Adriancho   -> menu, pedidos, cocina   (carta, carrito, cocina, gestion)
-  - Sistema_Victor    -> mesas_pedidos            (mesas, QR, pedido por mesa)
-  - Sistema_sispe     -> seguimiento_pedidos      (login por rol, recuperar contrasena)
-  - parte juan davisito -> base_datos, dashboard  (modelos del esquema SISPE y estadisticas)
+Une los módulos funcionales de SISPE en un solo servidor Django:
+  - menu, pedidos y cocina       (carta, carrito y preparación)
+  - mesas_pedidos                (mesas, QR y pedidos en sala)
+  - seguimiento_pedidos          (acceso por rol y recuperación de cuenta)
+  - base_datos y dashboard       (datos SISPE; estadísticas en reportes)
 
 Cada parte conserva su base de datos porque sus tablas tienen el mismo nombre
 con columnas distintas. config/routers.py decide a que base va cada app.
@@ -28,15 +28,15 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    # Parte Adriancho
+    # Carta, pedidos y cocina
     "menu",
     "pedidos",
     "cocina",
-    # Sistema_Victor
+    # Mesas y pedidos en sala
     "mesas_pedidos",
-    # Sistema_sispe
+    # Acceso y roles
     "seguimiento_pedidos",
-    # parte juan davisito
+    # Datos del sistema y compatibilidad de rutas
     "base_datos",
     "dashboard",
     # Modulo de administracion (inventario, facturas, usuarios)
@@ -75,9 +75,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-# default -> usuarios de Django, sesiones, admin y la carta (Parte Adriancho)
-# mesas   -> mesas, QR y pedidos por mesa (Sistema_Victor)
-# sistema -> esquema SISPE original: personas, roles, insumos... (juan davisito + Sistema_sispe)
+# default -> usuarios de Django, sesiones, administración y carta
+# mesas   -> mesas, QR y pedidos por mesa
+# sistema -> personas, roles, insumos y datos del esquema SISPE
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
@@ -136,17 +136,28 @@ LOGOUT_REDIRECT_URL = "/"
 
 SABOR_MONEDA = "$"
 
-# Correo (recuperar contrasena). Sin variables de entorno, los correos se
-# imprimen en la consola. Para Gmail:
-#   $env:SISPE_EMAIL_USER="cuenta@gmail.com"; $env:SISPE_EMAIL_PASS="clave de aplicacion"
-EMAIL_HOST_USER = os.environ.get("SISPE_EMAIL_USER", "")
-EMAIL_HOST_PASSWORD = os.environ.get("SISPE_EMAIL_PASS", "")
-if EMAIL_HOST_USER and EMAIL_HOST_PASSWORD:
-    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-    EMAIL_HOST = "smtp.gmail.com"
-    EMAIL_PORT = 587
-    EMAIL_USE_TLS = True
-    DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-else:
-    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-    DEFAULT_FROM_EMAIL = "sispe@localhost"
+# settings.py
+
+# --------------------------------------------------------------------
+# EMAIL (Recuperación de contraseña)
+# --------------------------------------------------------------------
+# Configura aquí tu cuenta SMTP. Para Gmail debes generar una
+# "Contraseña de aplicación" (https://myaccount.google.com/apppasswords)
+# y usarla en EMAIL_HOST_PASSWORD (NO tu contraseña normal).
+
+EMAIL_HOST = os.environ.get("SISPE_EMAIL_HOST", "smtp.gmail.com")
+EMAIL_PORT = int(os.environ.get("SISPE_EMAIL_PORT", "587"))
+EMAIL_USE_TLS = os.environ.get("SISPE_EMAIL_USE_TLS", "1") == "1"
+EMAIL_HOST_USER = os.environ.get("SISPE_EMAIL_USER", "proyecto.sispe@gmail.com")
+EMAIL_HOST_PASSWORD = os.environ.get("SISPE_EMAIL_PASS", "jeyo jvgk nmin nlps")
+DEFAULT_FROM_EMAIL = os.environ.get(
+    "SISPE_EMAIL_FROM", EMAIL_HOST_USER or "proyecto.sispe@gmail.com"
+)
+EMAIL_BACKEND = os.environ.get(
+    "SISPE_EMAIL_BACKEND",
+    (
+        "django.core.mail.backends.console.EmailBackend"
+        if DEBUG and not EMAIL_HOST_USER
+        else "django.core.mail.backends.smtp.EmailBackend"
+    ),
+)

@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block titulo %}Carta · Sabor Urbano{% endblock %}
+{% block titulo %}Carta · SISPE{% endblock %}
 {% block seccion %}Carta{% endblock %}
 
 {% block contenido %}
 
 <section class="hero">
-  <h1>La carta de <span>Sabor Urbano</span></h1>
+  <h1>La carta de <span>SISPE</span></h1>
   <p>Elige tus platos, súmales adiciones y envía el pedido. La cocina lo recibe al instante.</p>
   {% if mesa %}
     <div class="hero-mesa">Mesa <b>{{ mesa }}</b>{% if request.session.cliente_mesa.nombre %} · Hola, <b>{{ request.session.cliente_mesa.nombre }}</b>{% endif %} · pedido ligado a esta mesa</div>

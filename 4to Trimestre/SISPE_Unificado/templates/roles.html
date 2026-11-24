@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 
-{% block titulo %}Roles · Sabor Urbano{% endblock %}
+{% block titulo %}Roles · SISPE{% endblock %}
 {% block seccion %}Roles{% endblock %}
 
 {% block contenido %}
 <section class="hero">
   <h1>Quién es <span>quién</span></h1>
-  <p>El sistema tiene dos roles con permisos distintos y un cliente sin cuenta.</p>
+  <p>Los módulos disponibles dependen del rol asignado a cada cuenta.</p>
 </section>
 
 <div class="rejilla">
@@ -27,7 +27,27 @@
       <p class="desc">Cuenta del grupo Chef. Ve las comandas y avanza el estado:
         pendiente → en preparación → listo → entregado.</p>
       <ul class="partes-combo">
-        <li>Panel de cocina</li><li>Cambiar estado</li><li>QR de mesas</li><li>Reportes</li>
+        <li>Panel de cocina</li><li>Cambiar estado</li><li>Reportes</li>
+      </ul>
+    </div>
+  </article>
+
+  <article class="tarjeta">
+    <div class="tarjeta-cuerpo">
+      <h3>Cajero</h3>
+      <p class="desc">Atiende cobros y consulta los pedidos que están activos.</p>
+      <ul class="partes-combo">
+        <li>Panel de caja</li><li>Facturas</li><li>Pedidos activos</li>
+      </ul>
+    </div>
+  </article>
+
+  <article class="tarjeta">
+    <div class="tarjeta-cuerpo">
+      <h3>Mesero</h3>
+      <p class="desc">Administra el servicio en sala sin acceso a los códigos QR de administración.</p>
+      <ul class="partes-combo">
+        <li>Estado y liberación de mesas</li><li>Despacho de pedidos</li><li>Tomar pedidos</li>
       </ul>
     </div>
   </article>
@@ -35,25 +55,23 @@
   <article class="tarjeta">
     <div class="tarjeta-cuerpo">
       <h3>Administrador</h3>
-      <p class="desc">Superusuario. Todo el CRUD del menú, adiciones, combos,
-        imágenes y pedidos, además del admin de Django.</p>
+      <p class="desc">Acceso completo a la gestión del sistema, los módulos operativos y el Centro de Gestión SISPE.</p>
       <ul class="partes-combo">
         <li>CRUD completo</li><li>Subir imágenes</li><li>Adiciones</li><li>Combos</li>
+        <li>Generar e imprimir QR de mesas</li>
+      </ul>
+    </div>
+  </article>
+
+  <article class="tarjeta">
+    <div class="tarjeta-cuerpo">
+      <h3>Gestor técnico</h3>
+      <p class="desc">Cuenta técnica limitada al Centro de Gestión SISPE. No puede editar tablas ni entrar a los módulos operativos.</p>
+      <ul class="partes-combo">
+        <li>Acceso al panel de gestión</li><li>Sin permisos de edición</li>
       </ul>
     </div>
   </article>
 </div>
 
-<div class="panel mt-24">
-  <h3 class="mt-0">Direcciones de este equipo</h3>
-  <p class="chico suave">Para escanear los QR desde un celular en la misma red,
-    abre la hoja de QR usando una de estas IPs, no 127.0.0.1.</p>
-  <div class="fila">
-    {% for ip in ips %}
-      <a class="chip" href="http://{{ ip }}:8000/cocina/qr/?host={{ ip }}:8000">{{ ip }}:8000</a>
-    {% empty %}
-      <span class="chico suave">No pude detectar IPs de red. Usa la de tu equipo con ipconfig.</span>
-    {% endfor %}
-  </div>
-</div>
 {% endblock %}

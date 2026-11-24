@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-actualizar_bd.py  -  Sabor Urbano
+actualizar_bd.py  -  SISPE
 
 Pone al dia la base de datos SIN borrar nada:
 

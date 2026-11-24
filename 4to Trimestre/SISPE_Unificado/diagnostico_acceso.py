@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-diagnostico_acceso.py  -  Sabor Urbano
+diagnostico_acceso.py  -  SISPE
 ======================================
 
 Sirve cuando /admin/ responde:

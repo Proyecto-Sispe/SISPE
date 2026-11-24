@@ -1,4 +1,4 @@
-"""Vistas publicas: carta del cliente, portada de roles y codigos QR."""
+"""Vistas de la carta pública, la portada de roles y accesos QR protegidos."""
 
 import json
 import socket
@@ -11,6 +11,7 @@ from django.urls import reverse
 
 from . import qr
 from .models import Adicion, Categoria, Combo, Producto
+from administracion.permisos import admin_required
 
 
 def _ips_locales():
@@ -147,28 +148,21 @@ def carta(request):
 
 
 def roles(request):
-    return render(request, "roles.html", {"ips": _ips_locales()})
+    return render(request, "roles.html")
 
 
 # --------------------------------------------------------------------------
 # Codigos QR de las mesas
 # --------------------------------------------------------------------------
+@admin_required
 def qr_mesa(request, mesa):
-    host = _host_efectivo(request)
-    destino = qr.url_carta(host, mesa)
-    uri = qr.data_uri(destino)
-    contexto = {
-        "mesa": mesa,
-        "destino": destino,
-        "host": host,
-        "imagen": uri,
-        "respaldo": None if uri else qr.url_respaldo(destino),
-        "motor": qr.motor(),
-        "ips": _ips_locales(),
-    }
-    return render(request, "menu/qr.html", contexto)
+    query = request.GET.copy()
+    query["desde"] = str(mesa)
+    query["hasta"] = str(mesa)
+    return redirect(f"{reverse('mesas_list')}?{query.urlencode()}")
 
 
+@admin_required
 def qr_imagen(request, mesa):
     host = _host_efectivo(request)
     destino = qr.url_carta(host, mesa)
@@ -176,5 +170,5 @@ def qr_imagen(request, mesa):
     if not png:
         raise Http404("No hay generador de QR instalado (pip install segno)")
     respuesta = HttpResponse(png, content_type="image/png")
-    respuesta["Content-Disposition"] = f'inline; filename="qr_mesa_{mesa}.png"'
+    respuesta["Content-Disposition"] = f'attachment; filename="qr_mesa_{mesa}.png"'
     return respuesta

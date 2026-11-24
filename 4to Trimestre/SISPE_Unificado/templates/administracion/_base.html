@@ -3,24 +3,5 @@
 {% block extra_head %}<link rel="stylesheet" href="{% static 'css/administracion.css' %}">{% endblock %}
 {% block seccion %}Administración{% endblock %}
 {% block contenido %}
-{% with seccion_adm=request.resolver_match.url_name %}
-<nav class="adm-nav">
-  {% if es_admin %}
-    <a class="chip {% if seccion_adm == 'dashboard_admin' %}activo{% endif %}" href="{% url 'dashboard_admin' %}">Panel</a>
-    <a class="chip {% if 'adm_usuario' in seccion_adm %}activo{% endif %}" href="{% url 'adm_usuarios' %}">Usuarios</a>
-    <a class="chip {% if 'adm_menu' in seccion_adm %}activo{% endif %}" href="{% url 'adm_menu' %}">Menú</a>
-    <a class="chip {% if seccion_adm == 'adm_inventario' or 'adm_insumo' in seccion_adm %}activo{% endif %}" href="{% url 'adm_inventario' %}">Inventario</a>
-    <a class="chip {% if 'adm_receta' in seccion_adm %}activo{% endif %}" href="{% url 'adm_recetas' %}">Insumos por producto</a>
-    <a class="chip {% if 'adm_factura' in seccion_adm %}activo{% endif %}" href="{% url 'adm_facturas' %}">Facturas</a>
-    <a class="chip" href="{% url 'mesas_list' %}">Mesas y QR</a>
-    <a class="chip {% if seccion_adm == 'adm_pedidos' %}activo{% endif %}" href="{% url 'adm_pedidos' %}">Pedidos activos</a>
-    <a class="chip" href="{% url 'reportes' %}">Reportes</a>
-  {% elif es_cajero %}
-    <a class="chip {% if seccion_adm == 'dashboard_cajero' %}activo{% endif %}" href="{% url 'dashboard_cajero' %}">Panel Caja</a>
-    <a class="chip {% if 'adm_factura' in seccion_adm %}activo{% endif %}" href="{% url 'adm_facturas' %}">Facturas</a>
-    <a class="chip {% if seccion_adm == 'adm_pedidos' %}activo{% endif %}" href="{% url 'adm_pedidos' %}">Pedidos activos</a>
-  {% endif %}
-</nav>
 {% block adm %}{% endblock %}
-{% endwith %}
 {% endblock %}

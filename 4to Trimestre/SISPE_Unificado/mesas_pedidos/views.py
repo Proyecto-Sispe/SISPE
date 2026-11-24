@@ -7,8 +7,9 @@ from django.utils import timezone
 from django.utils.crypto import get_random_string
 from django.utils.http import url_has_allowed_host_and_scheme
 
-from administracion.permisos import admin_required, rol_required
-from menu.qr import data_uri
+from administracion.permisos import admin_required, obtener_rol_actual, rol_required
+from menu import qr
+from menu.views import _host_efectivo, _ips_locales
 
 from .forms import IngresoClienteMesaForm, MesaForm
 from .models import (
@@ -46,12 +47,12 @@ def _calcular_total_pedido(pedido):
     return subtotal_items + subtotal_adiciones
 
 
-def _mesas_con_qr(request):
-    """El QR de cada mesa abre /servicio/mesa/<id>/pedir/ en este servidor."""
+def _mesas_con_qr(host, puede_gestionar_qr):
+    """Prepara las mesas y genera sus QR solo para el rol administrador."""
     mesas = list(Mesa.objects.order_by("id"))
     for mesa in mesas:
-        mesa.url_pedido = request.build_absolute_uri(reverse("escanear_mesa", args=[mesa.id]))
-        mesa.qr_url = data_uri(mesa.url_pedido)
+        mesa.url_pedido = qr.url_carta(host, mesa.id) if puede_gestionar_qr else ""
+        mesa.qr_url = qr.data_uri(mesa.url_pedido) if puede_gestionar_qr else None
     return mesas
 
 
@@ -61,7 +62,51 @@ def _mesas_con_qr(request):
 
 @servicio_required
 def mesas_list(request):
-    return render(request, "mesas_pedidos/mesas_list.html", {"mesas": _mesas_con_qr(request)})
+    puede_gestionar_qr = obtener_rol_actual(request) == "administrador"
+    host = _host_efectivo(request)
+    mesas = _mesas_con_qr(host, puede_gestionar_qr)
+    desde = request.GET.get("desde", "").strip()
+    hasta = request.GET.get("hasta", "").strip()
+    rango_valido = True
+
+    if desde or hasta:
+        try:
+            desde_num = int(desde) if desde else 1
+            hasta_num = int(hasta) if hasta else 60
+            if desde_num < 1 or hasta_num < desde_num:
+                raise ValueError
+        except ValueError:
+            messages.error(
+                request,
+                "El rango debe usar mesas positivas y 'Hasta' no puede ser menor que 'Desde'.",
+            )
+            rango_valido = False
+            desde_num = hasta_num = 0
+
+    qr_count = 0
+    for mesa in mesas:
+        mesa.incluir_qr = (
+            puede_gestionar_qr
+            and rango_valido
+            and (not desde or mesa.id >= desde_num)
+            and (not hasta or mesa.id <= hasta_num)
+        )
+        qr_count += bool(mesa.incluir_qr and mesa.qr_url)
+
+    return render(
+        request,
+        "mesas_pedidos/mesas_list.html",
+        {
+            "mesas": mesas,
+            "puede_gestionar_qr": puede_gestionar_qr,
+            "host": host,
+            "ips": _ips_locales(),
+            "motor": qr.motor(),
+            "desde": desde,
+            "hasta": hasta,
+            "qr_count": qr_count,
+        },
+    )
 
 
 @admin_required
@@ -308,14 +353,6 @@ def despachar_y_liberar(request, id_pedido):
 
 @servicio_required
 def dashboard_visual(request):
-    return render(
-        request,
-        "mesas_pedidos/dashboard.html",
-        {
-            "mesas": _mesas_con_qr(request),
-            "productos": Menu.objects.select_related("categoria").order_by("categoria__nom_categoria", "productos"),
-            "pedidos": Pedido.objects.select_related("mesa").exclude(
-                estado=Pedido.EstadoPedido.ENTREGADO
-            ).order_by("-fecha_pedido"),
-        },
-    )
+    if obtener_rol_actual(request) == "administrador":
+        return redirect("dashboard_admin")
+    return redirect("mesas_list")

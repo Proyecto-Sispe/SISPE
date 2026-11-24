@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-sincronizar_bd.py  -  Sabor Urbano
+sincronizar_bd.py  -  SISPE
 ==================================
 
 Repara el error:

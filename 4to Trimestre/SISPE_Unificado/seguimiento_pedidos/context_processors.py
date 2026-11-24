@@ -28,6 +28,7 @@ def rol_context(request):
     return {
         "rol_actual": rol,
         "es_admin": rol == "administrador",
+        "es_django_admin": rol == "admin_django",
         "es_cocinero": rol == "cocinero",
         "es_cajero": rol == "cajero",
         "es_mesero": rol == "mesero",
@@ -35,6 +36,7 @@ def rol_context(request):
         "es_anonimo": rol == "anonimo",
         "rol_nombre_display": {
             "administrador": "Administrador",
+            "admin_django": "Admin Django",
             "cocinero": "Cocinero",
             "cajero": "Cajero",
             "mesero": "Mesero",

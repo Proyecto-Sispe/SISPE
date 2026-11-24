@@ -6,18 +6,23 @@ from decimal import Decimal
 from django.contrib import messages
 from django.db.models import Count, DecimalField, F, Q, Sum, Value
 from django.db.models.functions import Coalesce
+from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
+from django.utils.dateparse import parse_date
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
 from administracion import inventario
 from administracion.facturacion import anular
+from administracion.permisos import admin_required
+from mesas_pedidos.models import Mesa
 
 from menu.models import Categoria, Producto
-from menu.views import _host_efectivo, _ips_locales
 from pedidos.models import DetallePedido, Pedido
 
 from .permisos import chef_required
+from .reportes import exportar_excel, exportar_pdf
 
 
 @chef_required
@@ -82,78 +87,73 @@ def cambiar_estado(request, pk):
     return redirect("cocina_panel")
 
 
-@chef_required
+@admin_required
 def qr_mesas(request):
-    desde = request.GET.get("desde", "1")
-    hasta = request.GET.get("hasta", "12")
-    host = _host_efectivo(request)
-
-    try:
-        desde_i = max(int(desde), 1)
-    except (TypeError, ValueError):
-        desde_i = 1
-    try:
-        hasta_i = min(int(hasta), 60)
-    except (TypeError, ValueError):
-        hasta_i = 12
-    if hasta_i < desde_i:
-        hasta_i = desde_i
-
-    from menu import qr as qr_mod
-
-    mesas = []
-    for numero in range(desde_i, hasta_i + 1):
-        destino = qr_mod.url_carta(host, numero)
-        uri = qr_mod.data_uri(destino)
-        mesas.append(
-            {
-                "numero": numero,
-                "destino": destino,
-                "imagen": uri,
-                "respaldo": None if uri else qr_mod.url_respaldo(destino),
-            }
-        )
-
-    return render(
-        request,
-        "menu/qr_mesas.html",
-        {
-            "mesas": mesas,
-            "desde": desde_i,
-            "hasta": hasta_i,
-            "host": host,
-            "ips": _ips_locales(),
-            "motor": qr_mod.motor(),
-        },
-    )
+    query = request.GET.urlencode()
+    destino = reverse("mesas_list")
+    return redirect(f"{destino}?{query}" if query else destino)
 
 
 @chef_required
 def reportes(request):
-    desde = request.GET.get("desde", "")
-    hasta = request.GET.get("hasta", "")
-    categoria = request.GET.get("categoria", "")
-    estado = request.GET.get("estado", "")
+    desde = request.GET.get("desde", "").strip()
+    hasta = request.GET.get("hasta", "").strip()
+    categoria = request.GET.get("categoria", "").strip()
+    estado = request.GET.get("estado", "").strip()
+    export = request.GET.get("export", "").strip()
+
+    if export not in ("", "excel", "pdf"):
+        return HttpResponseBadRequest("Formato de exportación no válido.")
+
+    fecha_desde = parse_date(desde) if desde else None
+    fecha_hasta = parse_date(hasta) if hasta else None
+    if desde and fecha_desde is None:
+        return HttpResponseBadRequest("La fecha inicial no es válida.")
+    if hasta and fecha_hasta is None:
+        return HttpResponseBadRequest("La fecha final no es válida.")
+    if fecha_desde and fecha_hasta and fecha_desde > fecha_hasta:
+        return HttpResponseBadRequest("La fecha inicial no puede ser posterior a la fecha final.")
+
+    if categoria:
+        try:
+            categoria_id = int(categoria)
+        except ValueError:
+            return HttpResponseBadRequest("La categoría seleccionada no es válida.")
+        if not Categoria.objects.filter(pk=categoria_id, activa=True).exists():
+            return HttpResponseBadRequest("La categoría seleccionada no está disponible.")
+        categoria = str(categoria_id)
+
+    nombres_estados = dict(Pedido.ESTADOS)
+    if estado and estado not in nombres_estados:
+        return HttpResponseBadRequest("El estado seleccionado no es válido.")
 
     pedidos = Pedido.objects.all()
-    if desde:
-        pedidos = pedidos.filter(fecha_pedido__date__gte=desde)
-    if hasta:
-        pedidos = pedidos.filter(fecha_pedido__date__lte=hasta)
+    if fecha_desde:
+        pedidos = pedidos.filter(fecha_pedido__date__gte=fecha_desde)
+    if fecha_hasta:
+        pedidos = pedidos.filter(fecha_pedido__date__lte=fecha_hasta)
     if estado:
         pedidos = pedidos.filter(estado=estado)
 
-    detalles = DetallePedido.objects.filter(pedido__in=pedidos)
+    detalles = DetallePedido.objects.filter(pedido__in=pedidos).select_related(
+        "pedido", "producto", "combo"
+    )
     if categoria:
         detalles = detalles.filter(
             Q(producto__categoria_id=categoria) | Q(combo__items__producto__categoria_id=categoria)
         ).distinct()
 
+    pedidos_reporte = pedidos
+    if categoria:
+        pedidos_reporte = pedidos.filter(pk__in=detalles.values("pedido_id").distinct())
+
     ventas = detalles.aggregate(
         t=Coalesce(Sum("valor_venta"), Value(Decimal("0")), output_field=DecimalField())
     )["t"]
-    cantidad_pedidos = pedidos.count()
+    cantidad_pedidos = pedidos_reporte.count()
     ticket = (ventas / cantidad_pedidos) if cantidad_pedidos else Decimal("0")
+    pedidos_entregados = pedidos_reporte.filter(estado="entregado").count()
+    mesas_ocupadas = Mesa.objects.filter(estado=Mesa.EstadoMesa.OCUPADA).count()
 
     por_categoria = (
         detalles.filter(producto__isnull=False)
@@ -162,23 +162,29 @@ def reportes(request):
         .order_by("-total")
     )
 
-    top = (
+    top = list(
         detalles.filter(producto__isnull=False)
         .values("producto__nombre")
         .annotate(total=Sum("valor_venta"), unidades=Sum("cantidad"))
-        .order_by("-unidades")[:10]
+        .order_by("-unidades", "producto__nombre")[:10]
     )
 
-    combos_vendidos = (
+    combos_vendidos = list(
         detalles.filter(combo__isnull=False)
         .values("combo__nombre")
         .annotate(total=Sum("valor_venta"), unidades=Sum("cantidad"))
-        .order_by("-unidades")
+        .order_by("-unidades", "combo__nombre")
     )
 
-    por_estado = pedidos.values("estado").annotate(n=Count("id_pedido")).order_by("-n")
+    por_estado = list(
+        pedidos_reporte.values("estado").annotate(n=Count("id_pedido")).order_by("-n")
+    )
 
-    maximo_categoria = max([c["total"] for c in por_categoria], default=Decimal("0")) or Decimal("1")
+    por_categoria = list(por_categoria)
+    maximo_categoria = max(
+        (fila["total"] or Decimal("0") for fila in por_categoria),
+        default=Decimal("0"),
+    ) or Decimal("1")
     for fila in por_categoria:
         fila["porcentaje"] = int((fila["total"] / maximo_categoria) * 100)
 
@@ -191,10 +197,26 @@ def reportes(request):
         "estados": Pedido.ESTADOS,
         "ventas": ventas,
         "cantidad_pedidos": cantidad_pedidos,
+        "pedidos_entregados": pedidos_entregados,
+        "mesas_ocupadas": mesas_ocupadas,
         "ticket": ticket,
         "por_categoria": por_categoria,
         "top": top,
+        "producto_mas_vendido": top[0]["producto__nombre"] if top else "Sin ventas",
         "combos_vendidos": combos_vendidos,
         "por_estado": por_estado,
+        "categoria_nombre": (
+            Categoria.objects.filter(pk=categoria).values_list("nom_categoria", flat=True).first()
+            if categoria
+            else "Todas"
+        ),
+        "estado_nombre": nombres_estados.get(estado, "Todos"),
+        "detalle_export": detalles,
     }
+
+    if export == "excel":
+        return exportar_excel(contexto)
+    if export == "pdf":
+        return exportar_pdf(contexto)
+
     return render(request, "cocina/reportes.html", contexto)

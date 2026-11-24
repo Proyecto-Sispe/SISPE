@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 
-{% block titulo %}Reportes · Sabor Urbano{% endblock %}
+{% block titulo %}Reportes · SISPE{% endblock %}
 {% block seccion %}Reportes{% endblock %}
 
 {% block contenido %}
 
 <section class="hero">
   <h1>Reportes de <span>ventas</span></h1>
-  <p>Filtra por fecha, categoría y estado para ver cómo va el restaurante.</p>
+  <p>Consulta las métricas y exporta los resultados con los filtros seleccionados.</p>
 </section>
 
 <form class="panel" method="get">
@@ -43,12 +43,14 @@
     </div>
     <button class="btn btn-primario" type="submit">Filtrar</button>
     <a class="btn btn-secundario" href="{% url 'reportes' %}">Limpiar</a>
+    <button class="btn btn-secundario" type="submit" name="export" value="excel">Descargar Excel</button>
+    <button class="btn btn-secundario" type="submit" name="export" value="pdf">Descargar PDF</button>
   </div>
 </form>
 
 <div class="rejilla mt-24">
   <div class="panel">
-    <div class="chico suave">Ventas totales</div>
+    <div class="chico suave">Ventas del filtro</div>
     <div class="precio" style="font-size:26px">${{ ventas|floatformat:0 }}</div>
   </div>
   <div class="panel">
@@ -56,8 +58,22 @@
     <div class="precio" style="font-size:26px">{{ cantidad_pedidos }}</div>
   </div>
   <div class="panel">
+    <div class="chico suave">Pedidos entregados</div>
+    <div class="precio" style="font-size:26px">{{ pedidos_entregados }}</div>
+  </div>
+  <div class="panel">
     <div class="chico suave">Ticket promedio</div>
     <div class="precio" style="font-size:26px">${{ ticket|floatformat:0 }}</div>
+  </div>
+  <div class="panel">
+    <div class="chico suave">Mesas ocupadas ahora</div>
+    <div class="precio" style="font-size:26px">{{ mesas_ocupadas }}</div>
+  </div>
+  <div class="panel">
+    <div class="chico suave">Producto más vendido</div>
+    <div style="font-size:18px;font-weight:800;color:var(--ambar);overflow-wrap:anywhere">
+      {{ producto_mas_vendido }}
+    </div>
   </div>
 </div>
 
@@ -114,6 +130,22 @@
           </tr>
         {% empty %}
           <tr><td colspan="3" class="suave">Todavía no se ha vendido ningún combo.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="panel mt-16">
+  <div class="seccion-titulo mt-0"><h2>Pedidos por estado</h2></div>
+  <div class="tabla-envoltura">
+    <table class="tabla">
+      <thead><tr><th>Estado</th><th class="derecha">Pedidos</th></tr></thead>
+      <tbody>
+        {% for fila in por_estado %}
+          <tr><td>{{ fila.estado }}</td><td class="derecha">{{ fila.n }}</td></tr>
+        {% empty %}
+          <tr><td colspan="2" class="suave">Sin datos para esos filtros.</td></tr>
         {% endfor %}
       </tbody>
     </table>

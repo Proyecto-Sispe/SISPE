@@ -1,37 +1,129 @@
-{% extends "mesas_pedidos/base.html" %}
-{% block title %}Mesas y QR · SISPE{% endblock %}
-{% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h2 class="h4 mb-0">Mesas</h2>
-    <a href="{% url 'mesa_create' %}" class="btn btn-primary btn-sm">+ Nueva mesa</a>
-</div>
-<div class="row g-3">
-    {% for mesa in mesas %}
-    <div class="col-lg-3 col-md-4 col-sm-6">
-        <div class="card h-100 shadow-sm text-center">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <strong>Mesa #{{ mesa.id }}</strong>
-                {% if mesa.estado == 0 %}<span class="badge bg-success">Libre</span>{% else %}<span class="badge bg-danger">Ocupada</span>{% endif %}
-            </div>
-            <div class="card-body">
-                {% if mesa.qr_url %}<a href="{{ mesa.qr_url }}" download="mesa_{{ mesa.id }}.png" title="Descargar QR"><img src="{{ mesa.qr_url }}" alt="QR Mesa {{ mesa.id }}" class="img-fluid mb-2" style="max-height:170px"></a>{% endif %}
-                <p class="mb-1"><strong>{{ mesa.ubicacion }}</strong></p>
-                <p class="text-muted small mb-2">Capacidad: {{ mesa.capacidad }} personas</p>
-                <a href="{{ mesa.url_pedido }}" class="small" target="_blank">Abrir enlace del QR</a>
-            </div>
-            <div class="card-footer d-flex gap-1 justify-content-center flex-wrap">
-                <a href="{% url 'mesa_update' mesa.id %}" class="btn btn-outline-secondary btn-sm">Editar</a>
-                <a href="{% url 'mesa_delete' mesa.id %}" class="btn btn-outline-danger btn-sm">Eliminar</a>
-                {% if mesa.estado == 1 %}
-                <form method="post" action="{% url 'liberar_mesa' mesa.id %}">{% csrf_token %}
-                    <button class="btn btn-outline-success btn-sm">Liberar</button>
-                </form>
-                {% endif %}
-            </div>
-        </div>
+{% extends "base.html" %}
+{% load static %}
+
+{% block titulo %}Mesas y QR · SISPE{% endblock %}
+{% block seccion %}Mesas{% endblock %}
+{% block extra_head %}
+  <link rel="stylesheet" href="{% static 'css/mesas_qr.css' %}">
+{% endblock %}
+
+{% block contenido %}
+<section class="hero mesas-hero">
+  <div>
+    <h1>Gestión de <span>mesas</span></h1>
+    <p>Estado del servicio y códigos QR de las mesas registradas.</p>
+  </div>
+  {% if es_admin %}
+    <a href="{% url 'mesa_create' %}" class="btn btn-primario no-imprimir">+ Nueva mesa</a>
+  {% endif %}
+</section>
+
+{% if puede_gestionar_qr %}
+<section class="panel qr-controles no-imprimir">
+  <h2 class="mt-0">Generar e imprimir códigos QR</h2>
+  <p class="chico suave">Deja el rango vacío para incluir todas las mesas. Solo se generan QR para mesas existentes.</p>
+  <form method="get" class="qr-filtros">
+    <div class="grupo-campo">
+      <label for="desde">Desde mesa</label>
+      <input class="campo" type="number" min="1" id="desde" name="desde" value="{{ desde }}">
     </div>
-    {% empty %}
-    <div class="col-12"><div class="alert alert-warning">No hay mesas registradas.</div></div>
-    {% endfor %}
+    <div class="grupo-campo">
+      <label for="hasta">Hasta mesa</label>
+      <input class="campo" type="number" min="1" id="hasta" name="hasta" value="{{ hasta }}">
+    </div>
+    <div class="grupo-campo host-campo">
+      <label for="host">Dirección del servidor (IP:puerto)</label>
+      <input class="campo" type="text" id="host" name="host" value="{{ host }}"
+             list="ipsEquipo" placeholder="192.168.1.10:8000">
+      <datalist id="ipsEquipo">
+        {% for ip in ips %}<option value="{{ ip }}:8000">{% endfor %}
+      </datalist>
+    </div>
+    <button class="btn btn-primario" type="submit">Aplicar</button>
+    <a class="btn btn-secundario" href="{% url 'mesas_list' %}">Todas</a>
+    {% if qr_count %}
+      <button class="btn btn-secundario" type="button" onclick="window.print()">Imprimir {{ qr_count }} QR</button>
+    {% endif %}
+  </form>
+  <p class="chico suave mt-16 mb-0">
+    Dirección del QR: <b>{{ host }}</b> · Motor: <b>{{ motor|default:"no disponible" }}</b> · QR listos: <b>{{ qr_count }}</b>
+  </p>
+  {% if ips %}
+    <div class="fila mt-16">
+      {% for ip in ips %}
+        <a class="chip" href="?desde={{ desde }}&hasta={{ hasta }}&host={{ ip }}:8000">{{ ip }}:8000</a>
+      {% endfor %}
+    </div>
+  {% endif %}
+</section>
+{% endif %}
+
+<div class="seccion-titulo">
+  <h2>Mesas en operación</h2>
+  <span class="cuenta">{{ mesas|length }} registradas</span>
+</div>
+
+<div class="mesa-grid">
+  {% for mesa in mesas %}
+    <article class="panel mesa-card{% if mesa.incluir_qr %} con-qr{% endif %}">
+      <div class="mesa-cabecera">
+        <div>
+          <span class="chico suave">Mesa</span>
+          <h3>#{{ mesa.id }}</h3>
+        </div>
+        {% if mesa.estado == 0 %}
+          <span class="mesa-estado libre">Libre</span>
+        {% else %}
+          <span class="mesa-estado ocupada">Ocupada</span>
+        {% endif %}
+      </div>
+
+      {% if puede_gestionar_qr and mesa.incluir_qr %}
+        <div class="mesa-qr">
+          {% if mesa.qr_url %}
+            <a href="{% url 'qr_imagen' mesa.id %}?host={{ host|urlencode }}"
+               download="mesa_{{ mesa.id }}.png" title="Descargar QR de la mesa {{ mesa.id }}">
+              <img src="{{ mesa.qr_url }}" alt="Código QR de la mesa {{ mesa.id }}">
+            </a>
+            <a class="btn btn-secundario btn-mini no-imprimir"
+               href="{% url 'qr_imagen' mesa.id %}?host={{ host|urlencode }}"
+               download="mesa_{{ mesa.id }}.png">Descargar PNG</a>
+          {% else %}
+            <div class="aviso warning chico">No hay un generador QR instalado.</div>
+          {% endif %}
+          {% if mesa.url_pedido %}
+            <p class="chico suave mesa-destino">{{ mesa.url_pedido }}</p>
+            <a class="btn btn-secundario btn-mini no-imprimir"
+               href="{{ mesa.url_pedido }}" target="_blank" rel="noopener noreferrer">Abrir destino QR</a>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      <div class="mesa-detalles">
+        <strong>{{ mesa.ubicacion }}</strong>
+        <span>Capacidad: {{ mesa.capacidad }} personas</span>
+      </div>
+
+      <div class="mesa-acciones no-imprimir">
+        {% if es_admin %}
+          <a href="{% url 'mesa_update' mesa.id %}" class="btn btn-secundario btn-mini">Editar</a>
+          <a href="{% url 'mesa_delete' mesa.id %}" class="btn btn-peligro btn-mini">Eliminar</a>
+        {% endif %}
+        {% if mesa.estado == 1 %}
+          <form method="post" action="{% url 'liberar_mesa' mesa.id %}">
+            {% csrf_token %}
+            <button class="btn btn-secundario btn-mini" type="submit">Liberar mesa</button>
+          </form>
+        {% endif %}
+      </div>
+    </article>
+  {% empty %}
+    <div class="panel mesa-vacia">
+      <p class="mt-0">No hay mesas registradas.</p>
+      {% if es_admin %}
+        <a href="{% url 'mesa_create' %}" class="btn btn-primario no-imprimir">Crear primera mesa</a>
+      {% endif %}
+    </div>
+  {% endfor %}
 </div>
 {% endblock %}

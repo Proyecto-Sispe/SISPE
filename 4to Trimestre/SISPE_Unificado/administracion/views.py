@@ -341,11 +341,14 @@ def insumo_form(request, pk=None):
 def recetas(request):
     q = request.GET.get("q", "").strip()
     cat = request.GET.get("cat", "")
+    sin_receta = request.GET.get("sin_receta") == "1"
     productos = Producto.objects.select_related("categoria").prefetch_related("receta__insumo").order_by("nombre")
     if q:
         productos = productos.filter(Q(nombre__icontains=q) | Q(receta__insumo__nombre__icontains=q)).distinct()
     if cat:
         productos = productos.filter(categoria_id=cat)
+    if sin_receta:
+        productos = productos.annotate(n_insumos=Count("receta")).filter(n_insumos=0)
     pagina, filtros = _paginar(request, productos, 20)
     return render(
         request,
@@ -355,6 +358,11 @@ def recetas(request):
             "filtros": filtros,
             "q": q,
             "cat": cat,
+            "sin_receta": sin_receta,
+            "productos_sin_receta": Producto.objects.filter(disponible=True)
+            .annotate(n_insumos=Count("receta"))
+            .filter(n_insumos=0)
+            .count(),
             "categorias": Categoria.objects.order_by("orden", "nom_categoria"),
         },
     )

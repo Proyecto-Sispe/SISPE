@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-crear_tablas.py  -  Sabor Urbano
+crear_tablas.py  -  SISPE
 
 Crea las tablas base del restaurante (Categoria, Menu, Pedido, Detalle_Pedido)
 y carga las 11 categorias con sus 85 productos.

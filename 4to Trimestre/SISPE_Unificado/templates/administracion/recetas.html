@@ -5,10 +5,17 @@
   <h1>Insumos por <span>producto</span></h1>
   <p>Define qué materias primas gasta cada plato. Se descuentan solas al confirmar un pedido.</p>
 </section>
+{% if productos_sin_receta %}
+<div class="recetas-alerta">
+  Hay {{ productos_sin_receta }} productos disponibles sin receta; sus ingredientes no se descuentan todavía.
+  <a class="btn btn-secundario btn-mini" href="{% url 'adm_recetas' %}?sin_receta=1">Configurar productos pendientes</a>
+</div>
+{% endif %}
 <form class="filtros" method="get">
+  {% if sin_receta %}<input type="hidden" name="sin_receta" value="1">{% endif %}
   <div><label>Buscar</label><input type="search" name="q" value="{{ q }}" placeholder="Producto o insumo"></div>
   <div><label>Categoría</label><select name="cat"><option value="">Todas</option>{% for c in categorias %}<option value="{{ c.id_categoria }}" {% if cat == c.id_categoria|stringformat:"s" %}selected{% endif %}>{{ c.nom_categoria }}</option>{% endfor %}</select></div>
-  <div class="acciones-filtro"><button class="btn btn-primario">Buscar</button><a class="btn btn-secundario" href="{% url 'adm_recetas' %}">Limpiar</a></div>
+  <div class="acciones-filtro"><button class="btn btn-primario">Buscar</button><a class="btn btn-secundario" href="{% url 'adm_recetas' %}">Mostrar todos</a></div>
 </form>
 <div class="tabla-envoltura">
   <table class="tabla">
