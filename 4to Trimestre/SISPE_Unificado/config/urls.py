@@ -4,6 +4,7 @@ from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.urls import include, path
 from django.views.generic import TemplateView
+from django.urls import include
 
 from seguimiento_pedidos import views as acceso
 
@@ -60,6 +61,10 @@ urlpatterns = [
         ),
         name="password_reset_complete",
     ),
+    path(
+    "administracion/carga-masiva/",
+    include("carga_masiva.urls")
+),
 ]
 
 if settings.DEBUG:

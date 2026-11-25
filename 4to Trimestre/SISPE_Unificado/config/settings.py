@@ -13,13 +13,25 @@ con columnas distintas. config/routers.py decide a que base va cada app.
 import os
 from pathlib import Path
 
+from django.core.exceptions import ImproperlyConfigured
+from django.core.management.utils import get_random_secret_key
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.environ.get(
-    "SISPE_SECRET", "django-insecure-sispe-unificado-cambia-esta-clave-en-produccion"
-)
-DEBUG = os.environ.get("SISPE_DEBUG", "1") == "1"
-ALLOWED_HOSTS = ["*"]
+DEBUG = os.environ.get("SISPE_DEBUG", "0") == "1"
+SECRET_KEY = os.environ.get("SISPE_SECRET")
+if not SECRET_KEY:
+    if DEBUG:
+        SECRET_KEY = get_random_secret_key()
+    else:
+        raise ImproperlyConfigured("Set SISPE_SECRET before running with DEBUG disabled.")
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.environ.get(
+        "SISPE_ALLOWED_HOSTS", "127.0.0.1,localhost,testserver"
+    ).split(",")
+    if host.strip()
+]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -41,6 +53,8 @@ INSTALLED_APPS = [
     "dashboard",
     # Modulo de administracion (inventario, facturas, usuarios)
     "administracion",
+    # Modulo de carga masiva de datos
+    "carga_masiva",
 ]
 
 MIDDLEWARE = [
@@ -114,7 +128,28 @@ if os.environ.get("SISPE_SISTEMA_DB", "").lower() in ("mysql", "mariadb"):
 
 DATABASE_ROUTERS = ["config.routers.SispeRouter"]
 
-AUTH_PASSWORD_VALIDATORS = []
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "OPTIONS": {"min_length": 12},
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+    },
+]
+
+PASSWORD_RESET_TIMEOUT = 60 * 15
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = "DENY"
 
 LANGUAGE_CODE = "es-co"
 TIME_ZONE = "America/Bogota"
@@ -148,16 +183,12 @@ SABOR_MONEDA = "$"
 EMAIL_HOST = os.environ.get("SISPE_EMAIL_HOST", "smtp.gmail.com")
 EMAIL_PORT = int(os.environ.get("SISPE_EMAIL_PORT", "587"))
 EMAIL_USE_TLS = os.environ.get("SISPE_EMAIL_USE_TLS", "1") == "1"
-EMAIL_HOST_USER = os.environ.get("SISPE_EMAIL_USER", "proyecto.sispe@gmail.com")
-EMAIL_HOST_PASSWORD = os.environ.get("SISPE_EMAIL_PASS", "jeyo jvgk nmin nlps")
+EMAIL_HOST_USER = os.environ.get("SISPE_EMAIL_USER", "")
+EMAIL_HOST_PASSWORD = os.environ.get("SISPE_EMAIL_PASS", "")
 DEFAULT_FROM_EMAIL = os.environ.get(
-    "SISPE_EMAIL_FROM", EMAIL_HOST_USER or "proyecto.sispe@gmail.com"
+    "SISPE_EMAIL_FROM", EMAIL_HOST_USER or "no-reply@localhost"
 )
 EMAIL_BACKEND = os.environ.get(
     "SISPE_EMAIL_BACKEND",
-    (
-        "django.core.mail.backends.console.EmailBackend"
-        if DEBUG and not EMAIL_HOST_USER
-        else "django.core.mail.backends.smtp.EmailBackend"
-    ),
+    "django.core.mail.backends.smtp.EmailBackend",
 )

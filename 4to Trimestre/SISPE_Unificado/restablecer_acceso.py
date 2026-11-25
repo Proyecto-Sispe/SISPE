@@ -71,7 +71,7 @@ User = get_user_model()
 CUENTAS = [
     {
         "username": "admin",
-        "password": "Admin12345",
+        "password_env": "SISPE_ADMIN_INITIAL_PASSWORD",
         "email": "admin@local.com",
         "nombre": "Administrador",
         "superuser": True,
@@ -80,7 +80,7 @@ CUENTAS = [
     },
     {
         "username": "chef",
-        "password": "Chef12345",
+        "password_env": "SISPE_CHEF_INITIAL_PASSWORD",
         "email": "chef@local.com",
         "nombre": "Chef",
         "superuser": False,
@@ -129,7 +129,7 @@ def crear_grupos():
     return creados
 
 
-def crear_cuenta(datos):
+def crear_cuenta(datos, password):
     usuario, nuevo = User.objects.get_or_create(
         username=datos["username"],
         defaults={"email": datos["email"]},
@@ -140,7 +140,7 @@ def crear_cuenta(datos):
     usuario.is_superuser = datos["superuser"]
     if hasattr(usuario, "first_name"):
         usuario.first_name = datos["nombre"]
-    usuario.set_password(datos["password"])
+    usuario.set_password(password)
     usuario.save()
 
     try:
@@ -156,6 +156,21 @@ def crear_cuenta(datos):
 # 3. Ejecucion
 # --------------------------------------------------------------------------
 def main():
+    cuentas_configuradas = [
+        (datos, os.environ.get(datos["password_env"], ""))
+        for datos in CUENTAS
+    ]
+    faltantes = [
+        datos["password_env"]
+        for datos, password in cuentas_configuradas
+        if not password
+    ]
+    if faltantes:
+        print("Configura las variables de entorno requeridas:")
+        for variable in faltantes:
+            print("  " + variable)
+        return 1
+
     print("=" * 62)
     print(" SABOR URBANO - restablecer acceso")
     print("=" * 62)
@@ -170,10 +185,10 @@ def main():
             print(("  + Grupo creado   : " if nuevo else "  = Grupo existente: ") + nombre)
 
         print("-" * 62)
-        for datos in CUENTAS:
-            usuario, nuevo = crear_cuenta(datos)
+        for datos, password in cuentas_configuradas:
+            usuario, nuevo = crear_cuenta(datos, password)
             estado = "creada" if nuevo else "clave restablecida"
-            print("  {:<8} {:<22} {}".format(datos["username"], datos["password"], estado))
+            print("  {:<8} {}".format(datos["username"], estado))
             print("           {}".format(datos["descripcion"]))
     except OperationalError as exc:
         print()

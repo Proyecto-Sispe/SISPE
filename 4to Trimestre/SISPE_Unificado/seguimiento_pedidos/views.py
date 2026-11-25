@@ -1,36 +1,139 @@
 import hashlib
+import hmac
 import json
+import logging
+import os
+import secrets
+import smtplib
 from datetime import timedelta
+from types import SimpleNamespace
+
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, get_user_model
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
-from django.contrib.auth.hashers import check_password, make_password
+from django.contrib.auth.hashers import (
+    check_password,
+    identify_hasher,
+    make_password,
+)
 from django.contrib.auth.models import Group
 from django.core.mail import send_mail
+from django.core.exceptions import ImproperlyConfigured, ValidationError
+from django.contrib.auth.password_validation import validate_password
+from django.core.validators import validate_email
 from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
+from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
-from django.utils.crypto import get_random_string
 from django.utils.http import url_has_allowed_host_and_scheme
-from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
 
+from administracion.models import LoginThrottle
 from administracion.permisos import DJANGO_DASHBOARD_GROUP, admin_required, rol_required
 
 from .models import PasswordResets, Persona, PersonaHasRol, Rol, TipoDoc
 
+logger = logging.getLogger(__name__)
+RESET_EXPIRY = timedelta(minutes=15)
+RESET_MAX_ATTEMPTS = 5
+RESET_REQUEST_COOLDOWN = timedelta(minutes=1)
+LOGIN_WINDOW = timedelta(minutes=15)
+LOGIN_BUCKET_LIMITS = (8, 20)
+RESET_GENERIC_RESPONSE = (
+    "Si existe una cuenta activa con ese correo, recibirás instrucciones "
+    "para restablecer la contraseña."
+)
 
-def _verificar_password(password_ingresada, password_bd):
+
+def _login_buckets(request, identifier):
+    ip_address = request.META.get("REMOTE_ADDR", "unknown")
+    values = (
+        ("account-ip", f"{identifier.casefold()}|{ip_address}", LOGIN_BUCKET_LIMITS[0]),
+        ("ip", ip_address, LOGIN_BUCKET_LIMITS[1]),
+    )
+    return [
+        (
+            hmac.new(
+                settings.SECRET_KEY.encode("utf-8"),
+                f"{scope}:{value}".encode("utf-8"),
+                hashlib.sha256,
+            ).hexdigest(),
+            limit,
+        )
+        for scope, value, limit in values
+    ]
+
+
+def _login_is_limited(buckets, now):
+    for key, limit in buckets:
+        attempt = LoginThrottle.objects.using("default").filter(pk=key).first()
+        if (
+            attempt
+            and attempt.attempts >= limit
+            and attempt.blocked_until
+            and attempt.blocked_until > now
+        ):
+            return True
+    return False
+
+
+def _record_login_failure(buckets, now):
+    with transaction.atomic(using="default"):
+        attempts = LoginThrottle.objects.using("default")
+        attempts.filter(window_started__lt=now - timedelta(days=1)).delete()
+        for key, limit in buckets:
+            attempt, _ = attempts.select_for_update().get_or_create(
+                pk=key,
+                defaults={"window_started": now},
+            )
+            if attempt.window_started <= now - LOGIN_WINDOW:
+                attempt.attempts = 0
+                attempt.window_started = now
+                attempt.blocked_until = None
+            attempt.attempts += 1
+            if attempt.attempts >= limit:
+                attempt.blocked_until = now + LOGIN_WINDOW
+            attempt.save(
+                using="default",
+                update_fields=["attempts", "window_started", "blocked_until"],
+            )
+
+
+def _clear_login_failures(buckets):
+    LoginThrottle.objects.using("default").filter(
+        pk__in=[key for key, _limit in buckets]
+    ).delete()
+
+
+def _verificar_password(password_ingresada, password_bd, persona=None):
     if not password_bd:
         return False
-    # Soporta contraseñas hasheadas de Django y texto plano inicial del SQL
-    if password_bd.startswith(('pbkdf2_', 'argon2$', 'bcrypt$')):
-        return check_password(password_ingresada, password_bd)
-    return password_ingresada == password_bd
+    try:
+        identify_hasher(password_bd)
+    except ValueError:
+        if not hmac.compare_digest(password_ingresada, password_bd):
+            return False
+        if persona is not None:
+            persona.password = make_password(password_ingresada)
+            persona.save(using="sistema", update_fields=["password"])
+        return True
+
+    def actualizar_hash(password):
+        persona.password = make_password(password)
+        persona.save(using="sistema", update_fields=["password"])
+
+    return check_password(
+        password_ingresada,
+        password_bd,
+        setter=actualizar_hash if persona is not None else None,
+    )
 
 
 def _obtener_rol_usuario(persona):
@@ -65,11 +168,13 @@ GRUPO_POR_ROL = {
 }
 
 
-def _usuario_django(persona, rol):
+def _usuario_django(persona, rol, password=None):
     """Crea o actualiza el usuario de Django que acompana a la persona SISPE."""
     User = get_user_model()
     usuario, creado = User.objects.get_or_create(username=persona.correo_usu.lower())
-    if creado:
+    if password:
+        usuario.set_password(password)
+    elif creado:
         usuario.set_unusable_password()
     usuario.first_name = persona.nom1_usu or ''
     usuario.last_name = persona.ape1_usu or ''
@@ -101,19 +206,25 @@ def login_view(request):
         identificador = request.POST.get('correo', '').strip()
         password = request.POST.get('password', '')
         siguiente = _siguiente(request)
+        buckets = _login_buckets(request, identificador)
+        now = timezone.now()
+        if _login_is_limited(buckets, now):
+            messages.error(request, 'Correo/usuario o contrasena incorrectos.')
+            return _pantalla_login(request)
 
         persona = Persona.objects.filter(
             correo_usu__iexact=identificador,
             estado=1,
         ).first()
 
-        if persona and _verificar_password(password, persona.password):
+        if persona and _verificar_password(password, persona.password, persona):
             rol = _obtener_rol_usuario(persona)
             if not rol or rol not in RUTAS_POR_ROL:
                 messages.error(request, 'El usuario no tiene un rol valido asignado.')
                 return _pantalla_login(request)
 
-            auth_login(request, _usuario_django(persona, rol))
+            _clear_login_failures(buckets)
+            auth_login(request, _usuario_django(persona, rol, password))
             request.session['usuario_id'] = persona.id_usuario
             request.session['usuario_tipo_doc'] = persona.pkfk_tipo_doc_id
             request.session['usuario_nombre'] = f'{persona.nom1_usu} {persona.ape1_usu}'
@@ -122,6 +233,7 @@ def login_view(request):
 
         usuario = authenticate(request, username=identificador, password=password)
         if usuario is not None:
+            _clear_login_failures(buckets)
             auth_login(request, usuario)
             request.session['usuario_nombre'] = usuario.get_full_name() or usuario.username
             if usuario.groups.filter(name=DJANGO_DASHBOARD_GROUP).exists():
@@ -136,6 +248,7 @@ def login_view(request):
             )
             return redirect(siguiente or RUTAS_POR_ROL.get(request.session['usuario_rol'], 'portal'))
 
+        _record_login_failure(buckets, now)
         messages.error(request, 'Correo/usuario o contrasena incorrectos.')
         return _pantalla_login(request)
 
@@ -145,6 +258,34 @@ def login_view(request):
 def logout_view(request):
     auth_logout(request)
     return redirect('home')
+
+
+@login_required
+def cambiar_password(request):
+    form = PasswordChangeForm(request.user, request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        password_nueva = form.cleaned_data["new_password1"]
+        persona_id = request.session.get("usuario_id")
+        tipo_doc_id = request.session.get("usuario_tipo_doc")
+        if persona_id and tipo_doc_id:
+            persona = Persona.objects.using("sistema").filter(
+                id_usuario=persona_id,
+                pkfk_tipo_doc_id=tipo_doc_id,
+            ).first()
+            if persona:
+                persona.password = make_password(password_nueva)
+                persona.save(using="sistema", update_fields=["password"])
+
+        usuario = form.save()
+        update_session_auth_hash(request, usuario)
+        messages.success(request, "La contraseña se actualizó correctamente.")
+        return redirect("portal")
+
+    return render(
+        request,
+        "seguimiento_pedidos/cambiar_password.html",
+        {"form": form},
+    )
 
 
 def home(request):
@@ -191,6 +332,42 @@ def registro_view(request):
         messages.error(request, 'El documento y el teléfono deben ser numéricos.')
         return render(request, 'registro.html', contexto)
 
+    if len(numero) > 18 or len(telefono) > 18:
+        messages.error(request, 'El documento o el teléfono excede la longitud permitida.')
+        return render(request, 'registro.html', contexto)
+
+    try:
+        validate_email(correo)
+    except ValidationError:
+        messages.error(request, 'Ingresa un correo electrónico válido.')
+        return render(request, 'registro.html', contexto)
+    if len(correo) > 45:
+        messages.error(request, 'El correo no puede superar los 45 caracteres.')
+        return render(request, 'registro.html', contexto)
+
+    try:
+        validate_password(
+            password,
+            user=SimpleNamespace(
+                username=correo,
+                email=correo,
+                first_name=nom1,
+                last_name=ape1,
+            ),
+        )
+    except ValidationError as error:
+        for mensaje in error.messages:
+            messages.error(request, mensaje)
+        return render(request, 'registro.html', contexto)
+
+    documento = TipoDoc.objects.filter(
+        id_doc=int(tipo_doc),
+        estado=1,
+    ).first()
+    if not documento:
+        messages.error(request, 'Selecciona un tipo de documento válido.')
+        return render(request, 'registro.html', contexto)
+
     rol_cliente = _rol_cliente()
     if not rol_cliente:
         messages.error(request, 'No hay un rol de cliente configurado. Contacta al administrador.')
@@ -227,58 +404,197 @@ def registro_view(request):
     return redirect('login')
 
 
+def _token_digest(token):
+    return hashlib.sha256(token.encode("utf-8")).hexdigest()
+
+
+def _reset_activo(token, now=None):
+    if not token:
+        return None
+    return (
+        PasswordResets.objects.using("sistema")
+        .filter(
+            token=_token_digest(token),
+            codigo_hash__gt="",
+            usado=0,
+            intentos__lt=RESET_MAX_ATTEMPTS,
+            expira__gt=now or timezone.now(),
+        )
+        .first()
+    )
+
+
 def recuperar_password_page(request):
-    return render(request, 'seguimiento_pedidos/recuperar_password.html')
+    token = request.POST.get("token", "")
+    if request.method == "POST" and token:
+        reset = _reset_activo(token)
+        if not reset:
+            messages.error(
+                request,
+                "El enlace no es válido, venció o ya fue utilizado. Solicita uno nuevo.",
+            )
+            return redirect("recuperar_password")
+
+        codigo = (request.POST.get("codigo") or "").strip()
+        password = request.POST.get("password") or ""
+        confirmacion = request.POST.get("confirmacion") or ""
+        if not codigo.isdigit() or len(codigo) != 6:
+            codigo = ""
+        if not password or password != confirmacion:
+            messages.error(request, "Las contraseñas no coinciden.")
+            return redirect(f"{reverse('recuperar_password')}#token={token}")
+
+        User = get_user_model()
+        usuario_existente = User.objects.filter(
+            email__iexact=reset.correo,
+            is_active=True,
+        ).first()
+        try:
+            validate_password(password, user=usuario_existente)
+        except ValidationError as error:
+            for mensaje in error.messages:
+                messages.error(request, mensaje)
+            return redirect(f"{reverse('recuperar_password')}#token={token}")
+
+        with transaction.atomic(using="sistema"):
+            reset = (
+                PasswordResets.objects.using("sistema")
+                .select_for_update()
+                .filter(
+                    pk=reset.pk,
+                    usado=0,
+                    intentos__lt=RESET_MAX_ATTEMPTS,
+                    expira__gt=timezone.now(),
+                )
+                .first()
+            )
+            if not reset:
+                messages.error(
+                    request,
+                    "El enlace no es válido, venció o ya fue utilizado. Solicita uno nuevo.",
+                )
+                return redirect("recuperar_password")
+
+            if not codigo or not check_password(codigo, reset.codigo_hash):
+                reset.intentos += 1
+                if reset.intentos >= RESET_MAX_ATTEMPTS:
+                    reset.usado = 1
+                reset.save(using="sistema", update_fields=["intentos", "usado"])
+                messages.error(
+                    request,
+                    "El código no es válido. Solicita un nuevo enlace si agotaste los intentos.",
+                )
+                return redirect(f"{reverse('recuperar_password')}#token={token}")
+
+            personas = list(
+                Persona.objects.using("sistema")
+                .select_for_update()
+                .filter(correo_usu__iexact=reset.correo, estado=1)
+            )
+            usuarios = list(
+                User.objects.filter(email__iexact=reset.correo, is_active=True)
+            )
+            if not personas and not usuarios:
+                reset.usado = 1
+                reset.save(using="sistema", update_fields=["usado"])
+                messages.error(request, "No se pudo completar la recuperación. Solicita un enlace nuevo.")
+                return redirect("recuperar_password")
+
+            hash_nuevo = make_password(password)
+            for persona in personas:
+                persona.password = hash_nuevo
+                persona.save(using="sistema", update_fields=["password"])
+            for usuario in usuarios:
+                usuario.password = hash_nuevo
+                usuario.save(using="default", update_fields=["password"])
+
+            reset.usado = 1
+            reset.save(using="sistema", update_fields=["usado"])
+            PasswordResets.objects.using("sistema").filter(
+                correo__iexact=reset.correo,
+                usado=0,
+            ).exclude(pk=reset.pk).update(usado=1)
+
+        messages.success(request, "La contraseña se actualizó. Ya puedes iniciar sesión.")
+        return redirect("login")
+
+    return render(request, "seguimiento_pedidos/recuperar_password.html")
 
 
-@csrf_exempt
 @require_POST
 def api_enviar_recuperacion(request):
     try:
         if request.content_type and 'application/json' in request.content_type:
             data = json.loads(request.body.decode('utf-8'))
-            correo = data.get('correo', '').strip().lower()
+            correo = data.get('correo', '')
         else:
-            correo = request.POST.get('correo', '').strip().lower()
-    except (json.JSONDecodeError, UnicodeDecodeError):
-        return JsonResponse({'ok': False, 'mensaje': 'JSON inválido.'}, status=400)
+            correo = request.POST.get('correo', '')
+    except (json.JSONDecodeError, UnicodeDecodeError, AttributeError):
+        correo = ""
 
-    if not correo:
-        return JsonResponse({'ok': False, 'mensaje': 'Debes ingresar un correo.'}, status=400)
+    correo = correo.strip().lower() if isinstance(correo, str) else ""
+    try:
+        validate_email(correo)
+    except ValidationError:
+        return JsonResponse({"ok": True, "mensaje": RESET_GENERIC_RESPONSE})
+    if len(correo) > 120:
+        return JsonResponse({"ok": True, "mensaje": RESET_GENERIC_RESPONSE})
 
+    ahora = timezone.now()
+    User = get_user_model()
     persona = Persona.objects.filter(correo_usu__iexact=correo, estado=1).first()
-    if not persona:
-        return JsonResponse(
-            {'ok': False, 'mensaje': 'No existe un usuario activo con ese correo.'},
-            status=404,
+    usuario_django = User.objects.filter(
+        email__iexact=correo,
+        is_active=True,
+    ).exclude(password__startswith="!").exists()
+    if not persona and not usuario_django:
+        return JsonResponse({"ok": True, "mensaje": RESET_GENERIC_RESPONSE})
+
+    resets = PasswordResets.objects.using("sistema")
+    if resets.filter(
+        correo__iexact=correo,
+        created_at__gte=ahora - RESET_REQUEST_COOLDOWN,
+    ).exists():
+        return JsonResponse({"ok": True, "mensaje": RESET_GENERIC_RESPONSE})
+
+    token_plano = secrets.token_urlsafe(32)
+    codigo_6_digitos = f"{secrets.randbelow(1_000_000):06d}"
+    with transaction.atomic(using="sistema"):
+        resets.filter(correo__iexact=correo, usado=0).update(usado=1)
+        resets.create(
+            correo=correo,
+            token=_token_digest(token_plano),
+            codigo="",
+            codigo_hash=make_password(codigo_6_digitos),
+            intentos=0,
+            expira=ahora + RESET_EXPIRY,
+            usado=0,
+            created_at=ahora,
         )
 
-    token_plano = get_random_string(40)
-    token_hash = hashlib.sha256(token_plano.encode('utf-8')).hexdigest()
-    codigo_6_digitos = get_random_string(6, allowed_chars='0123456789')
-    ahora = timezone.now()
-    expira = ahora + timedelta(minutes=15)
-
-    PasswordResets.objects.create(
-        correo=persona.correo_usu,
-        token=token_hash,
-        codigo=codigo_6_digitos,
-        expira=expira,
-        usado=0,
-        created_at=ahora,
+    recovery_path = f"{reverse('recuperar_password')}#token={token_plano}"
+    public_url = os.environ.get("SISPE_PUBLIC_URL", "").strip().rstrip("/")
+    enlace_recuperacion = (
+        f"{public_url}{recovery_path}"
+        if public_url
+        else request.build_absolute_uri(recovery_path)
     )
-
-    enlace_recuperacion = request.build_absolute_uri(
-        f'/recuperar-password/?token={token_plano}'
-    )
-
     asunto = 'Recuperación de contraseña - SISPE'
+    nombre = persona.nom1_usu if persona else "usuario"
     cuerpo = (
-        f'Hola {persona.nom1_usu},\n\n'
+        f'Hola {nombre},\n\n'
         f'Solicitaste recuperar tu contraseña en SISPE.\n'
         f'Código de verificación: {codigo_6_digitos}\n'
         f'Enlace de recuperación: {enlace_recuperacion}\n\n'
-        f'Este código y enlace vencen en 15 minutos.'
+        f'Este código y enlace vencen en 15 minutos. Si no solicitaste este cambio, ignora este correo.'
+    )
+    cuerpo_html = render_to_string(
+        "seguimiento_pedidos/emails/recuperar_password.html",
+        {
+            "nombre": nombre,
+            "codigo": codigo_6_digitos,
+            "enlace_recuperacion": enlace_recuperacion,
+        },
     )
 
     try:
@@ -286,21 +602,24 @@ def api_enviar_recuperacion(request):
             subject=asunto,
             message=cuerpo,
             from_email=None,
-            recipient_list=[persona.correo_usu],
+            recipient_list=[correo],
+            html_message=cuerpo_html,
             fail_silently=False,
         )
-    except Exception as exc:
-        return JsonResponse(
-            {'ok': False, 'mensaje': f'No se pudo enviar el correo: {exc}'},
-            status=500,
+    except (
+        ImproperlyConfigured,
+        OSError,
+        UnicodeError,
+        ValueError,
+        smtplib.SMTPException,
+    ) as error:
+        resets.filter(token=_token_digest(token_plano)).update(usado=1)
+        logger.error(
+            "Password recovery email delivery failed (%s).",
+            type(error).__name__,
         )
-
     return JsonResponse(
-        {
-            'ok': True,
-            'mensaje': 'Correo de recuperación enviado correctamente.',
-            'expira_en_minutos': 15,
-        },
+        {"ok": True, "mensaje": RESET_GENERIC_RESPONSE},
         status=200,
     )
 

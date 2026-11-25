@@ -21,9 +21,17 @@ SISPE reúne todas las partes del proyecto (Carta, pedidos, cocina, servicio en 
 py -m venv venv
 venv\Scripts\activate
 pip install -r requirements.txt
+$env:SISPE_DEBUG="1"
+$env:SISPE_SECRET = (& python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())")
+$env:SISPE_ALLOWED_HOSTS="127.0.0.1,localhost"
 python manage.py migrate
+python actualizar_bd.py
 python manage.py runserver 0.0.0.0:8000
 ```
+
+En producción, establece `SISPE_DEBUG="0"`, `SISPE_SECRET` y
+`SISPE_ALLOWED_HOSTS` con valores propios del entorno. No guardes estas
+variables ni claves de correo en el repositorio.
 
 ### Actualización y Sincronización de Base de Datos
 
@@ -40,6 +48,7 @@ python manage.py runserver 0.0.0.0:8000
   ```powershell
   python manage.py migrate
   python crear_tablas.py
+  # Define SISPE_ADMIN_INITIAL_PASSWORD y SISPE_CHEF_INITIAL_PASSWORD primero.
   python restablecer_acceso.py
   python actualizar_bd.py
   ```
@@ -76,18 +85,7 @@ Para usar MySQL en la base de datos `sistema`, define las siguientes variables d
 La pantalla de `/login/` admite dos tipos de credenciales:
 
 1. **Correo de persona SISPE (Tabla `Persona`):** Entra a su panel por rol y sincroniza automáticamente un usuario Django con el grupo adecuado (ej. Cocinero -> `Chef`, Administrador -> Superusuario).
-2. **Usuarios de Django:**
-
-| Usuario / Correo | Contraseña | Vistas habilitadas / Rol |
-| ----- | ----- | ----- |
-| `admin` | `Admin12345` | `/admin/`, `/cocina/`, `/gestion/` |
-| `chef` | `Chef12345` | `/cocina/`, `/cocina/qr/`, `/cocina/reportes/` |
-| `admin@gmail.com` | `1234` | Administrador |
-| `cocina1@gmail.com` | `1234` | Cocina |
-| `mesero1@gmail.com` | `1234` | Mesero |
-| `cliente@gmail.com` | `1234` | Cliente |
-
-> **Nota:** El usuario Django `superadmin` es de tipo `staff` (no superusuario) y su clave debe asignársela un superusuario antes de iniciar sesión.
+2. **Usuarios de Django:** Usa las cuentas creadas para el entorno. El repositorio no incluye contraseñas predeterminadas; para crear o restablecer las cuentas de prueba, define `SISPE_ADMIN_INITIAL_PASSWORD` y `SISPE_CHEF_INITIAL_PASSWORD` antes de ejecutar `restablecer_acceso.py`.
 
 ## Funcionalidades Destacadas
 
@@ -99,9 +97,17 @@ La pantalla de `/login/` admite dos tipos de credenciales:
 
 ## Configuración de Envío de Correos
 
-De manera predeterminada, los correos de restablecimiento de contraseña se imprimen en consola. Para habilitar el envío mediante Gmail, establece las siguientes variables de entorno:
+Los correos de recuperación no se imprimen en consola. Configura el proveedor SMTP mediante variables de entorno:
 
 ```powershell
+$env:SISPE_EMAIL_HOST="smtp.gmail.com"
+$env:SISPE_EMAIL_PORT="587"
 $env:SISPE_EMAIL_USER="tu_cuenta@gmail.com"
 $env:SISPE_EMAIL_PASS="tu_clave_de_aplicacion"
-$env:SISPE_EMAIL_FROM="tu_cuenta@gmail.com" # Opcional
+$env:SISPE_EMAIL_FROM="tu_cuenta@gmail.com"
+$env:SISPE_PUBLIC_URL="https://tu-dominio"
+```
+
+Ejecuta `python actualizar_bd.py` para agregar, sin borrar datos, `codigo_hash`
+e `intentos` a `password_resets`. Los códigos y enlaces vencen en 15 minutos;
+el código se bloquea después de cinco intentos fallidos.

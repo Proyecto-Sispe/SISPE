@@ -9,6 +9,19 @@ from menu.models import Producto
 from pedidos.models import Pedido
 
 
+class LoginThrottle(models.Model):
+    key = models.CharField(max_length=64, primary_key=True)
+    attempts = models.PositiveSmallIntegerField(default=0)
+    window_started = models.DateTimeField()
+    blocked_until = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = "sispe_login_throttle"
+        indexes = [
+            models.Index(fields=["window_started"], name="login_window_idx"),
+        ]
+
+
 class Insumo(models.Model):
     nombre = models.CharField(max_length=120, unique=True)
     unidad = models.CharField(max_length=20, default="Unidades")

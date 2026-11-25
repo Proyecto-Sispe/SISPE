@@ -4,6 +4,7 @@ from . import views
 urlpatterns = [
     path('recuperar-password/', views.recuperar_password_page, name='recuperar_password'),
     path('api/auth/recuperar-password/', views.api_enviar_recuperacion, name='api_recuperar_password'),
+    path('cambiar-password/', views.cambiar_password, name='cambiar_password'),
 
     # Dashboards de ejemplo por rol
     path('dashboard/admin/', views.dashboard_admin, name='dashboard_admin'),

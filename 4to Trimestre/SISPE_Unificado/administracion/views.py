@@ -94,7 +94,9 @@ def usuarios(request):
     )
 
 
-def _sincronizar_usuario_django(correo_anterior, persona, rol_nombre):
+def _sincronizar_usuario_django(
+    correo_anterior, persona, rol_nombre, password_actualizada=False
+):
     """Mantiene al día el usuario Django creado en el login (grupo, nombre, activo)."""
     from seguimiento_pedidos.views import _usuario_django
 
@@ -104,6 +106,8 @@ def _sincronizar_usuario_django(correo_anterior, persona, rol_nombre):
         return
     usuario.username = persona.correo_usu.lower()
     usuario.is_active = persona.estado == 1
+    if password_actualizada:
+        usuario.password = persona.password
     usuario.save()
     _usuario_django(persona, rol_nombre.lower())
 
@@ -186,7 +190,12 @@ def usuario_editar(request, tipo, numero):
                     pkfk_id_usuario=numero, pkfk_tipo_doc=tipo, pkfk_idrol_id=int(d["rol"])
                 )
             persona = Persona.objects.get(id_usuario=numero, pkfk_tipo_doc_id=tipo)
-            _sincronizar_usuario_django(inicial["correo"], persona, Rol.objects.get(pk=d["rol"]).nom_rol)
+            _sincronizar_usuario_django(
+                inicial["correo"],
+                persona,
+                Rol.objects.get(pk=d["rol"]).nom_rol,
+                password_actualizada=bool(d["password"]),
+            )
             messages.success(request, "Cambios guardados.")
             return redirect("adm_usuarios")
     return render(

@@ -152,6 +152,8 @@ class PasswordResets(models.Model):
     expira = models.DateTimeField()
     usado = models.IntegerField()
     created_at = models.DateTimeField()
+    codigo_hash = models.CharField(max_length=128, blank=True, default="")
+    intentos = models.PositiveSmallIntegerField(default=0)
 
     class Meta:
         managed = False

@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block titulo %}Carga masiva · SISPE{% endblock %}
+{% block seccion %}Carga de datos{% endblock %}
+
+{% block contenido %}
+<section class="hero">
+  <h1>Carga masiva <span>de datos</span></h1>
+  <p>Importa categorías, productos e insumos desde archivos Excel o CSV.</p>
+</section>
+
+<section class="panel">
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="grupo-campo">
+      <label for="{{ form.tipo.id_for_label }}">Tipo de información</label>
+      {{ form.tipo }}
+      {{ form.tipo.errors }}
+    </div>
+    <div class="grupo-campo">
+      <label for="{{ form.archivo.id_for_label }}">Seleccionar archivo Excel o CSV</label>
+      {{ form.archivo }}
+      {% if form.archivo.help_text %}<span class="ayuda">{{ form.archivo.help_text }}</span>{% endif %}
+      {{ form.archivo.errors }}
+    </div>
+    <button type="submit" name="accion" value="previsualizar" class="btn btn-primario">
+      Validar archivo
+    </button>
+  </form>
+</section>
+
+{% if registros is not None %}
+  <section class="panel mt-16">
+    <div class="seccion-titulo mt-0">
+      <h2>Vista previa</h2>
+    </div>
+    <p class="suave">
+      {{ total }} registros · {{ correctos }} válidos · {{ errores|length }} con errores
+    </p>
+
+    {% if errores %}
+      <div class="seccion-titulo">
+        <h2>Errores encontrados</h2>
+      </div>
+      <div class="tabla-envoltura">
+        <table class="tabla">
+          <thead><tr><th>Fila</th><th>Error</th></tr></thead>
+          <tbody>
+            {% for error in errores %}
+              <tr><td>{{ error.fila }}</td><td>{{ error.error }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% endif %}
+
+    <div class="seccion-titulo">
+      <h2>Registros válidos</h2>
+    </div>
+    <div class="tabla-envoltura">
+      <table class="tabla">
+        <thead><tr><th>Registro</th><th>Nombre</th></tr></thead>
+        <tbody>
+          {% for registro in registros %}
+            <tr><td>{{ forloop.counter }}</td><td>{{ registro.nombre }}</td></tr>
+          {% empty %}
+            <tr><td colspan="2" class="suave">No hay registros válidos para importar.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if correctos > 0 %}
+      <div class="seccion-titulo">
+        <h2>Confirmar importación</h2>
+      </div>
+      {% if errores %}
+        <p class="suave">Se importarán los {{ correctos }} registros válidos y se omitirán las {{ errores|length }} filas con errores.</p>
+      {% else %}
+        <p class="suave">Vuelve a seleccionar el archivo validado para confirmar la importación.</p>
+      {% endif %}
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="hidden" name="tipo" value="{{ tipo }}">
+        <div class="grupo-campo">
+          <label for="archivo-confirmacion">Archivo validado</label>
+          <input id="archivo-confirmacion" type="file" name="archivo" accept=".xlsx,.csv" class="campo-archivo" required>
+        </div>
+        <button type="submit" name="accion" value="importar" class="btn btn-primario">
+          Confirmar e importar {{ correctos }} registros
+        </button>
+      </form>
+    {% endif %}
+  </section>
+{% endif %}
+
+<section class="mt-16">
+  <div class="seccion-titulo">
+    <h2>Historial de cargas</h2>
+  </div>
+  <div class="tabla-envoltura">
+    <table class="tabla">
+      <thead>
+        <tr>
+          <th>Archivo</th><th>Tipo</th><th>Exitosos</th>
+          <th>Errores</th><th>Estado</th><th>Fecha</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for carga in historial %}
+          <tr>
+            <td>{{ carga.archivo_nombre }}</td>
+            <td>{{ carga.get_tipo_display }}</td>
+            <td>{{ carga.registros_exitosos }}</td>
+            <td>{{ carga.registros_error }}</td>
+            <td>{{ carga.get_estado_display }}</td>
+            <td>{{ carga.fecha }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6" class="suave">Todavía no hay cargas registradas.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

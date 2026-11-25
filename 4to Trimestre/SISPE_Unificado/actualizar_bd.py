@@ -49,7 +49,7 @@ except ImportError:
 
 django.setup()
 
-from django.db import connection  # noqa: E402
+from django.db import connection, connections  # noqa: E402
 
 MOTOR = connection.vendor  # 'sqlite' o 'mysql'
 
@@ -80,6 +80,71 @@ def tipos():
 
 
 T = tipos()
+
+
+def asegurar_columnas_recuperacion():
+    """Agrega campos de hash y límite de intentos en la base SISPE."""
+    db = connections["sistema"]
+    quote = db.ops.quote_name
+    tabla = "password_resets"
+
+    with db.cursor() as cur:
+        tablas = {nombre.lower() for nombre in db.introspection.table_names()}
+        if tabla not in tablas:
+            if db.vendor == "sqlite":
+                cur.execute(
+                    "CREATE TABLE {} ("
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                    "correo VARCHAR(120) NOT NULL, "
+                    "token VARCHAR(64) NOT NULL, "
+                    "codigo VARCHAR(6) NOT NULL DEFAULT '', "
+                    "expira DATETIME NOT NULL, "
+                    "usado INTEGER NOT NULL DEFAULT 0, "
+                    "created_at DATETIME NOT NULL, "
+                    "codigo_hash VARCHAR(128) NOT NULL DEFAULT '', "
+                    "intentos INTEGER NOT NULL DEFAULT 0"
+                    ")".format(quote(tabla))
+                )
+            elif db.vendor == "mysql":
+                cur.execute(
+                    "CREATE TABLE {} ("
+                    "id BIGINT AUTO_INCREMENT PRIMARY KEY, "
+                    "correo VARCHAR(120) NOT NULL, "
+                    "token VARCHAR(64) NOT NULL, "
+                    "codigo VARCHAR(6) NOT NULL DEFAULT '', "
+                    "expira DATETIME NOT NULL, "
+                    "usado INTEGER NOT NULL DEFAULT 0, "
+                    "created_at DATETIME NOT NULL, "
+                    "codigo_hash VARCHAR(128) NOT NULL DEFAULT '', "
+                    "intentos INTEGER NOT NULL DEFAULT 0"
+                    ")".format(quote(tabla))
+                )
+            else:
+                raise RuntimeError(
+                    "La recuperación de contraseñas requiere SQLite o MySQL."
+                )
+            print("  + tabla password_resets creada en la base sistema")
+            return
+
+        with db.cursor() as inspect_cursor:
+            columnas_actuales = {
+                columna.name.lower()
+                for columna in db.introspection.get_table_description(
+                    inspect_cursor, tabla
+                )
+            }
+        nuevas = (
+            ("codigo_hash", "VARCHAR(128) NOT NULL DEFAULT ''"),
+            ("intentos", "INTEGER NOT NULL DEFAULT 0"),
+        )
+        for nombre, tipo in nuevas:
+            if nombre not in columnas_actuales:
+                cur.execute(
+                    "ALTER TABLE {} ADD COLUMN {} {}".format(
+                        quote(tabla), quote(nombre), tipo
+                    )
+                )
+                print(f"  + password_resets.{nombre} agregada")
 
 
 def tablas_existentes():
@@ -154,6 +219,8 @@ def main():
     print(" Settings :", os.environ["DJANGO_SETTINGS_MODULE"])
     print(" Motor    :", MOTOR)
     print("-" * 64)
+    print(" Seguridad de recuperación de contraseñas")
+    asegurar_columnas_recuperacion()
 
     print(" Tablas nuevas")
     crear_tabla(

@@ -87,8 +87,8 @@ from django.test import Client
 User = get_user_model()
 
 CUENTAS = [
-    ("admin", "Admin12345", True, "Administrador"),
-    ("chef", "Chef12345", False, "Chef"),
+    ("admin", "SISPE_DIAGNOSTIC_ADMIN_PASSWORD", True, "Administrador"),
+    ("chef", "SISPE_DIAGNOSTIC_CHEF_PASSWORD", False, "Chef"),
 ]
 
 
@@ -219,7 +219,7 @@ def probar_login_propio(username, password):
     """El login del sistema (/login/) manda al panel de cocina."""
     cliente = Client()
     try:
-        resp = cliente.post("/login/", {"username": username, "password": password})
+        resp = cliente.post("/login/", {"correo": username, "password": password})
     except Exception as exc:
         return False, "no se pudo abrir /login/ ({})".format(exc)
     if resp.status_code == 302:
@@ -275,17 +275,28 @@ def main():
         print(LINEA)
         return 0
 
+    cuentas_con_clave = [
+        (username, os.environ.get(password_env, ""), superuser, grupo, password_env)
+        for username, password_env, superuser, grupo in CUENTAS
+    ]
+    faltantes = [cuenta[4] for cuenta in cuentas_con_clave if not cuenta[1]]
+    if faltantes:
+        print(" Define estas variables de entorno antes de restablecer las cuentas:")
+        for variable in faltantes:
+            print("   " + variable)
+        return 1
+
     print(" Restableciendo cuentas...")
     asegurar_grupos()
-    for username, password, superuser, grupo in CUENTAS:
+    for username, password, superuser, grupo, _password_env in cuentas_con_clave:
         usuario, creado = arreglar_cuenta(username, password, superuser, grupo)
-        print("   {:<8} clave {:<12} {}".format(
-            username, password, "creada" if creado else "restablecida"))
+        print("   {:<8} {}".format(
+            username, "creada" if creado else "restablecida"))
     print(SUB)
 
     print(" Probando el login de verdad:")
     fallos = 0
-    for username, password, superuser, grupo in CUENTAS:
+    for username, password, superuser, grupo, _password_env in cuentas_con_clave:
         ok_admin, detalle_admin = probar_admin(username, password)
         print("   {:<8} /admin/  {}".format(username, "OK  - " + detalle_admin if ok_admin else "FALLA - " + detalle_admin))
         if not ok_admin:
@@ -299,13 +310,7 @@ def main():
         print(LINEA)
         return 2
 
-    print(" LISTO. Entra con:")
-    print("     http://127.0.0.1:8000/admin/     usuario: admin   clave: Admin12345")
-    print("     http://127.0.0.1:8000/login/     usuario: chef    clave: Chef12345")
-    print()
-    print(" La clave distingue mayusculas: Admin12345 lleva A mayuscula y")
-    print(" no lleva espacios. Si el campo Contrasena queda vacio, el error")
-    print(" que ves es exactamente el mismo.")
+    print(" LISTO. Las cuentas fueron verificadas; utiliza las claves configuradas localmente.")
     print(LINEA)
     return 0
 

@@ -1,4 +1,5 @@
 from django import forms
+from django.contrib.auth.password_validation import validate_password
 
 from seguimiento_pedidos.models import Rol, TipoDoc
 
@@ -33,6 +34,12 @@ class PersonaForm(forms.Form):
             self.fields["tipo_doc"].disabled = True
             self.fields["numero"].disabled = True
             self.fields["password"].help_text = "Déjala vacía para conservar la actual."
+
+    def clean_password(self):
+        password = self.cleaned_data.get("password")
+        if password:
+            validate_password(password)
+        return password
 
 
 class InsumoForm(forms.ModelForm):
